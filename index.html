@@ -229,8 +229,9 @@
           },
           numOfWorkers: 4, // Potência máxima habilitada
           decoder: {
-            // TRAVA DE LEITORES REMOVIDA: Lê todos os formatos igual no Netlify
-            readers: ["ean_reader", "ean_8_reader", "code_128_reader", "code_39_reader", "code_39_vin_reader", "upc_reader", "upc_e_reader", "i2of5_reader"]
+            // BLINDADO: Só lê os códigos automáticos da sua Argox (Code 128) 
+            // e códigos originais de fábrica (EAN). Fim dos números falsos!
+            readers: ["code_128_reader", "ean_reader"]
           },
           locate: true
         }, function(err) {
