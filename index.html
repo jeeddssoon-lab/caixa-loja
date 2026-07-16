@@ -298,9 +298,11 @@
         var tipoBusca = (termo.includes('*') || !isNaN(termo)) ? 'codigo' : 'nome';
         var urlBusca = URL_GOOGLE + "?acao=buscar&termo=" + encodeURIComponent(termo) + "&tipoBusca=" + tipoBusca;
 
-        fetch(urlBusca)
-        .then(response => response.json())
-        .then(data => {
+        fetch(urlBusca, { redirect: "follow" }) // Avisa pro GitHub seguir o redirecionamento do Google
+        .then(response => response.text()) // Pede a resposta em formato de texto bruto primeiro
+        .then(texto => {
+            var data = JSON.parse(texto); // Converte para os dados do produto
+            
             document.getElementById('codigoBarra').value = ""; 
             document.getElementById('codigoBarra').focus(); 
             
