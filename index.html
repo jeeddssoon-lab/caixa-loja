@@ -290,8 +290,7 @@
         var msgBox = document.getElementById('msgCaixa');
         var areaBusca = document.getElementById('areaResultadosCaixa');
         
-        // CORREÇÃO DE OURO: O Leitor de câmera às vezes esconde o asterisco.
-        // Se for um número puro (ex: 1001), nós forçamos o formato da planilha (*1001*)
+        // Mantém a correção para sempre buscar com os asteriscos da Argox
         if (!termo.includes('*') && !isNaN(termo)) {
             termo = "*" + termo + "*";
         }
@@ -301,21 +300,22 @@
         areaBusca.style.display = 'none';
 
         var tipoBusca = (termo.includes('*') || !isNaN(termo.replace(/\*/g,''))) ? 'codigo' : 'nome';
-        var urlBusca = URL_GOOGLE + "?acao=buscar&termo=" + encodeURIComponent(termo) + "&tipoBusca=" + tipoBusca;
+        
+        // A JOGADA DE MESTRE: Envelopar a busca (POST) ao invés de usar URL (GET)
+        var pacoteDeBusca = {
+            acao: 'buscar',
+            termo: termo,
+            tipoBusca: tipoBusca
+        };
 
-        // FETCH BLINDADO: Puxamos como texto bruto primeiro
-        fetch(urlBusca, { redirect: "follow" })
-        .then(response => response.text()) 
-        .then(texto => {
-            // A BARREIRA: Se o Google jogar a tela do Caixa ou de Login, nós barramos aqui!
-            if (texto.includes("<html") || texto.includes("<!DOCTYPE")) {
-                msgBox.innerHTML = "❌ O Google bloqueou! O link ainda está pedindo login ou mandando tela velha.";
-                console.error("ERRO DO GOOGLE (Recebeu HTML ao invés de Dados):", texto);
-                return;
-            }
-
-            var data = JSON.parse(texto);
-            
+        // Usando o método POST (Igual finalizar a venda). O navegador NUNCA bloqueia isso!
+        fetch(URL_GOOGLE, {
+            method: 'POST',
+            body: JSON.stringify(pacoteDeBusca),
+            headers: { "Content-Type": "text/plain;charset=utf-8" }
+        })
+        .then(response => response.json())
+        .then(data => {
             document.getElementById('codigoBarra').value = ""; 
             document.getElementById('codigoBarra').focus(); 
             
@@ -335,7 +335,7 @@
             }
         })
         .catch(err => {
-            msgBox.innerHTML = "❌ Erro de Conexão com o Google!";
+            msgBox.innerHTML = "❌ Erro de conexão com a planilha!";
             console.error(err);
         });
       }
