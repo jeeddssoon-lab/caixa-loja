@@ -287,21 +287,34 @@
       }
 
       function buscarProdutoCaixa(termo) {
-        if(URL_GOOGLE === "COLE_O_SEU_LINK_AQUI") { alert("Atenção: Cole a URL do Google Script no código HTML!"); return; }
-
         var msgBox = document.getElementById('msgCaixa');
         var areaBusca = document.getElementById('areaResultadosCaixa');
+        
+        // CORREÇÃO DE OURO: O Leitor de câmera às vezes esconde o asterisco.
+        // Se for um número puro (ex: 1001), nós forçamos o formato da planilha (*1001*)
+        if (!termo.includes('*') && !isNaN(termo)) {
+            termo = "*" + termo + "*";
+        }
+
         msgBox.innerHTML = "Buscando: " + termo + "...";
         msgBox.style.color = "#0d6efd";
         areaBusca.style.display = 'none';
 
-        var tipoBusca = (termo.includes('*') || !isNaN(termo)) ? 'codigo' : 'nome';
+        var tipoBusca = (termo.includes('*') || !isNaN(termo.replace(/\*/g,''))) ? 'codigo' : 'nome';
         var urlBusca = URL_GOOGLE + "?acao=buscar&termo=" + encodeURIComponent(termo) + "&tipoBusca=" + tipoBusca;
 
-        fetch(urlBusca, { redirect: "follow" }) // Avisa pro GitHub seguir o redirecionamento do Google
-        .then(response => response.text()) // Pede a resposta em formato de texto bruto primeiro
+        // FETCH BLINDADO: Puxamos como texto bruto primeiro
+        fetch(urlBusca, { redirect: "follow" })
+        .then(response => response.text()) 
         .then(texto => {
-            var data = JSON.parse(texto); // Converte para os dados do produto
+            // A BARREIRA: Se o Google jogar a tela do Caixa ou de Login, nós barramos aqui!
+            if (texto.includes("<html") || texto.includes("<!DOCTYPE")) {
+                msgBox.innerHTML = "❌ O Google bloqueou! O link ainda está pedindo login ou mandando tela velha.";
+                console.error("ERRO DO GOOGLE (Recebeu HTML ao invés de Dados):", texto);
+                return;
+            }
+
+            var data = JSON.parse(texto);
             
             document.getElementById('codigoBarra').value = ""; 
             document.getElementById('codigoBarra').focus(); 
@@ -316,13 +329,13 @@
                     mostrarListaParaEscolha(resultados);
                 }
             } else {
-                msgBox.innerHTML = "❌ Produto não encontrado!";
+                msgBox.innerHTML = "❌ Produto não encontrado no estoque!";
                 msgBox.style.color = "#dc3545";
                 setTimeout(function(){ msgBox.innerHTML = ""; }, 3000);
             }
         })
         .catch(err => {
-            msgBox.innerHTML = "Erro de conexão com a planilha!";
+            msgBox.innerHTML = "❌ Erro de Conexão com o Google!";
             console.error(err);
         });
       }
