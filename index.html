@@ -229,9 +229,8 @@
           },
           numOfWorkers: 4, // Potência máxima habilitada
           decoder: {
-            // BLINDADO: Só lê os códigos automáticos da sua Argox (Code 128) 
-            // e códigos originais de fábrica (EAN). Fim dos números falsos!
-            readers: ["code_128_reader", "ean_reader"]
+            // O SEGREDO ESTAVA AQUI! O formato real da sua Argox é o Code 39!
+            readers: ["code_39_reader"]
           },
           locate: true
         }, function(err) {
@@ -246,9 +245,9 @@
 
         Quagga.onDetected(function(result) {
             if (result.codeResult && result.codeResult.code) {
-                var codigoDetectado = result.codeResult.code;
+                // Limpa os asteriscos se eles aparecerem
+                var codigoDetectado = result.codeResult.code.replace(/\*/g, '');
                 
-                // TRAVA DO ASTERISCO REMOVIDA! Bipando direto igual no Netlify
                 tocarBip();
                 fecharCameraAutomatica();
                 document.getElementById('codigoBarra').value = codigoDetectado;
