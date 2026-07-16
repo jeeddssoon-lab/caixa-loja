@@ -217,24 +217,28 @@
             name: "Live",
             type: "LiveStream",
             target: document.querySelector('#interactive'),
-            constraints: { 
-              width: { min: 1280, ideal: 1920 }, // Força a câmera do celular a usar alta resolução (HD/Full HD)
-              height: { min: 720, ideal: 1080 },
-              facingMode: "environment" // Garante o uso da lente traseira principal
-            }
+            constraints: {
+              width: { ideal: 1280 }, // Resolução exata que funcionava liso no Netlify
+              height: { ideal: 720 }, 
+              facingMode: "environment" 
+            },
           },
           locator: { 
-            patchSize: "large", // Facilita encontrar o código de barras
+            patchSize: "medium", 
             halfSample: true 
           },
-          numOfWorkers: navigator.hardwareConcurrency || 4, // Libera todos os núcleos do processador para leitura
-          decoder: { 
-            // Somente os formatos mais comuns (Argox) para bipar super rápido
-            readers: ["code_128_reader", "ean_reader"] 
+          numOfWorkers: 4, // Potência máxima habilitada
+          decoder: {
+            // TRAVA DE LEITORES REMOVIDA: Lê todos os formatos igual no Netlify
+            readers: ["ean_reader", "ean_8_reader", "code_128_reader", "code_39_reader", "code_39_vin_reader", "upc_reader", "upc_e_reader", "i2of5_reader"]
           },
           locate: true
         }, function(err) {
-            if (err) { alert("Erro ao ligar câmera: Dê permissão no navegador."); return; }
+            if (err) {
+                alert("Erro ao ligar o leitor automático: " + err);
+                document.getElementById('box-camera').style.display = 'none';
+                return;
+            }
             Quagga.start();
             cameraLigada = true;
         });
@@ -242,12 +246,12 @@
         Quagga.onDetected(function(result) {
             if (result.codeResult && result.codeResult.code) {
                 var codigoDetectado = result.codeResult.code;
-                if (codigoDetectado.startsWith("*") && codigoDetectado.endsWith("*")) {
-                    tocarBip();
-                    fecharCameraAutomatica();
-                    document.getElementById('codigoBarra').value = codigoDetectado;
-                    buscarProdutoCaixa(codigoDetectado);
-                }
+                
+                // TRAVA DO ASTERISCO REMOVIDA! Bipando direto igual no Netlify
+                tocarBip();
+                fecharCameraAutomatica();
+                document.getElementById('codigoBarra').value = codigoDetectado;
+                buscarProdutoCaixa(codigoDetectado);
             }
         });
       }
