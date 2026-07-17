@@ -74,6 +74,12 @@
       .lbl-combinada { cursor: pointer; font-size: 13px; font-weight: bold; background: #fff3cd; color: #856404; padding: 6px 12px; border-radius: 5px; border: 1px solid #ffeeba; display: flex; align-items: center; gap: 5px; transition: 0.2s;}
       .lbl-combinada:hover { background: #ffeeba; }
       .lbl-combinada input { cursor: pointer; width: 16px; height: 16px; margin: 0; }
+
+      /* BOTOES DE QUANTIDADE (+ E -) */
+      .btn-qtd { background: #e9ecef; border: 1px solid #ced4da; border-radius: 4px; width: 30px; height: 30px; font-weight: bold; font-size: 18px; cursor: pointer; color: #495057; display: inline-flex; justify-content: center; align-items: center; transition: 0.2s; }
+      .btn-qtd:hover { background: #ced4da; color: #212529; }
+      .box-qtd { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+      .texto-qtd { font-size: 16px; font-weight: bold; color: #0d6efd; min-width: 20px; text-align: center; }
       
       @media (max-width: 768px) {
         body { padding: 5px; background-color: #fff;}
@@ -374,8 +380,41 @@
 
       function adicionarAoCarrinho(produto) {
         var itemExistente = window.carrinho.find(function(p) { return p.codigo === produto.codigo; });
-        if (itemExistente) itemExistente.quantidadeComprada += 1;
-        else { produto.quantidadeComprada = 1; window.carrinho.push(produto); }
+        
+        if (itemExistente) {
+            // TRAVA: Não deixa bipar mais do que tem no estoque!
+            if (itemExistente.quantidadeComprada + 1 > itemExistente.quantidade) {
+                alert("⚠️ ESTOQUE INSUFICIENTE!\n\nVocê só tem " + itemExistente.quantidade + " unidade(s) no estoque.");
+                return;
+            }
+            itemExistente.quantidadeComprada += 1;
+        } else {
+            // TRAVA: Se já não tiver nada no estoque, nem deixa adicionar
+            if (produto.quantidade < 1) {
+                alert("⚠️ ESTOQUE ZERADO!\n\nEste produto está esgotado no sistema.");
+                return;
+            }
+            produto.quantidadeComprada = 1; // Força entrar SEMPRE como 1 unidade
+            window.carrinho.push(produto);
+        }
+        atualizarTabelaCaixa();
+      }
+
+      // NOVA FUNÇÃO: Botões de Menos e Mais na Tabela
+      function alterarQtd(index, delta) {
+        var p = window.carrinho[index];
+        var novaQtd = p.quantidadeComprada + delta;
+
+        // Se tentar diminuir menos que 1, não faz nada (para tirar tem que clicar no X)
+        if (novaQtd < 1) return;
+
+        // Se tentar aumentar mais do que tem no estoque, bloqueia!
+        if (novaQtd > p.quantidade) {
+            alert("⚠️ LIMITE DE ESTOQUE!\n\nVocê só tem " + p.quantidade + " unidade(s) no estoque.");
+            return;
+        }
+
+        p.quantidadeComprada = novaQtd;
         atualizarTabelaCaixa();
       }
 
@@ -407,12 +446,14 @@
       function atualizarTabelaCaixa() {
          var tbody = document.getElementById('listaCarrinho');
          var total = 0;
+         
          if (window.carrinho.length === 0) {
             tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#999; padding: 20px;">Aguardando itens...</td></tr>';
             document.getElementById('txtTotal').innerText = "R$ 0,00";
             renderizarPaineis();
             return;
          }
+
          var html = '';
          var temCredito = window.formasPagamento.includes('credito');
 
@@ -420,18 +461,28 @@
             var p = window.carrinho[i];
             var precoBruto = temCredito ? p.precoParc : p.precoVista;
             var preco = limpaValorHTML(precoBruto);
+            
             var subtotal = preco * p.quantidadeComprada;
             total += subtotal;
             var precoFormatado = preco.toFixed(2).replace('.', ',');
             
             html += `<tr>
-              <td><b style="color:#0d6efd">${p.quantidadeComprada}x</b> ${p.item} <br><small style="color:#666;">Tam: ${p.tamanho} | Marca: <b>${p.fornecedor}</b></small></td>
-              <td><b>R$ ${precoFormatado}</b></td>
-              <td><button class="btn-remover" onclick="removerDoCarrinho(${i})">X</button></td>
+              <td>
+                <div class="box-qtd">
+                  <button class="btn-qtd" onclick="alterarQtd(${i}, -1)">-</button>
+                  <span class="texto-qtd">${p.quantidadeComprada}</span>
+                  <button class="btn-qtd" onclick="alterarQtd(${i}, 1)">+</button>
+                </div>
+                ${p.item} <br><small style="color:#666;">Tam: ${p.tamanho}</small>
+              </td>
+              <td style="vertical-align: middle;"><b>R$ ${precoFormatado}</b></td>
+              <td style="vertical-align: middle;"><button class="btn-remover" onclick="removerDoCarrinho(${i})">X</button></td>
             </tr>`;
          }
+         
          tbody.innerHTML = html;
          document.getElementById('txtTotal').innerText = "R$ " + total.toFixed(2).replace('.', ',');
+         
          renderizarPaineis();
       }
 
