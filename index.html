@@ -121,7 +121,24 @@
       </div>
 
       <div class="col-direita">
+        
+        <!-- NOVA CAIXA DE DESCONTO -->
+        <div class="caixa-opcoes" style="display: block; border-color: #0d6efd; margin-bottom: 15px; background: #e7f1ff; padding: 10px; border-radius: 5px; border: 1px solid #b6d4fe;">
+          <label style="font-size: 14px; font-weight: bold; color: #0d6efd; display: block; margin-bottom: 8px;">🎟️ Aplicar Desconto:</label>
+          <div style="display: flex; gap: 15px; margin-bottom: 8px;">
+            <label style="font-size: 13px; font-weight: bold; cursor: pointer; color: #333;">
+              <input type="radio" name="tipoDesconto" value="valor" checked onchange="atualizarTabelaCaixa()"> R$ Valor
+            </label>
+            <label style="font-size: 13px; font-weight: bold; cursor: pointer; color: #333;">
+              <input type="radio" name="tipoDesconto" value="porcentagem" onchange="atualizarTabelaCaixa()"> % Porcento
+            </label>
+          </div>
+          <input type="number" id="valorDesconto" class="input-opcao" placeholder="Digite o desconto..." onkeyup="atualizarTabelaCaixa()" style="border: 1px solid #b6d4fe; margin-bottom: 0;">
+        </div>
+
         <div class="painel-total">
+          <div id="linhaSubtotal" style="font-size: 14px; color: #adb5bd; margin-bottom: 5px; display: none;">Subtotal: R$ 0,00</div>
+          <div id="linhaDesconto" style="font-size: 14px; color: #dc3545; margin-bottom: 5px; display: none;">Desconto: - R$ 0,00</div>
           <div class="titulo-total">Total a Pagar</div>
           <p class="valor-total" id="txtTotal">R$ 0,00</p>
         </div>
@@ -445,11 +462,17 @@
 
       function atualizarTabelaCaixa() {
          var tbody = document.getElementById('listaCarrinho');
-         var total = 0;
+         var subtotal = 0;
          
          if (window.carrinho.length === 0) {
             tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#999; padding: 20px;">Aguardando itens...</td></tr>';
             document.getElementById('txtTotal').innerText = "R$ 0,00";
+            
+            // Esconde os textos de desconto se o carrinho estiver vazio
+            document.getElementById('linhaSubtotal').style.display = 'none';
+            document.getElementById('linhaDesconto').style.display = 'none';
+            document.getElementById('valorDesconto').value = ''; 
+            
             renderizarPaineis();
             return;
          }
@@ -462,8 +485,8 @@
             var precoBruto = temCredito ? p.precoParc : p.precoVista;
             var preco = limpaValorHTML(precoBruto);
             
-            var subtotal = preco * p.quantidadeComprada;
-            total += subtotal;
+            var subtotalItem = preco * p.quantidadeComprada;
+            subtotal += subtotalItem;
             var precoFormatado = preco.toFixed(2).replace('.', ',');
             
             html += `<tr>
@@ -481,7 +504,43 @@
          }
          
          tbody.innerHTML = html;
-         document.getElementById('txtTotal').innerText = "R$ " + total.toFixed(2).replace('.', ',');
+         
+         // ==========================================
+         // LÓGICA MÁGICA DO DESCONTO
+         // ==========================================
+         var descInput = document.getElementById('valorDesconto').value.replace(',', '.');
+         var valorDesc = parseFloat(descInput) || 0;
+         var tipoDesc = document.querySelector('input[name="tipoDesconto"]:checked').value;
+         
+         var totalFinal = subtotal;
+         var valorDescontadoReais = 0;
+
+         // Calcula o desconto se o lojista digitou algo
+         if (valorDesc > 0) {
+             if (tipoDesc === 'valor') {
+                 valorDescontadoReais = valorDesc; // Desconta os R$ secos
+             } else if (tipoDesc === 'porcentagem') {
+                 valorDescontadoReais = subtotal * (valorDesc / 100); // Desconta a %
+             }
+             totalFinal = subtotal - valorDescontadoReais;
+         }
+
+         // Trava de segurança para a venda nunca ficar negativa
+         if (totalFinal < 0) totalFinal = 0;
+
+         // Atualiza a tela preta com o novo valor
+         if (valorDescontadoReais > 0) {
+             document.getElementById('linhaSubtotal').style.display = 'block';
+             document.getElementById('linhaSubtotal').innerText = "Subtotal: R$ " + subtotal.toFixed(2).replace('.', ',');
+             
+             document.getElementById('linhaDesconto').style.display = 'block';
+             document.getElementById('linhaDesconto').innerText = "Desconto: - R$ " + valorDescontadoReais.toFixed(2).replace('.', ',');
+         } else {
+             document.getElementById('linhaSubtotal').style.display = 'none';
+             document.getElementById('linhaDesconto').style.display = 'none';
+         }
+
+         document.getElementById('txtTotal').innerText = "R$ " + totalFinal.toFixed(2).replace('.', ',');
          
          renderizarPaineis();
       }
