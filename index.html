@@ -184,7 +184,7 @@
           <h3>Caixa (PDV)</h3>
         </div>
         
-        <div class="cartao-menu estoque" onclick="alert('Módulo de Estoque será adicionado aqui em breve!')">
+        <div class="cartao-menu estoque" onclick="abrirTela('tela-estoque')">
           <i>📦</i>
           <h3>Estoque</h3>
         </div>
@@ -500,11 +500,13 @@
       }
 
       // Função Mestre para trocar as telas sem recarregar a página
+      // Função Mestre para trocar as telas sem recarregar a página
       function abrirTela(idDaTela) {
-          // Esconde todas as 3 telas primeiro
+          // Esconde todas as telas primeiro
           document.getElementById('tela-login').classList.add('tela-oculta');
           document.getElementById('tela-menu').classList.add('tela-oculta');
           document.getElementById('tela-caixa').classList.add('tela-oculta');
+          document.getElementById('tela-estoque').classList.add('tela-oculta'); // <-- ADICIONAMOS ISSO AQUI!
           
           // Mostra só a tela que você pediu
           document.getElementById(idDaTela).classList.remove('tela-oculta');
