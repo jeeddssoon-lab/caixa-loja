@@ -111,6 +111,39 @@
       .btn-qtd:hover { background: #ced4da; color: #212529; }
       .box-qtd { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
       .texto-qtd { font-size: 16px; font-weight: bold; color: #0d6efd; min-width: 20px; text-align: center; }
+
+      /* ========================================== */
+      /* ESTILOS DA TELA DE ESTOQUE                 */
+      /* ========================================== */
+      #tela-estoque { width: 100%; max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; }
+      .cabecalho-estoque { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+      
+      .botoes-seletor { display: flex; gap: 10px; margin-bottom: 20px; }
+      .btn-seletor { flex: 1; padding: 15px; font-size: 16px; font-weight: bold; background: white; border: 2px solid #dee2e6; border-radius: 8px; cursor: pointer; transition: 0.2s; color: #555; }
+      .btn-seletor:hover { background: #f8f9fa; border-color: #0d6efd; color: #0d6efd; }
+      .btn-seletor.ativo { background: #e7f1ff; border-color: #0d6efd; color: #0d6efd; }
+
+      .bloco-form { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.05); margin-bottom: 15px; border-left: 5px solid #0d6efd; }
+      .titulo-bloco { font-size: 16px; font-weight: bold; color: #333; margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+      
+      .linha-form { display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; }
+      .grupo-input { flex: 1; min-width: 200px; display: flex; flex-direction: column; }
+      .grupo-input label { font-size: 13px; font-weight: bold; color: #555; margin-bottom: 5px; }
+      .grupo-input input, .grupo-input select { padding: 10px; border: 1px solid #ced4da; border-radius: 5px; font-size: 14px; font-weight: bold; background: #f8f9fa; }
+      .grupo-input input:focus { outline: none; border-color: #0d6efd; background: white; }
+
+      .btn-acao { background: #f8f9fa; border: 1px dashed #6c757d; color: #495057; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 13px; transition: 0.2s; margin-top: 5px; display: inline-block; }
+      .btn-acao:hover { background: #e2e3e5; border-color: #495057; }
+      
+      .linha-custo-extra { display: flex; gap: 10px; align-items: center; margin-top: 10px; background: #fff3cd; padding: 10px; border-radius: 5px; border: 1px solid #ffeeba; }
+      .btn-remover-custo { background: #dc3545; color: white; border: none; width: 30px; height: 30px; border-radius: 50%; font-weight: bold; cursor: pointer; }
+      
+      .painel-resultado-preco { background: #212529; color: white; padding: 15px; border-radius: 8px; margin-top: 15px; text-align: center; }
+      .txt-custo-real { color: #ffc107; font-size: 18px; font-weight: bold; margin-bottom: 10px; }
+      .txt-preco-sugerido { color: #00ff00; font-size: 28px; font-weight: bold; }
+      
+      .btn-salvar-item { background: #198754; color: white; border: none; padding: 15px; border-radius: 5px; font-size: 18px; font-weight: bold; width: 100%; cursor: pointer; text-transform: uppercase; margin-top: 10px; }
+      .btn-salvar-item:hover { background: #157347; }
       
       @media (max-width: 768px) {
         body { padding: 5px; background-color: #fff;}
@@ -163,6 +196,122 @@
       </div>
       <br><br>
       <button onclick="fazerLogout()" style="background: transparent; border: none; color: #dc3545; text-decoration: underline; cursor: pointer; font-size: 16px; font-weight: bold;">Sair (Logout)</button>
+    </div>
+
+    <!-- ================= TELA 4: ESTOQUE ================= -->
+    <div id="tela-estoque" class="tela-oculta">
+      
+      <div class="cabecalho-estoque">
+        <button class="btn-voltar-menu" style="margin-bottom: 0;" onclick="abrirTela('tela-menu')">⬅ Voltar ao Menu</button>
+        <h2 style="margin: 0; border: none;">📦 Gestão de Estoque</h2>
+      </div>
+
+      <div class="botoes-seletor">
+        <button class="btn-seletor ativo" id="btnTipoItem">📦 Cadastrar Item</button>
+        <button class="btn-seletor" id="btnTipoServico" onclick="alert('Formulário de serviço em breve!')">🛠️ Cadastrar Serviço</button>
+      </div>
+
+      <!-- FORMULÁRIO DE ITEM (Com os 4 Blocos!) -->
+      <div id="form-cad-item">
+        
+        <!-- 1. Identificação -->
+        <div class="bloco-form">
+          <div class="titulo-bloco">1. Identificação Básica</div>
+          <div class="linha-form">
+            <div class="grupo-input">
+              <label>Código de Barras:</label>
+              <div style="display: flex; gap: 5px;">
+                <input type="text" id="cadCodigo" placeholder="Bipe ou gere automático..." style="flex:1;">
+                <button class="btn-acao" style="margin:0; background:#0d6efd; color:white; border:none;">⚙️ Gerar</button>
+              </div>
+            </div>
+            <div class="grupo-input" style="flex: 2;">
+              <label>Nome do Item:</label>
+              <input type="text" id="cadNome" placeholder="Ex: Camiseta Polo Preta">
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Origem -->
+        <div class="bloco-form" style="border-left-color: #6c757d;">
+          <div class="titulo-bloco">2. Origem da Mercadoria</div>
+          <div class="linha-form">
+            <div class="grupo-input">
+              <label>Fornecedor:</label>
+              <input type="text" id="cadFornecedor" placeholder="Nome da fábrica/distribuidor">
+            </div>
+            <div class="grupo-input">
+              <label>Nota Fiscal (NF):</label>
+              <input type="text" id="cadNF" placeholder="Nº da nota (opcional)">
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Estoque e Logística -->
+        <div class="bloco-form" style="border-left-color: #fd7e14;">
+          <div class="titulo-bloco">3. Estoque e Medida</div>
+          <div class="linha-form">
+            <div class="grupo-input">
+              <label>Unidade de Medida:</label>
+              <select id="cadMedida">
+                <option value="UN">Unidade (UN)</option>
+                <option value="KG">Quilo (KG)</option>
+                <option value="CX">Caixa (CX)</option>
+                <option value="LT">Litro (LT)</option>
+                <option value="MT">Metro (MT)</option>
+              </select>
+            </div>
+            <div class="grupo-input">
+              <label>Quantidade de Entrada:</label>
+              <input type="number" id="cadQtd" placeholder="Quantas chegaram?">
+            </div>
+          </div>
+          <button class="btn-acao" onclick="document.getElementById('bloco-validade').style.display='flex'">📅 + Adicionar Validade/Lote</button>
+          
+          <div class="linha-form" id="bloco-validade" style="display: none; margin-top: 15px; background: #f8f9fa; padding: 10px; border-radius: 5px;">
+            <div class="grupo-input">
+              <label>Data de Validade:</label>
+              <input type="date" id="cadValidade">
+            </div>
+            <div class="grupo-input">
+              <label>Lote:</label>
+              <input type="text" id="cadLote" placeholder="Ex: L2024-AB">
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Precificação (A Mágica) -->
+        <div class="bloco-form" style="border-left-color: #198754;">
+          <div class="titulo-bloco">4. Precificação e Lucro</div>
+          <div class="linha-form">
+            <div class="grupo-input">
+              <label>Preço de Custo Original (R$):</label>
+              <input type="number" id="cadCustoFabrica" placeholder="0.00" onkeyup="calcularPreco()">
+            </div>
+            <div class="grupo-input">
+              <label>Margem de Lucro Desejada (%):</label>
+              <input type="number" id="cadMargem" placeholder="Ex: 100" onkeyup="calcularPreco()">
+            </div>
+          </div>
+
+          <div id="area-custos-extras"></div>
+          <button class="btn-acao" onclick="adicionarCustoExtra()">💸 + Adicionar Custo Extra (Frete, Imposto, Embalagem)</button>
+
+          <div class="painel-resultado-preco">
+            <div class="txt-custo-real" id="txtCustoReal">CUSTO REAL DA PEÇA: R$ 0,00</div>
+            <div style="font-size: 14px; color: #adb5bd; margin-bottom: 5px;">Sugestão de Preço de Venda:</div>
+            <div class="txt-preco-sugerido" id="txtPrecoVenda">R$ 0,00</div>
+            
+            <div style="margin-top: 15px; background: white; padding: 10px; border-radius: 5px;">
+              <label style="color: #333; font-size: 12px; font-weight: bold; display: block; margin-bottom: 5px;">Arredondar Preço Final (R$):</label>
+              <input type="number" id="cadPrecoFinal" placeholder="Ex: 59.90" style="width: 150px; text-align: center; font-size: 18px; font-weight: bold; color: #198754; border: 2px solid #198754; border-radius: 5px; padding: 5px;" onkeyup="calcularPrecoReverso()">
+            </div>
+          </div>
+        </div>
+
+        <button class="btn-salvar-item">💾 SALVAR NO ESTOQUE</button>
+
+      </div>
     </div>
 
 
@@ -794,6 +943,89 @@
             btn.innerHTML = "✅ FINALIZAR"; btn.disabled = false;
             alert("Erro de conexão ao registrar venda!");
         });
+      }
+      // ==========================================
+      // LÓGICA DO MÓDULO DE ESTOQUE
+      // ==========================================
+
+      // Função para adicionar uma nova linha de Custo Extra
+      function adicionarCustoExtra() {
+        var area = document.getElementById('area-custos-extras');
+        var div = document.createElement('div');
+        div.className = 'linha-custo-extra';
+        
+        div.innerHTML = `
+          <div class="grupo-input" style="flex: 2; min-width: 120px;">
+            <label>Descrição:</label>
+            <input type="text" placeholder="Ex: Frete">
+          </div>
+          <div class="grupo-input" style="flex: 1; min-width: 70px;">
+            <label>Tipo:</label>
+            <select class="tipo-custo-extra" onchange="calcularPreco()">
+              <option value="R$">R$ Valor</option>
+              <option value="%">% Porcento</option>
+            </select>
+          </div>
+          <div class="grupo-input" style="flex: 1; min-width: 80px;">
+            <label>Valor:</label>
+            <input type="number" class="valor-custo-extra" placeholder="0.00" onkeyup="calcularPreco()">
+          </div>
+          <button class="btn-remover-custo" onclick="removerCustoExtra(this)" title="Remover custo">X</button>
+        `;
+        area.appendChild(div);
+      }
+
+      function removerCustoExtra(botao) {
+        botao.parentElement.remove();
+        calcularPreco(); // Recalcula quando apaga
+      }
+
+      // Função Mágica que calcula o Custo Real e o Preço de Venda
+      function calcularPreco() {
+        var custoFabrica = parseFloat(document.getElementById('cadCustoFabrica').value) || 0;
+        var margem = parseFloat(document.getElementById('cadMargem').value) || 0;
+        var totalCustosExtras = 0;
+
+        // Pega todos os custos extras que o usuário adicionou
+        var linhasCustos = document.querySelectorAll('.linha-custo-extra');
+        linhasCustos.forEach(function(linha) {
+            var tipo = linha.querySelector('.tipo-custo-extra').value;
+            var valor = parseFloat(linha.querySelector('.valor-custo-extra').value) || 0;
+            
+            if (tipo === 'R$') {
+                totalCustosExtras += valor;
+            } else if (tipo === '%') {
+                totalCustosExtras += custoFabrica * (valor / 100);
+            }
+        });
+
+        // O custo real não é só o preço da fábrica, é a fábrica + frete + embalagem...
+        var custoReal = custoFabrica + totalCustosExtras;
+        document.getElementById('txtCustoReal').innerText = "CUSTO REAL DA PEÇA: R$ " + custoReal.toFixed(2).replace('.', ',');
+
+        // Preço sugerido baseado na margem que ele quer
+        var precoSugerido = custoReal + (custoReal * (margem / 100));
+        document.getElementById('txtPrecoVenda').innerText = "R$ " + precoSugerido.toFixed(2).replace('.', ',');
+        
+        // Joga o valor sugerido pro campo de edição final (para ele poder arredondar)
+        if(document.activeElement.id !== "cadPrecoFinal") {
+             document.getElementById('cadPrecoFinal').value = precoSugerido.toFixed(2);
+        }
+      }
+
+      // Se o usuário digitar direto no Preço Final (Ex: arredondar de 59.98 para 59.90)
+      function calcularPrecoReverso() {
+         var custoRealTexto = document.getElementById('txtCustoReal').innerText;
+         // Extrai só o número do texto do custo real
+         var custoReal = parseFloat(custoRealTexto.replace('CUSTO REAL DA PEÇA: R$ ', '').replace(',', '.')) || 0;
+         var precoFinal = parseFloat(document.getElementById('cadPrecoFinal').value) || 0;
+         
+         if(custoReal > 0 && precoFinal > custoReal) {
+             // Descobre qual foi a margem % que sobrou
+             var lucroR$ = precoFinal - custoReal;
+             var novaMargem = (lucroR$ / custoReal) * 100;
+             document.getElementById('cadMargem').value = novaMargem.toFixed(2);
+         }
       }
     </script>
   </body>
