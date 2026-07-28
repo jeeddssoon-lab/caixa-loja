@@ -225,9 +225,19 @@
                 <button class="btn-acao" style="margin:0; background:#0d6efd; color:white; border:none;">⚙️ Gerar</button>
               </div>
             </div>
-            <div class="grupo-input" style="flex: 2;">
-              <label>Nome do Item:</label>
-              <input type="text" id="cadNome" placeholder="Ex: Camiseta Polo Preta">
+            <div class="grupo-input">
+              <label>Código de Barras:</label>
+              <div style="display: flex; gap: 5px;">
+                <input type="text" id="cadCodigo" placeholder="Bipe, digite ou deixe vazio..." style="flex:1;">
+                <button class="btn-camera" onclick="abrirCameraEstoque()" title="Escanear Código" style="padding: 0 15px; margin: 0; border-radius: 5px;">📷</button>
+              </div>
+              
+              <!-- Box da Câmera Exclusiva do Estoque -->
+              <div id="box-camera-estoque" style="display: none; margin-top: 10px; border: 2px solid #212529; border-radius: 5px; overflow: hidden; position: relative; background: #000; width: 100%; max-width: 500px; height: 300px; margin-left: auto; margin-right: auto;">
+                 <div class="linha-guia"></div>
+                 <div id="interactive-estoque" class="viewport" style="width: 100%; height: 100%;"></div>
+                 <button class="btn-fechar-camera" onclick="fecharCameraEstoque()">FECHAR</button>
+              </div>
             </div>
           </div>
         </div>
@@ -309,7 +319,7 @@
           </div>
         </div>
 
-        <button class="btn-salvar-item">💾 SALVAR NO ESTOQUE</button>
+        <button class="btn-salvar-item" onclick="salvarItemEstoque()">💾 SALVAR NO ESTOQUE</button>
 
       </div>
     </div>
@@ -1028,6 +1038,92 @@
              var novaMargem = (lucroR$ / custoReal) * 100;
              document.getElementById('cadMargem').value = novaMargem.toFixed(2);
          }
+      }
+      // ==========================================
+      // CÂMERA E SALVAMENTO DO ESTOQUE
+      // ==========================================
+      
+      let cameraEstoqueLigada = false;
+
+      function abrirCameraEstoque() {
+        document.getElementById('box-camera-estoque').style.display = 'block';
+        if (cameraEstoqueLigada) return;
+
+        Quagga.init({
+          inputStream: {
+            name: "Live",
+            type: "LiveStream",
+            target: document.querySelector('#interactive-estoque'),
+            constraints: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: "environment" },
+          },
+          locator: { patchSize: "medium", halfSample: true },
+          numOfWorkers: 4,
+          decoder: { 
+            // Lê tanto o Code 39 da Argox quanto códigos EAN normais de supermercado
+            readers: ["code_39_reader", "ean_reader", "upc_reader"] 
+          },
+          locate: true
+        }, function(err) {
+            if (err) {
+                alert("Erro ao ligar a câmera do estoque: " + err);
+                document.getElementById('box-camera-estoque').style.display = 'none';
+                return;
+            }
+            Quagga.start();
+            cameraEstoqueLigada = true;
+        });
+
+        Quagga.onDetected(function(result) {
+            if (result.codeResult && result.codeResult.code) {
+                // Tira o asterisco só para ficar limpo na tela
+                var codigoDetectado = result.codeResult.code.replace(/\*/g, ''); 
+                tocarBip();
+                fecharCameraEstoque();
+                document.getElementById('cadCodigo').value = codigoDetectado;
+            }
+        });
+      }
+
+      function fecharCameraEstoque() {
+         if (cameraEstoqueLigada) { Quagga.stop(); cameraEstoqueLigada = false; }
+         document.getElementById('box-camera-estoque').style.display = 'none';
+      }
+
+      // Função acionada ao clicar em SALVAR NO ESTOQUE
+      function salvarItemEstoque() {
+          var codigo = document.getElementById('cadCodigo').value.trim();
+          var nome = document.getElementById('cadNome').value.trim();
+          var fornecedor = document.getElementById('cadFornecedor').value.trim();
+          var quantidade = document.getElementById('cadQtd').value;
+          var precoVenda = document.getElementById('cadPrecoFinal').value;
+          
+          if (nome === "") {
+              alert("⚠️ Atenção: Digite pelo menos o Nome do Item para salvar!");
+              document.getElementById('cadNome').focus();
+              return;
+          }
+
+          // A MÁGICA: Se o campo código estiver vazio, o sistema gera sozinho!
+          if (codigo === "") {
+              // Gera um número sequencial aleatório de 4 dígitos (Ex: 8542)
+              var numeroGerado = Math.floor(1000 + Math.random() * 9000);
+              codigo = "*" + numeroGerado + "*"; // Envelopa nos asteriscos da Argox
+              
+              document.getElementById('cadCodigo').value = codigo;
+              alert("ℹ️ Nenhum código foi bipado.\nO sistema gerou automaticamente o código: " + codigo);
+          } else if (!codigo.includes('*') && !isNaN(codigo)) {
+              // Se o usuário digitou o número na mão e esqueceu os asteriscos, o sistema arruma
+              codigo = "*" + codigo + "*";
+              document.getElementById('cadCodigo').value = codigo;
+          }
+
+          // Esse alerta temporário mostra que os dados estão prontos para ir pro Google Sheets!
+          alert("✅ ITEM PRONTO PARA SER GRAVADO!\n\n" + 
+                "Item: " + nome + "\n" +
+                "Código: " + codigo + "\n" +
+                "Preço: R$ " + precoVenda);
+                
+          // (Na próxima etapa, colocaremos o fetch() aqui para enviar tudo pra planilha)
       }
     </script>
   </body>
