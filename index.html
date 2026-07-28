@@ -218,17 +218,11 @@
         <div class="bloco-form">
           <div class="titulo-bloco">1. Identificação Básica</div>
           <div class="linha-form">
+            
             <div class="grupo-input">
-              <label>Código de Barras:</label>
+              <label>Código de Barras (Bipe ou digite):</label>
               <div style="display: flex; gap: 5px;">
-                <input type="text" id="cadCodigo" placeholder="Bipe ou gere automático..." style="flex:1;">
-                <button class="btn-acao" style="margin:0; background:#0d6efd; color:white; border:none;">⚙️ Gerar</button>
-              </div>
-            </div>
-            <div class="grupo-input">
-              <label>Código de Barras:</label>
-              <div style="display: flex; gap: 5px;">
-                <input type="text" id="cadCodigo" placeholder="Bipe, digite ou deixe vazio..." style="flex:1;">
+                <input type="text" id="cadCodigo" placeholder="Deixe vazio para gerar automático" style="flex:1;">
                 <button class="btn-camera" onclick="abrirCameraEstoque()" title="Escanear Código" style="padding: 0 15px; margin: 0; border-radius: 5px;">📷</button>
               </div>
               
@@ -239,6 +233,12 @@
                  <button class="btn-fechar-camera" onclick="fecharCameraEstoque()">FECHAR</button>
               </div>
             </div>
+            
+            <div class="grupo-input" style="flex: 2;">
+              <label>Nome do Item:</label>
+              <input type="text" id="cadNome" placeholder="Ex: Camiseta Polo Preta">
+            </div>
+            
           </div>
         </div>
 
