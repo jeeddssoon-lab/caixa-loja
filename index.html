@@ -253,17 +253,21 @@
         </div>
 
         <div class="linha-form">
-          <div class="grupo-input" style="min-width: 100px;">
+          <div class="grupo-input" style="min-width: 80px;">
             <label>Medida:</label>
             <select id="cadMedida"><option value="UN">UN</option><option value="KG">KG</option><option value="CX">CX</option><option value="LT">LT</option><option value="MT">MT</option></select>
           </div>
-          <div class="grupo-input" style="min-width: 100px;">
+          <div class="grupo-input" style="min-width: 80px;">
             <label>Quantidade:</label>
             <input type="number" id="cadQtd" placeholder="Qtd" value="1">
           </div>
           <div class="grupo-input" style="min-width: 120px;">
             <label>Custo Base (R$):</label>
             <input type="number" id="cadCustoFabrica" placeholder="0.00" onkeyup="calcularPreco()">
+          </div>
+          <div class="grupo-input" style="min-width: 120px;">
+            <label>Margem Lucro (%):</label>
+            <input type="number" id="cadMargem" placeholder="Ex: 100" onkeyup="calcularPreco()">
           </div>
         </div>
 
@@ -272,22 +276,22 @@
 
         <!-- Modificadores de Preço -->
         <div style="background: #e9ecef; padding: 10px; border-radius: 5px; margin-top: 10px;">
-          <button class="btn-acao" style="margin-top:0; border-color: #6c757d;" onclick="adicionarCustoExtra()">💸 + Adicionar Modificador (Frete, Impostos ou Descontos na nota)</button>
+          <button class="btn-acao" style="margin-top:0; border-color: #6c757d;" onclick="adicionarCustoExtra()">💸 + Adicionar Modificador (Frete, Impostos ou Descontos)</button>
           <div id="area-custos-extras"></div>
         </div>
 
         <!-- Painel Preto Compacto de Cálculo -->
         <div class="painel-resultado-estoque">
           <div>
-            <p class="lbl-painel-est">Custo Real Final:</p>
+            <p class="lbl-painel-est">Custo Real Final (Com frete/taxas):</p>
             <p class="val-painel-est" id="txtCustoReal">R$ 0,00</p>
           </div>
           
-          <div style="display:flex; gap: 15px; align-items: center;">
-            <div style="text-align: center;">
-              <p class="lbl-painel-est">Margem %:</p>
-              <input type="number" id="cadMargem" placeholder="Ex: 100" style="width: 70px; text-align: center; font-weight: bold; border-radius: 4px; border: none; padding: 5px;" onkeyup="calcularPreco()">
-            </div>
+          <div style="text-align: right;">
+            <p class="lbl-painel-est" style="color: #00ff00;">Preço de Venda (R$):</p>
+            <input type="number" id="cadPrecoFinal" placeholder="0.00" style="width: 120px; text-align: right; font-size: 24px; font-weight: bold; color: #00ff00; background: transparent; border: none; border-bottom: 2px solid #00ff00; padding: 0; outline: none;" onkeyup="calcularPrecoReverso()">
+          </div>
+        </div>
             
             <div style="text-align: right;">
               <p class="lbl-painel-est" style="color: #00ff00;">Preço de Venda (R$):</p>
@@ -555,6 +559,7 @@
         var margem = parseFloat(document.getElementById('cadMargem').value) || 0;
         var totalModificadores = 0;
 
+        // Calcula fretes, taxas e descontos
         var linhasCustos = document.querySelectorAll('.linha-custo-extra');
         linhasCustos.forEach(function(linha) {
             var tipo = linha.querySelector('.tipo-custo-extra').value;
@@ -565,11 +570,17 @@
             else if (tipo === '-%') { totalModificadores -= custoFabrica * (valor / 100); }
         });
 
+        // 1. Acha o Custo Real (Custo de Fábrica + Fretes - Descontos)
         var custoReal = custoFabrica + totalModificadores;
         if (custoReal < 0) custoReal = 0; 
         document.getElementById('txtCustoReal').innerText = "R$ " + custoReal.toFixed(2).replace('.', ',');
 
-        var precoSugerido = custoReal + (custoReal * (margem / 100));
+        // 2. Acha o Lucro baseado APENAS no Custo Base (Fábrica)
+        var lucroEmReais = custoFabrica * (margem / 100);
+
+        // 3. O Preço Sugerido é o Custo Real (para não perder o frete) + o seu Lucro
+        var precoSugerido = custoReal + lucroEmReais;
+        
         if(document.activeElement.id !== "cadPrecoFinal") {
              document.getElementById('cadPrecoFinal').value = precoSugerido.toFixed(2);
         }
@@ -578,11 +589,14 @@
       function calcularPrecoReverso() {
          var custoRealTexto = document.getElementById('txtCustoReal').innerText;
          var custoReal = parseFloat(custoRealTexto.replace('R$ ', '').replace(',', '.')) || 0;
+         var custoFabrica = parseFloat(document.getElementById('cadCustoFabrica').value) || 0;
          var precoFinal = parseFloat(document.getElementById('cadPrecoFinal').value) || 0;
          
-         if(custoReal > 0 && precoFinal > custoReal) {
+         if(custoFabrica > 0 && precoFinal > custoReal) {
+             // Descobre o lucro líquido tirando o Custo Real
              var lucroR$ = precoFinal - custoReal;
-             var novaMargem = (lucroR$ / custoReal) * 100;
+             // Calcula a margem % em cima do Custo Original
+             var novaMargem = (lucroR$ / custoFabrica) * 100;
              document.getElementById('cadMargem').value = novaMargem.toFixed(2);
          }
       }
