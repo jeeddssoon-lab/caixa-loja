@@ -325,8 +325,8 @@
           </div>
 
           <div id="area-custos-extras"></div>
-          <button class="btn-acao" onclick="adicionarCustoExtra()">💸 + Adicionar Custo Extra (Frete, Imposto, Embalagem)</button>
-
+          <button class="btn-acao" onclick="adicionarCustoExtra()">💸 + Adicionar Modificador (Frete, Imposto, Desconto...)</button>
+          
           <div class="painel-resultado-preco">
             <div class="txt-custo-real" id="txtCustoReal">CUSTO REAL DA PEÇA: R$ 0,00</div>
             <div style="font-size: 14px; color: #adb5bd; margin-bottom: 5px;">Sugestão de Preço de Venda:</div>
@@ -1057,20 +1057,22 @@
         div.innerHTML = `
           <div class="grupo-input" style="flex: 2; min-width: 120px;">
             <label>Descrição:</label>
-            <input type="text" placeholder="Ex: Frete">
+            <input type="text" placeholder="Ex: Frete, Desconto...">
           </div>
-          <div class="grupo-input" style="flex: 1; min-width: 70px;">
+          <div class="grupo-input" style="flex: 1; min-width: 110px;">
             <label>Tipo:</label>
             <select class="tipo-custo-extra" onchange="calcularPreco()">
-              <option value="R$">R$ Valor</option>
-              <option value="%">% Porcento</option>
+              <option value="+R$">➕ R$ Acréscimo</option>
+              <option value="+%">➕ % Acréscimo</option>
+              <option value="-R$">➖ R$ Desconto</option>
+              <option value="-%">➖ % Desconto</option>
             </select>
           </div>
           <div class="grupo-input" style="flex: 1; min-width: 80px;">
             <label>Valor:</label>
             <input type="number" class="valor-custo-extra" placeholder="0.00" onkeyup="calcularPreco()">
           </div>
-          <button class="btn-remover-custo" onclick="removerCustoExtra(this)" title="Remover custo">X</button>
+          <button class="btn-remover-custo" onclick="removerCustoExtra(this)" title="Remover modificador">X</button>
         `;
         area.appendChild(div);
       }
@@ -1083,26 +1085,37 @@
       function calcularPreco() {
         var custoFabrica = parseFloat(document.getElementById('cadCustoFabrica').value) || 0;
         var margem = parseFloat(document.getElementById('cadMargem').value) || 0;
-        var totalCustosExtras = 0;
+        var totalModificadores = 0;
 
+        // Pega todos os acréscimos e descontos que o usuário adicionou
         var linhasCustos = document.querySelectorAll('.linha-custo-extra');
         linhasCustos.forEach(function(linha) {
             var tipo = linha.querySelector('.tipo-custo-extra').value;
             var valor = parseFloat(linha.querySelector('.valor-custo-extra').value) || 0;
             
-            if (tipo === 'R$') {
-                totalCustosExtras += valor;
-            } else if (tipo === '%') {
-                totalCustosExtras += custoFabrica * (valor / 100);
+            if (tipo === '+R$') {
+                totalModificadores += valor; // Soma valor em Reais
+            } else if (tipo === '+%') {
+                totalModificadores += custoFabrica * (valor / 100); // Soma Porcentagem
+            } else if (tipo === '-R$') {
+                totalModificadores -= valor; // Subtrai valor em Reais
+            } else if (tipo === '-%') {
+                totalModificadores -= custoFabrica * (valor / 100); // Subtrai Porcentagem
             }
         });
 
-        var custoReal = custoFabrica + totalCustosExtras;
+        // O custo real agora é o preço da fábrica + taxas - descontos
+        var custoReal = custoFabrica + totalModificadores;
+        // Evita que o custo real fique negativo se o usuário colocar um desconto maior que o valor
+        if (custoReal < 0) custoReal = 0; 
+        
         document.getElementById('txtCustoReal').innerText = "CUSTO REAL DA PEÇA: R$ " + custoReal.toFixed(2).replace('.', ',');
 
+        // Preço sugerido baseado na margem que ele quer
         var precoSugerido = custoReal + (custoReal * (margem / 100));
         document.getElementById('txtPrecoVenda').innerText = "R$ " + precoSugerido.toFixed(2).replace('.', ',');
         
+        // Joga o valor sugerido pro campo de edição final (para ele poder arredondar)
         if(document.activeElement.id !== "cadPrecoFinal") {
              document.getElementById('cadPrecoFinal').value = precoSugerido.toFixed(2);
         }
