@@ -292,16 +292,9 @@
             <input type="number" id="cadPrecoFinal" placeholder="0.00" style="width: 120px; text-align: right; font-size: 24px; font-weight: bold; color: #00ff00; background: transparent; border: none; border-bottom: 2px solid #00ff00; padding: 0; outline: none;" onkeyup="calcularPrecoReverso()">
           </div>
         </div>
-            
-            <div style="text-align: right;">
-              <p class="lbl-painel-est" style="color: #00ff00;">Preço de Venda (R$):</p>
-              <input type="number" id="cadPrecoFinal" placeholder="0.00" style="width: 120px; text-align: right; font-size: 24px; font-weight: bold; color: #00ff00; background: transparent; border: none; border-bottom: 2px solid #00ff00; padding: 0; outline: none;" onkeyup="calcularPrecoReverso()">
-            </div>
-          </div>
-        </div>
 
         <button class="btn-salvar-item" style="background: #0d6efd;" onclick="adicionarItemNaListaEstoque()">➕ ADICIONAR PRODUTO À LISTA</button>
-      </div>
+      </div> <!-- Fim Bloco 2. Produto -->
 
       <!-- 3. LISTA DA NOTA (Tabela) -->
       <div class="bloco-form" style="border-left-color: #198754;">
@@ -318,7 +311,7 @@
         <button class="btn-salvar-item" style="background: #198754; margin-top: 15px;" onclick="salvarEstoqueCompleto()">💾 PROCESSAR ENTRADA NO ESTOQUE</button>
       </div>
 
-    </div>
+    </div> <!-- FIM TELA ESTOQUE -->
 
     <!-- ================= TELA 4: CAIXA (Intacta) ================= -->
     <div id="tela-caixa" class="tela-oculta">
@@ -443,57 +436,12 @@
           renderizarCamposDinamicosNoFormulario();
       };
 
-      function abrirModalEngrenagem() {
-          document.getElementById('modalEngrenagem').style.display = 'flex';
-          atualizarTagsNoModal();
-      }
-
-      function adicionarCampoDinamico() {
-          let nome = document.getElementById('txtNovoCampo').value.trim();
-          if (nome === "") return;
-          nome = nome.charAt(0).toUpperCase() + nome.slice(1);
-          if (!camposDinamicosLoja.includes(nome)) {
-              camposDinamicosLoja.push(nome);
-              document.getElementById('txtNovoCampo').value = "";
-              atualizarTagsNoModal();
-          }
-      }
-
-      function removerCampoDinamico(nome) {
-          camposDinamicosLoja = camposDinamicosLoja.filter(c => c !== nome);
-          atualizarTagsNoModal();
-      }
-
-      function atualizarTagsNoModal() {
-          let area = document.getElementById('listaCamposAtivos');
-          area.innerHTML = "";
-          if(camposDinamicosLoja.length === 0){
-             area.innerHTML = "<span style='color:#999; font-size: 12px;'>Nenhum campo extra criado.</span>";
-          }
-          camposDinamicosLoja.forEach(campo => {
-              area.innerHTML += `<div class="tag-item">${campo} <span onclick="removerCampoDinamico('${campo}')">×</span></div>`;
-          });
-      }
-
-      function salvarConfiguracaoCampos() {
-          localStorage.setItem('camposDinamicosLOJA', JSON.stringify(camposDinamicosLoja));
-          renderizarCamposDinamicosNoFormulario();
-          document.getElementById('modalEngrenagem').style.display = 'none';
-      }
-
-      function renderizarCamposDinamicosNoFormulario() {
-          let area = document.getElementById('area-campos-dinamicos');
-          if (area) {
-              area.innerHTML = "";
-              camposDinamicosLoja.forEach(campo => {
-                  area.innerHTML += `
-                  <div class="grupo-input" style="min-width: 150px;">
-                    <label>${campo}:</label>
-                    <input type="text" class="input-dinamico-extra" data-nome="${campo}" placeholder="Digite a(o) ${campo}...">
-                  </div>`;
-              });
-          }
-      }
+      function abrirModalEngrenagem() { document.getElementById('modalEngrenagem').style.display = 'flex'; atualizarTagsNoModal(); }
+      function adicionarCampoDinamico() { let nome = document.getElementById('txtNovoCampo').value.trim(); if (nome === "") return; nome = nome.charAt(0).toUpperCase() + nome.slice(1); if (!camposDinamicosLoja.includes(nome)) { camposDinamicosLoja.push(nome); document.getElementById('txtNovoCampo').value = ""; atualizarTagsNoModal(); } }
+      function removerCampoDinamico(nome) { camposDinamicosLoja = camposDinamicosLoja.filter(c => c !== nome); atualizarTagsNoModal(); }
+      function atualizarTagsNoModal() { let area = document.getElementById('listaCamposAtivos'); area.innerHTML = ""; if(camposDinamicosLoja.length === 0){ area.innerHTML = "<span style='color:#999; font-size: 12px;'>Nenhum campo extra criado.</span>"; } camposDinamicosLoja.forEach(campo => { area.innerHTML += `<div class="tag-item">${campo} <span onclick="removerCampoDinamico('${campo}')">×</span></div>`; }); }
+      function salvarConfiguracaoCampos() { localStorage.setItem('camposDinamicosLOJA', JSON.stringify(camposDinamicosLoja)); renderizarCamposDinamicosNoFormulario(); document.getElementById('modalEngrenagem').style.display = 'none'; }
+      function renderizarCamposDinamicosNoFormulario() { let area = document.getElementById('area-campos-dinamicos'); if (area) { area.innerHTML = ""; camposDinamicosLoja.forEach(campo => { area.innerHTML += `<div class="grupo-input" style="min-width: 150px;"><label>${campo}:</label><input type="text" class="input-dinamico-extra" data-nome="${campo}" placeholder="Digite a(o) ${campo}..."></div>`; }); } }
 
       // ==========================================
       // LÓGICA DO CAIXA E NAVEGAÇÃO
@@ -651,7 +599,7 @@
           document.querySelectorAll('.input-dinamico-extra').forEach(i => i.value = "");
           document.getElementById('area-custos-extras').innerHTML = "";
           
-          // CORREÇÃO AQUI: Verifica se a validade existe antes de tentar limpar!
+          // Verifica se a validade existe antes de tentar limpar
           if(document.getElementById('cadValidade')) document.getElementById('cadValidade').value = "";
           if(document.getElementById('cadLote')) document.getElementById('cadLote').value = "";
           
