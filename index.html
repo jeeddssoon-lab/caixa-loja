@@ -623,10 +623,10 @@
               }
           });
 
-          // Salva no Array
+          // Salva no Array (vai pra tabela)
           listaDeEntradaEstoque.push({ codigo: codigo, nome: nome, detalhes: detalhesDinamicos, qtd: qtd, precoVenda: precoVenda });
 
-          // LIMPA OS CAMPOS DO PRODUTO (Mantendo Fornecedor e NF!)
+          // LIMPA OS CAMPOS DO PRODUTO (Mantendo Fornecedor e NF intactos!)
           document.getElementById('cadCodigo').value = "";
           document.getElementById('cadNome').value = "";
           document.getElementById('cadQtd').value = "1";
@@ -636,8 +636,10 @@
           document.getElementById('txtCustoReal').innerText = "R$ 0,00";
           document.querySelectorAll('.input-dinamico-extra').forEach(i => i.value = "");
           document.getElementById('area-custos-extras').innerHTML = "";
-          document.getElementById('cadValidade').value = "";
-          document.getElementById('cadLote').value = "";
+          
+          // CORREÇÃO AQUI: Verifica se a validade existe antes de tentar limpar!
+          if(document.getElementById('cadValidade')) document.getElementById('cadValidade').value = "";
+          if(document.getElementById('cadLote')) document.getElementById('cadLote').value = "";
           
           document.getElementById('cadCodigo').focus();
           atualizarTabelaEntradaEstoque();
