@@ -36,7 +36,7 @@
       .btn-voltar-menu:hover { background: #5a6268; }
 
       /* ========================================== */
-      /* ESTILOS DO CAIXA PDV (Originais Intactos)  */
+      /* ESTILOS DO CAIXA PDV                       */
       /* ========================================== */
       #tela-caixa { width: 100%; max-width: 1200px; display: flex; flex-direction: column; }
       .pdv-container { display: flex; gap: 15px; width: 100%; height: 90vh; }
@@ -58,9 +58,7 @@
       #interactive.viewport { width: 100%; height: 100%; }
       #interactive.viewport video { width: 100%; height: 100%; object-fit: cover; }
       
-      /* Linha vermelha guia para ajudar o lojista a mirar */
       .linha-guia { position: absolute; top: 50%; left: 10%; width: 80%; height: 2px; background: red; z-index: 5; box-shadow: 0 0 4px red; }
-      
       .btn-fechar-camera { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); background: #dc3545; color: white; border: none; padding: 8px 16px; border-radius: 20px; font-weight: bold; cursor: pointer; z-index: 10; box-shadow: 0 2px 5px rgba(0,0,0,0.5);}
       
       .mensagem-caixa { font-size: 13px; font-weight: bold; min-height: 18px; color: #dc3545; }
@@ -145,6 +143,21 @@
       .btn-salvar-item { background: #198754; color: white; border: none; padding: 15px; border-radius: 5px; font-size: 18px; font-weight: bold; width: 100%; cursor: pointer; text-transform: uppercase; margin-top: 10px; }
       .btn-salvar-item:hover { background: #157347; }
       
+      /* ========================================== */
+      /* MODAL DA ENGRENAGEM (Campos Dinâmicos)     */
+      /* ========================================== */
+      .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 1000; }
+      .modal-box { background: white; padding: 25px; border-radius: 10px; width: 90%; max-width: 450px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+      .modal-box h3 { margin-top: 0; color: #0d6efd; font-size: 20px; }
+      .modal-box p { font-size: 14px; color: #555; margin-bottom: 15px;}
+      .linha-add-tag { display: flex; gap: 10px; margin-bottom: 15px; }
+      .linha-add-tag input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+      .linha-add-tag button { background: #0d6efd; color: white; border: none; padding: 10px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; }
+      .area-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; min-height: 50px; padding: 10px; background: #f8f9fa; border-radius: 5px; border: 1px dashed #ccc; }
+      .tag-item { background: #e9ecef; color: #333; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 8px; }
+      .tag-item span { color: red; cursor: pointer; font-weight: bold; font-size: 16px; }
+      .btn-fechar-modal { background: #198754; color: white; width: 100%; padding: 12px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 16px; }
+
       @media (max-width: 768px) {
         body { padding: 5px; background-color: #fff;}
         .pdv-container { flex-direction: column; height: auto; gap: 10px; }
@@ -257,9 +270,12 @@
           </div>
         </div>
 
-        <!-- 3. Estoque e Logística -->
+        <!-- 3. Estoque e Logística COM A ENGRENAGEM -->
         <div class="bloco-form" style="border-left-color: #fd7e14;">
-          <div class="titulo-bloco">3. Estoque e Medida</div>
+          <div class="titulo-bloco" style="display: flex; justify-content: space-between; align-items: center;">
+            <span>3. Estoque e Referências</span>
+            <button class="btn-acao" style="margin:0; border-color:#0d6efd; color:#0d6efd;" onclick="abrirModalEngrenagem()">⚙️ Configurar Campos</button>
+          </div>
           <div class="linha-form">
             <div class="grupo-input">
               <label>Unidade de Medida:</label>
@@ -276,6 +292,10 @@
               <input type="number" id="cadQtd" placeholder="Quantas chegaram?">
             </div>
           </div>
+
+          <!-- ESPAÇO PARA OS CAMPOS DINÂMICOS (TAMANHO, COR, MARCA) APARECEREM -->
+          <div class="linha-form" id="area-campos-dinamicos"></div>
+
           <button class="btn-acao" onclick="document.getElementById('bloco-validade').style.display='flex'">📅 + Adicionar Validade/Lote</button>
           
           <div class="linha-form" id="bloco-validade" style="display: none; margin-top: 15px; background: #f8f9fa; padding: 10px; border-radius: 5px;">
@@ -461,23 +481,99 @@
       </div>
     </div> <!-- Fim Tela Caixa -->
 
+    <!-- ================= JANELA MODAL DA ENGRENAGEM ================= -->
+    <div id="modalEngrenagem" class="modal-overlay">
+      <div class="modal-box">
+        <h3>⚙️ Personalizar Referências</h3>
+        <p>Digite os campos extras que você precisa para seus itens (Ex: Cor, Tamanho, Modelo, Marca)</p>
+        
+        <div class="linha-add-tag">
+          <input type="text" id="txtNovoCampo" placeholder="Digite o nome do campo...">
+          <button onclick="adicionarCampoDinamico()">Adicionar</button>
+        </div>
+        
+        <p style="font-size: 12px; margin-bottom: 5px; font-weight: bold;">Campos Ativos:</p>
+        <div class="area-tags" id="listaCamposAtivos">
+          <!-- As tags criadas vão aparecer aqui -->
+        </div>
+        
+        <button class="btn-fechar-modal" onclick="salvarConfiguracaoCampos()">✅ Salvar Configuração</button>
+      </div>
+    </div>
+
     <script>
       // ==========================================
-      // LÓGICA DE LOGIN E NAVEGAÇÃO
+      // LÓGICA DE INICIALIZAÇÃO E ENGRENAGEM
       // ==========================================
-      
-      // Senha e E-mail provisórios do sistema 
-      const USUARIO_CORRETO = "admin@loja.com";
-      const SENHA_CORRETA = "123456";
+      let camposDinamicosLoja = JSON.parse(localStorage.getItem('camposDinamicosLOJA')) || [];
 
-      // Quando a página carregar, verifica se tem senha salva
       window.onload = function() {
           if (localStorage.getItem("lembrarLogin") === "sim") {
               document.getElementById("emailLogin").value = localStorage.getItem("emailSalvo");
               document.getElementById("senhaLogin").value = localStorage.getItem("senhaSalva");
               document.getElementById("lembrarCheck").checked = true;
           }
+          // Desenha as caixinhas dinâmicas criadas
+          renderizarCamposDinamicosNoFormulario();
       };
+
+      function abrirModalEngrenagem() {
+          document.getElementById('modalEngrenagem').style.display = 'flex';
+          atualizarTagsNoModal();
+      }
+
+      function adicionarCampoDinamico() {
+          let nome = document.getElementById('txtNovoCampo').value.trim();
+          if (nome === "") return;
+          // Padroniza primeira letra maiúscula
+          nome = nome.charAt(0).toUpperCase() + nome.slice(1);
+          if (!camposDinamicosLoja.includes(nome)) {
+              camposDinamicosLoja.push(nome);
+              document.getElementById('txtNovoCampo').value = "";
+              atualizarTagsNoModal();
+          }
+      }
+
+      function removerCampoDinamico(nome) {
+          camposDinamicosLoja = camposDinamicosLoja.filter(c => c !== nome);
+          atualizarTagsNoModal();
+      }
+
+      function atualizarTagsNoModal() {
+          let area = document.getElementById('listaCamposAtivos');
+          area.innerHTML = "";
+          if(camposDinamicosLoja.length === 0){
+             area.innerHTML = "<span style='color:#999; font-size: 12px;'>Nenhum campo extra criado.</span>";
+          }
+          camposDinamicosLoja.forEach(campo => {
+              area.innerHTML += `<div class="tag-item">${campo} <span onclick="removerCampoDinamico('${campo}')">×</span></div>`;
+          });
+      }
+
+      function salvarConfiguracaoCampos() {
+          localStorage.setItem('camposDinamicosLOJA', JSON.stringify(camposDinamicosLoja));
+          renderizarCamposDinamicosNoFormulario();
+          document.getElementById('modalEngrenagem').style.display = 'none';
+      }
+
+      function renderizarCamposDinamicosNoFormulario() {
+          let area = document.getElementById('area-campos-dinamicos');
+          area.innerHTML = "";
+          camposDinamicosLoja.forEach(campo => {
+              area.innerHTML += `
+              <div class="grupo-input">
+                <label>${campo}:</label>
+                <input type="text" class="input-dinamico-extra" data-nome="${campo}" placeholder="Digite a(o) ${campo}...">
+              </div>`;
+          });
+      }
+
+      // ==========================================
+      // LÓGICA DE LOGIN E NAVEGAÇÃO
+      // ==========================================
+      
+      const USUARIO_CORRETO = "admin@loja.com";
+      const SENHA_CORRETA = "123456";
 
       function fazerLogin() {
           var email = document.getElementById("emailLogin").value.trim();
@@ -488,40 +584,33 @@
           if (email === USUARIO_CORRETO && senha === SENHA_CORRETA) {
               msg.style.display = "none";
               
-              // Se marcou "Lembrar", salva no navegador (localStorage)
               if (lembrar) {
                   localStorage.setItem("lembrarLogin", "sim");
                   localStorage.setItem("emailSalvo", email);
                   localStorage.setItem("senhaSalva", senha);
               } else {
-                  localStorage.clear(); // Limpa se desmarcou
+                  localStorage.clear();
               }
 
-              // Login deu certo! Abre o menu.
               abrirTela('tela-menu');
           } else {
-              msg.style.display = "block"; // Mostra o erro
+              msg.style.display = "block"; 
           }
       }
 
       function fazerLogout() {
           abrirTela('tela-login');
-          document.getElementById("senhaLogin").value = ""; // Apaga a senha por segurança
+          document.getElementById("senhaLogin").value = ""; 
       }
 
-      // Função Mestre para trocar as telas sem recarregar a página
-      // Função Mestre para trocar as telas sem recarregar a página
       function abrirTela(idDaTela) {
-          // Esconde todas as telas primeiro
           document.getElementById('tela-login').classList.add('tela-oculta');
           document.getElementById('tela-menu').classList.add('tela-oculta');
           document.getElementById('tela-caixa').classList.add('tela-oculta');
-          document.getElementById('tela-estoque').classList.add('tela-oculta'); // <-- ADICIONAMOS ISSO AQUI!
+          document.getElementById('tela-estoque').classList.add('tela-oculta'); 
           
-          // Mostra só a tela que você pediu
           document.getElementById(idDaTela).classList.remove('tela-oculta');
           
-          // Se abriu o caixa, foca o mouse automaticamente no campo de bipar!
           if(idDaTela === 'tela-caixa') {
               setTimeout(function(){
                   document.getElementById('codigoBarra').focus();
@@ -956,11 +1045,10 @@
             alert("Erro de conexão ao registrar venda!");
         });
       }
-      // ==========================================
-      // LÓGICA DO MÓDULO DE ESTOQUE
-      // ==========================================
 
-      // Função para adicionar uma nova linha de Custo Extra
+      // ==========================================
+      // LÓGICA DO MÓDULO DE ESTOQUE E CÂMERA
+      // ==========================================
       function adicionarCustoExtra() {
         var area = document.getElementById('area-custos-extras');
         var div = document.createElement('div');
@@ -989,16 +1077,14 @@
 
       function removerCustoExtra(botao) {
         botao.parentElement.remove();
-        calcularPreco(); // Recalcula quando apaga
+        calcularPreco(); 
       }
 
-      // Função Mágica que calcula o Custo Real e o Preço de Venda
       function calcularPreco() {
         var custoFabrica = parseFloat(document.getElementById('cadCustoFabrica').value) || 0;
         var margem = parseFloat(document.getElementById('cadMargem').value) || 0;
         var totalCustosExtras = 0;
 
-        // Pega todos os custos extras que o usuário adicionou
         var linhasCustos = document.querySelectorAll('.linha-custo-extra');
         linhasCustos.forEach(function(linha) {
             var tipo = linha.querySelector('.tipo-custo-extra').value;
@@ -1011,38 +1097,29 @@
             }
         });
 
-        // O custo real não é só o preço da fábrica, é a fábrica + frete + embalagem...
         var custoReal = custoFabrica + totalCustosExtras;
         document.getElementById('txtCustoReal').innerText = "CUSTO REAL DA PEÇA: R$ " + custoReal.toFixed(2).replace('.', ',');
 
-        // Preço sugerido baseado na margem que ele quer
         var precoSugerido = custoReal + (custoReal * (margem / 100));
         document.getElementById('txtPrecoVenda').innerText = "R$ " + precoSugerido.toFixed(2).replace('.', ',');
         
-        // Joga o valor sugerido pro campo de edição final (para ele poder arredondar)
         if(document.activeElement.id !== "cadPrecoFinal") {
              document.getElementById('cadPrecoFinal').value = precoSugerido.toFixed(2);
         }
       }
 
-      // Se o usuário digitar direto no Preço Final (Ex: arredondar de 59.98 para 59.90)
       function calcularPrecoReverso() {
          var custoRealTexto = document.getElementById('txtCustoReal').innerText;
-         // Extrai só o número do texto do custo real
          var custoReal = parseFloat(custoRealTexto.replace('CUSTO REAL DA PEÇA: R$ ', '').replace(',', '.')) || 0;
          var precoFinal = parseFloat(document.getElementById('cadPrecoFinal').value) || 0;
          
          if(custoReal > 0 && precoFinal > custoReal) {
-             // Descobre qual foi a margem % que sobrou
              var lucroR$ = precoFinal - custoReal;
              var novaMargem = (lucroR$ / custoReal) * 100;
              document.getElementById('cadMargem').value = novaMargem.toFixed(2);
          }
       }
-      // ==========================================
-      // CÂMERA E SALVAMENTO DO ESTOQUE
-      // ==========================================
-      
+
       let cameraEstoqueLigada = false;
 
       function abrirCameraEstoque() {
@@ -1059,7 +1136,6 @@
           locator: { patchSize: "medium", halfSample: true },
           numOfWorkers: 4,
           decoder: { 
-            // Lê tanto o Code 39 da Argox quanto códigos EAN normais de supermercado
             readers: ["code_39_reader", "ean_reader", "upc_reader"] 
           },
           locate: true
@@ -1075,7 +1151,6 @@
 
         Quagga.onDetected(function(result) {
             if (result.codeResult && result.codeResult.code) {
-                // Tira o asterisco só para ficar limpo na tela
                 var codigoDetectado = result.codeResult.code.replace(/\*/g, ''); 
                 tocarBip();
                 fecharCameraEstoque();
@@ -1089,7 +1164,6 @@
          document.getElementById('box-camera-estoque').style.display = 'none';
       }
 
-      // Função acionada ao clicar em SALVAR NO ESTOQUE
       function salvarItemEstoque() {
           var codigo = document.getElementById('cadCodigo').value.trim();
           var nome = document.getElementById('cadNome').value.trim();
@@ -1103,28 +1177,29 @@
               return;
           }
 
-          // A MÁGICA: Se o campo código estiver vazio, o sistema gera sozinho!
           if (codigo === "") {
-              // Gera um número sequencial aleatório de 4 dígitos (Ex: 8542)
               var numeroGerado = Math.floor(1000 + Math.random() * 9000);
-              codigo = "*" + numeroGerado + "*"; // Envelopa nos asteriscos da Argox
+              codigo = "*" + numeroGerado + "*"; 
               
               document.getElementById('cadCodigo').value = codigo;
               alert("ℹ️ Nenhum código foi bipado.\nO sistema gerou automaticamente o código: " + codigo);
           } else if (!codigo.includes('*') && !isNaN(codigo)) {
-              // Se o usuário digitou o número na mão e esqueceu os asteriscos, o sistema arruma
               codigo = "*" + codigo + "*";
               document.getElementById('cadCodigo').value = codigo;
           }
 
-          // Esse alerta temporário mostra que os dados estão prontos para ir pro Google Sheets!
+          var detalhesDinamicos = "";
+          document.querySelectorAll('.input-dinamico-extra').forEach(input => {
+              if (input.value.trim() !== "") {
+                  detalhesDinamicos += "- " + input.getAttribute('data-nome') + ": " + input.value + "\n";
+              }
+          });
+
           alert("✅ ITEM PRONTO PARA SER GRAVADO!\n\n" + 
                 "Item: " + nome + "\n" +
                 "Código: " + codigo + "\n" +
-                "Preço: R$ " + precoVenda);
-                
-          // (Na próxima etapa, colocaremos o fetch() aqui para enviar tudo pra planilha)
+                "Preço: R$ " + precoVenda + "\n\nDetalhes Extras:\n" + detalhesDinamicos);
       }
     </script>
   </body>
-</html>
+</html>```
