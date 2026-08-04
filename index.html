@@ -336,44 +336,8 @@
 
     </div> <!-- FIM TELA ESTOQUE -->
 
-    <!-- ================= TELA 4: CAIXA (Intacta) ================= -->
-    <!-- ================= TELA 5: MEUS ITENS (CADASTRADOS NA NUVEM) ================= -->
-    <div id="tela-lista-itens" class="tela-oculta" style="width: 100%; max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column;">
-      
-      <div class="cabecalho-estoque">
-        <h2 style="margin: 0; color: #333;">📋 Meus Itens (Estoque Atual)</h2>
-        <button class="btn-voltar-menu" style="margin: 0;" onclick="abrirTela('tela-menu')">⬅ Voltar ao Menu</button>
-      </div>
 
-      <div class="bloco-form" style="border-left-color: #ffc107;">
-        <div class="titulo-bloco" style="display: flex; justify-content: space-between; align-items: center;">
-          <span>Todos os produtos na nuvem</span>
-          <button class="btn-acao" style="margin:0;" onclick="carregarEstoqueGeral()">🔄 Atualizar Lista</button>
-        </div>
-        
-        <div class="linha-form" style="margin-bottom: 15px;">
-           <input type="text" id="buscaEstoque" placeholder="🔍 Buscar produto por nome, código ou fornecedor..." onkeyup="filtrarEstoque()" style="width: 100%; padding: 12px; border-radius: 5px; border: 2px solid #ced4da; font-size: 16px;">
-        </div>
-        
-        <div class="area-tabela" style="max-height: 60vh; overflow-y: auto;">
-          <table>
-            <thead>
-              <tr>
-                <th>Cód</th>
-                <th>Produto / Detalhes</th>
-                <th>Fornecedor</th>
-                <th>Custo (R$)</th>
-                <th>Venda (R$)</th>
-                <th style="text-align: center;">Qtd</th>
-              </tr>
-            </thead>
-            <tbody id="tabelaEstoqueGeral">
-              <tr><td colspan="6" style="text-align:center; color:#999; padding: 20px;">Carregando dados da nuvem...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div> <!-- FIM TELA MEUS ITENS -->
+    <!-- ================= TELA 4: CAIXA (Intacta) ================= -->
     <div id="tela-caixa" class="tela-oculta">
       <button class="btn-voltar-menu" onclick="abrirTela('tela-menu')">⬅ Voltar ao Menu</button>
       <div class="pdv-container">
@@ -467,6 +431,44 @@
         </div>
       </div>
     </div> <!-- Fim Tela Caixa -->
+
+    <!-- ================= TELA 5: MEUS ITENS (CADASTRADOS NA NUVEM) ================= -->
+    <div id="tela-lista-itens" class="tela-oculta" style="width: 100%; max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column;">
+      
+      <div class="cabecalho-estoque">
+        <h2 style="margin: 0; color: #333;">📋 Meus Itens (Estoque Atual)</h2>
+        <button class="btn-voltar-menu" style="margin: 0;" onclick="abrirTela('tela-menu')">⬅ Voltar ao Menu</button>
+      </div>
+
+      <div class="bloco-form" style="border-left-color: #ffc107;">
+        <div class="titulo-bloco" style="display: flex; justify-content: space-between; align-items: center;">
+          <span>Todos os produtos na nuvem</span>
+          <button class="btn-acao" style="margin:0;" onclick="carregarEstoqueGeral()">🔄 Atualizar Lista</button>
+        </div>
+        
+        <div class="linha-form" style="margin-bottom: 15px;">
+           <input type="text" id="buscaEstoque" placeholder="🔍 Buscar produto por nome, código ou fornecedor..." onkeyup="filtrarEstoque()" style="width: 100%; padding: 12px; border-radius: 5px; border: 2px solid #ced4da; font-size: 16px;">
+        </div>
+        
+        <div class="area-tabela" style="max-height: 60vh; overflow-y: auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Cód</th>
+                <th>Produto / Detalhes</th>
+                <th>Fornecedor</th>
+                <th>Custo (R$)</th>
+                <th>Venda (R$)</th>
+                <th style="text-align: center;">Qtd</th>
+              </tr>
+            </thead>
+            <tbody id="tabelaEstoqueGeral">
+              <tr><td colspan="6" style="text-align:center; color:#999; padding: 20px;">Carregando dados da nuvem...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div> <!-- FIM TELA MEUS ITENS -->
 
     <!-- ================= JANELA MODAL DA ENGRENAGEM ================= -->
     <div id="modalEngrenagem" class="modal-overlay">
@@ -644,9 +646,6 @@
       function abrirCameraEstoque() { document.getElementById('box-camera-estoque').style.display = 'block'; if (cameraEstoqueLigada) return; Quagga.init({ inputStream: { name: "Live", type: "LiveStream", target: document.querySelector('#interactive-estoque'), constraints: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: "environment" }, }, locator: { patchSize: "medium", halfSample: true }, numOfWorkers: 4, decoder: { readers: ["code_39_reader", "ean_reader", "upc_reader"] }, locate: true }, function(err) { if (err) { alert("Erro ao ligar a câmera: " + err); document.getElementById('box-camera-estoque').style.display = 'none'; return; } Quagga.start(); cameraEstoqueLigada = true; }); Quagga.onDetected(function(result) { if (result.codeResult && result.codeResult.code) { var codigoDetectado = result.codeResult.code.replace(/\*/g, ''); tocarBip(); fecharCameraEstoque(); document.getElementById('cadCodigo').value = codigoDetectado; } }); }
       function fecharCameraEstoque() { if (cameraEstoqueLigada) { Quagga.stop(); cameraEstoqueLigada = false; } document.getElementById('box-camera-estoque').style.display = 'none'; }
 
-      // ==========================================
-      // LÓGICA DA LISTA (Adicionar e Salvar Nota)
-      // ==========================================
       // ==========================================
       // LÓGICA DA LISTA (Adicionar, Somar e Salvar Nota)
       // ==========================================
@@ -849,6 +848,60 @@
               btnSalvar.disabled = false;
               btnSalvar.style.opacity = "1";
           }
+      }
+
+      // ==========================================
+      // LÓGICA DA LISTAGEM DO ESTOQUE (NUVEM)
+      // ==========================================
+      function carregarEstoqueGeral() {
+          var tbody = document.getElementById('tabelaEstoqueGeral');
+          tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#0d6efd; padding: 20px; font-weight: bold;">⏳ Puxando produtos da nuvem...</td></tr>';
+
+          try {
+              // Vai na coleção "produtos" do Firebase e traz todos ordenados por nome
+              db.collection("produtos").orderBy("nome").get().then((querySnapshot) => {
+                  tbody.innerHTML = "";
+                  
+                  if (querySnapshot.empty) {
+                      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#999; padding: 20px;">Nenhum produto cadastrado no banco de dados.</td></tr>';
+                      return;
+                  }
+
+                  querySnapshot.forEach((doc) => {
+                      var p = doc.data();
+                      var tr = document.createElement('tr');
+                      
+                      tr.innerHTML = `
+                          <td>${p.codigo || '-'}</td>
+                          <td><b style="color:#0d6efd; font-size:15px;">${p.nome || '-'}</b> <br><small style="color:#666;">${p.detalhesExtras || ''}</small></td>
+                          <td style="font-size: 13px; color: #555;">${p.fornecedor || '-'}</td>
+                          <td>R$ ${(p.custoUnitario || 0).toFixed(2).replace('.', ',')}</td>
+                          <td style="color:#198754; font-weight:bold; font-size: 16px;">R$ ${(p.precoVenda || 0).toFixed(2).replace('.', ',')}</td>
+                          <td style="font-weight:bold; text-align:center; font-size: 16px; background: #f8f9fa;">${p.quantidade || 0}</td>
+                      `;
+                      tbody.appendChild(tr);
+                  });
+              }).catch((error) => {
+                  console.error("Erro Firebase:", error);
+                  tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:red; padding: 20px;">❌ Erro de Conexão: ' + error.message + '</td></tr>';
+              });
+          } catch(e) {
+              console.error("Erro Interno:", e);
+              tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:red; padding: 20px;">❌ Erro no Código: ' + e.message + ' (Verifique se as chaves do Firebase foram colocadas no topo)</td></tr>';
+          }
+      }
+
+      function filtrarEstoque() {
+          var termo = document.getElementById('buscaEstoque').value.toLowerCase();
+          var linhas = document.querySelectorAll('#tabelaEstoqueGeral tr');
+          
+          linhas.forEach(function(linha) {
+              if(linha.innerText.toLowerCase().includes(termo)) {
+                  linha.style.display = '';
+              } else {
+                  linha.style.display = 'none';
+              }
+          });
       }
     </script>
   </body>
