@@ -5,10 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Sistema de Gestão - PDV</title>
     <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2/dist/quagga.min.js"></script>
+    <!-- Módulo Gerador de Código de Barras -->
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     
     <style>
       body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #e9ecef; margin: 0; padding: 10px; display: flex; justify-content: center; flex-direction: column; align-items: center;}
       
+      /* ========================================== */
+      /* LAYOUT DE IMPRESSÃO (ETIQUETAS)            */
+      /* ========================================== */
+      @media print {
+        body * { visibility: hidden; }
+        #area-impressao, #area-impressao * { visibility: visible; }
+        #area-impressao { position: absolute; left: 0; top: 0; width: 100%; display: flex; flex-wrap: wrap; align-content: flex-start; }
+        .etiqueta { border: 1px dashed #999; width: 4.5cm; height: 3cm; padding: 5px; text-align: center; margin: 2px; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box; page-break-inside: avoid; }
+        .etiqueta h4 { margin: 0 0 2px 0; font-size: 11px; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #000; }
+        .etiqueta p { font-size: 16px; font-weight: bold; margin: 0 0 2px 0; color: #000; }
+        .etiqueta svg { width: 100%; max-height: 40px; }
+      }
+
       /* ========================================== */
       /* ESTILOS GERAIS E OCULTAÇÃO                 */
       /* ========================================== */
@@ -165,6 +180,9 @@
     </style>
   </head>
   <body>
+
+    <!-- ESSA É A FOLHA INVISÍVEL QUE VAI IMPRIMIR AS ETIQUETAS -->
+    <div id="area-impressao"></div>
 
     <!-- ================= TELA 1: LOGIN ================= -->
     <div id="tela-login" class="fundo-login">
@@ -767,13 +785,9 @@
           } 
           document.getElementById('txtTotal').innerText = "R$ " + totalFinal.toFixed(2).replace('.', ','); 
           
-          // AQUI É O PONTO CHAVE: CHAMA A FUNÇÃO QUE TINHA SIDO APAGADA
           renderizarPaineis(); 
       }
       
-      // ===============================================================
-      // ESTA É A FUNÇÃO QUE FOI APAGADA SEM QUERER! AGORA ELA VOLTOU:
-      // ===============================================================
       function renderizarPaineis() { 
           var numFormas = window.formasPagamento.length; 
           var pSimples = document.getElementById('opcoes-dinheiro-simples'); 
@@ -1126,7 +1140,10 @@
                           <td style="font-size: 13px; color: #555;">${p.fornecedor || '-'}</td>
                           <td>R$ ${(p.custoUnitario || 0).toFixed(2).replace('.', ',')}</td>
                           <td style="color:#198754; font-weight:bold; font-size: 16px;">R$ ${(p.precoVenda || 0).toFixed(2).replace('.', ',')}</td>
-                          <td style="font-weight:bold; text-align:center; font-size: 16px; background: #f8f9fa;">${p.quantidade || 0}</td>
+                          <td style="font-weight:bold; text-align:center; font-size: 16px; background: #f8f9fa;">
+                              ${p.quantidade || 0}<br>
+                              <button class="btn-acao" onclick="prepararImpressao('${p.codigo}', '${(p.nome || '').replace(/'/g, "\\'")}', ${p.precoVenda})" style="margin-top: 5px; background: #212529; color: white; border: none; font-size: 10px; padding: 5px 8px;">🏷️ IMPRIMIR</button>
+                          </td>
                       `;
                       tbody.appendChild(tr);
                   });
@@ -1197,6 +1214,53 @@
           // Salva na memória do navegador do lojista
           localStorage.setItem('taxasMaquininhaLOJA', JSON.stringify(taxas));
           alert("✅ TAXAS ATUALIZADAS!\n\nAs taxas foram salvas com sucesso. O sistema agora usará esses valores para calcular os preços de venda.");
+      }
+
+      // ==========================================
+      // GERADOR DE ETIQUETAS
+      // ==========================================
+      function prepararImpressao(codigo, nome, preco) {
+          if (!codigo || codigo === '-' || codigo === "") { 
+              alert('❌ Este item não tem código de barras cadastrado!'); 
+              return; 
+          }
+          
+          let qtd = prompt("🏷️ Quantas etiquetas você quer imprimir para: " + nome + "?", "1");
+          
+          if (qtd && parseInt(qtd) > 0) {
+              let area = document.getElementById('area-impressao');
+              area.innerHTML = ''; // Limpa a folha
+              
+              let formatado = parseFloat(preco).toFixed(2).replace('.', ',');
+              let codigoLimpo = codigo.replace(/\*/g, ''); // Tira os asteriscos pro gerador
+              
+              // 1. Cria os quadradinhos das etiquetas no HTML
+              for(let i = 0; i < parseInt(qtd); i++) {
+                  let div = document.createElement('div');
+                  div.className = 'etiqueta';
+                  div.innerHTML = `<h4>${nome}</h4><p>R$ ${formatado}</p><svg id="barcode-${codigoLimpo}-${i}"></svg>`;
+                  area.appendChild(div);
+              }
+              
+              // 2. Chama o "desenhista" para pintar o código de barras dentro de cada quadrado
+              for(let i = 0; i < parseInt(qtd); i++) {
+                  JsBarcode(`#barcode-${codigoLimpo}-${i}`, codigoLimpo, {
+                      format: "CODE39",
+                      width: 1.5,
+                      height: 40,
+                      displayValue: true,
+                      fontSize: 12,
+                      margin: 0
+                  });
+              }
+              
+              // 3. Abre a janela nativa de impressão do Windows/Navegador
+              setTimeout(() => { 
+                  window.print(); 
+                  // Depois que fechar a aba de impressão, limpa as etiquetas invisíveis para não bugar o sistema
+                  setTimeout(() => { area.innerHTML = ''; }, 1000);
+              }, 500);
+          }
       }
     </script>
   </body>
