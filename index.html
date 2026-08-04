@@ -444,6 +444,29 @@
     </div>
 
     <!-- ================= SCRIPTS ================= -->
+    
+    <!-- ========================================== -->
+    <!-- MOTORES DO FIREBASE                        -->
+    <!-- ========================================== -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+
+    <script>
+      // As chaves do seu banco de dados ELEVAPDV
+      const firebaseConfig = {
+        apiKey: "AIzaSyB-Kreopb61NBKGzTBtoLNHMXkdgFQGFJw",
+        authDomain: "elevapdv.firebaseapp.com",
+        projectId: "elevapdv",
+        storageBucket: "elevapdv.firebasestorage.app",
+        messagingSenderId: "40744075384",
+        appId: "1:40744075384:web:10a256e9d0a99c7dcb6d8d",
+        measurementId: "G-M3VMTF7SV4"
+      };
+
+      // Inicializando o sistema na nuvem
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore();
+    </script>
     <script>
       let camposDinamicosLoja = JSON.parse(localStorage.getItem('camposDinamicosLOJA')) || [];
 
@@ -724,7 +747,7 @@
           document.getElementById('txtTotalNota').innerText = "R$ " + totalFinalDaNota.toFixed(2).replace('.', ',');
       }
 
-      function salvarEstoqueCompleto() {
+      async function salvarEstoqueCompleto() {
           var fornecedor = document.getElementById('cadFornecedor').value.trim();
           var nf = document.getElementById('cadNF').value.trim();
           var totalDaNota = document.getElementById('txtTotalNota').innerText;
@@ -734,14 +757,50 @@
               return;
           }
 
-          alert("✅ SUCESSO!\n\nForam registrados " + listaDeEntradaEstoque.length + " produtos no estoque!\nFornecedor: " + (fornecedor || "Não informado") + "\nNF: " + (nf || "S/N") + "\nValor Lançado: " + totalDaNota);
-          
-          // Zera a lista e os campos globais após salvar
-          listaDeEntradaEstoque = [];
-          document.getElementById('cadFornecedor').value = "";
-          document.getElementById('cadNF').value = "";
-          document.getElementById('area-custos-nota').innerHTML = "";
-          atualizarTabelaEntradaEstoque();
+          // Muda o botão para mostrar que está carregando
+          var btnSalvar = document.querySelector('.btn-salvar-item[onclick="salvarEstoqueCompleto()"]');
+          var textoOriginal = btnSalvar.innerHTML;
+          btnSalvar.innerHTML = "⏳ SALVANDO NA NUVEM...";
+          btnSalvar.disabled = true;
+          btnSalvar.style.opacity = "0.7";
+
+          try {
+              // Faz um laço (loop) para salvar cada produto da lista lá no Firebase
+              for (let i = 0; i < listaDeEntradaEstoque.length; i++) {
+                  let item = listaDeEntradaEstoque[i];
+                  
+                  // Cria uma pasta chamada "produtos" no Firebase e joga os dados dentro
+                  await db.collection("produtos").add({
+                      codigo: item.codigo,
+                      nome: item.nome,
+                      detalhesExtras: item.detalhes.replace(/<[^>]*>?/gm, ''), // Tira as tags HTML dos detalhes
+                      quantidade: item.qtd,
+                      custoUnitario: item.custoUnitario,
+                      precoVenda: item.precoVenda,
+                      fornecedor: fornecedor,
+                      notaFiscal: nf,
+                      dataCadastro: firebase.firestore.FieldValue.serverTimestamp() // Pega a data e hora oficial do servidor
+                  });
+              }
+
+              alert("✅ SUCESSO ABSOLUTO!\n\nOs " + listaDeEntradaEstoque.length + " produtos foram salvos de verdade no seu Banco de Dados!");
+              
+              // Zera a lista e os campos globais após salvar
+              listaDeEntradaEstoque = [];
+              document.getElementById('cadFornecedor').value = "";
+              document.getElementById('cadNF').value = "";
+              document.getElementById('area-custos-nota').innerHTML = "";
+              atualizarTabelaEntradaEstoque();
+
+          } catch (error) {
+              console.error("Erro ao salvar:", error);
+              alert("❌ ERRO AO SALVAR!\nVerifique sua internet. Detalhe: " + error.message);
+          } finally {
+              // Devolve o botão ao estado normal
+              btnSalvar.innerHTML = textoOriginal;
+              btnSalvar.disabled = false;
+              btnSalvar.style.opacity = "1";
+          }
       }
     </script>
   </body>
