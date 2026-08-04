@@ -191,10 +191,13 @@
           <i>🛒</i><h3>Caixa (PDV)</h3>
         </div>
         <div class="cartao-menu estoque" onclick="abrirTela('tela-estoque')">
-          <i>📦</i><h3>Estoque</h3>
+          <i>📦</i><h3>Entrada (Nota)</h3>
+        </div>
+        <div class="cartao-menu itens" onclick="abrirTela('tela-lista-itens'); carregarEstoqueGeral();">
+          <i>📋</i><h3>Meus Itens</h3>
         </div>
         <div class="cartao-menu financeiro" onclick="alert('Em breve!')">
-          <i>📊</i><h3>Gestão</h3>
+          <i>📊</i><h3>Gestão / Dashboard</h3>
         </div>
       </div>
       <br><br>
@@ -334,6 +337,43 @@
     </div> <!-- FIM TELA ESTOQUE -->
 
     <!-- ================= TELA 4: CAIXA (Intacta) ================= -->
+    <!-- ================= TELA 5: MEUS ITENS (CADASTRADOS NA NUVEM) ================= -->
+    <div id="tela-lista-itens" class="tela-oculta" style="width: 100%; max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column;">
+      
+      <div class="cabecalho-estoque">
+        <h2 style="margin: 0; color: #333;">📋 Meus Itens (Estoque Atual)</h2>
+        <button class="btn-voltar-menu" style="margin: 0;" onclick="abrirTela('tela-menu')">⬅ Voltar ao Menu</button>
+      </div>
+
+      <div class="bloco-form" style="border-left-color: #ffc107;">
+        <div class="titulo-bloco" style="display: flex; justify-content: space-between; align-items: center;">
+          <span>Todos os produtos na nuvem</span>
+          <button class="btn-acao" style="margin:0;" onclick="carregarEstoqueGeral()">🔄 Atualizar Lista</button>
+        </div>
+        
+        <div class="linha-form" style="margin-bottom: 15px;">
+           <input type="text" id="buscaEstoque" placeholder="🔍 Buscar produto por nome, código ou fornecedor..." onkeyup="filtrarEstoque()" style="width: 100%; padding: 12px; border-radius: 5px; border: 2px solid #ced4da; font-size: 16px;">
+        </div>
+        
+        <div class="area-tabela" style="max-height: 60vh; overflow-y: auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Cód</th>
+                <th>Produto / Detalhes</th>
+                <th>Fornecedor</th>
+                <th>Custo (R$)</th>
+                <th>Venda (R$)</th>
+                <th style="text-align: center;">Qtd</th>
+              </tr>
+            </thead>
+            <tbody id="tabelaEstoqueGeral">
+              <tr><td colspan="6" style="text-align:center; color:#999; padding: 20px;">Carregando dados da nuvem...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div> <!-- FIM TELA MEUS ITENS -->
     <div id="tela-caixa" class="tela-oculta">
       <button class="btn-voltar-menu" onclick="abrirTela('tela-menu')">⬅ Voltar ao Menu</button>
       <div class="pdv-container">
@@ -494,8 +534,16 @@
 
       function fazerLogin() { var email = document.getElementById("emailLogin").value.trim(); var senha = document.getElementById("senhaLogin").value.trim(); var lembrar = document.getElementById("lembrarCheck").checked; var msg = document.getElementById("msgLogin"); if (email === USUARIO_CORRETO && senha === SENHA_CORRETA) { msg.style.display = "none"; if (lembrar) { localStorage.setItem("lembrarLogin", "sim"); localStorage.setItem("emailSalvo", email); localStorage.setItem("senhaSalva", senha); } else { localStorage.clear(); } abrirTela('tela-menu'); } else { msg.style.display = "block"; } }
       function fazerLogout() { abrirTela('tela-login'); document.getElementById("senhaLogin").value = ""; }
-      function abrirTela(idDaTela) { document.getElementById('tela-login').classList.add('tela-oculta'); document.getElementById('tela-menu').classList.add('tela-oculta'); document.getElementById('tela-caixa').classList.add('tela-oculta'); document.getElementById('tela-estoque').classList.add('tela-oculta'); document.getElementById(idDaTela).classList.remove('tela-oculta'); if(idDaTela === 'tela-caixa') { setTimeout(function(){ document.getElementById('codigoBarra').focus(); }, 100); } }
-
+      function abrirTela(idDaTela) { 
+          document.getElementById('tela-login').classList.add('tela-oculta'); 
+          document.getElementById('tela-menu').classList.add('tela-oculta'); 
+          document.getElementById('tela-caixa').classList.add('tela-oculta'); 
+          document.getElementById('tela-estoque').classList.add('tela-oculta'); 
+          if(document.getElementById('tela-lista-itens')) document.getElementById('tela-lista-itens').classList.add('tela-oculta');
+          
+          document.getElementById(idDaTela).classList.remove('tela-oculta'); 
+          if(idDaTela === 'tela-caixa') { setTimeout(function(){ document.getElementById('codigoBarra').focus(); }, 100); } 
+      }
       const URL_GOOGLE = "https://script.google.com/macros/s/AKfycbyhWkf9fuYZUBFrFmn6xqKg9h3nOyXXrTHAG9nqUEKK58Z-389cCA2s7k1LN6jkVCgl/exec"; 
       window.carrinho = []; window.resultadosAtuais = []; window.formasPagamento = ['dinheiro']; let cameraLigada = false;
 
