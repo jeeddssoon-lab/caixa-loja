@@ -419,12 +419,12 @@
             <div id="opcoes-cartao" class="caixa-opcoes">
               <label class="label-opcao" style="font-size:14px;">⚙️ Detalhes da Maquininha:</label>
               <label class="label-opcao" style="font-weight:normal; margin-top:5px;">Bandeira:</label>
-              <select id="bandeira-cartao" class="input-opcao" style="font-weight:normal;">
+              <select id="bandeira-cartao" class="input-opcao" style="font-weight:normal;" onchange="atualizarTabelaCaixa()">
                 <option value="Visa/Master">Visa / Mastercard</option><option value="Elo">Elo</option><option id="opt-link" value="Link">Link de Pagamento</option>
               </select>
               <div id="div-parcelas">
                 <label class="label-opcao" style="font-weight:normal;">Parcelas (Crédito):</label>
-                <select id="parcelas-cartao" class="input-opcao" style="font-weight:normal;">
+                <select id="parcelas-cartao" class="input-opcao" style="font-weight:normal;" onchange="atualizarTabelaCaixa()">
                   <option value="1">1x</option><option value="2">2x</option><option value="3">3x</option><option value="4">4x</option><option value="5">5x</option><option value="6">6x</option>
                   <option value="7">7x</option><option value="8">8x</option><option value="9">9x</option><option value="10">10x</option><option value="11">11x</option><option value="12">12x</option>
                 </select>
@@ -675,8 +675,99 @@
       function alternarModoCombinado() { var chk = document.getElementById('chkMisto').checked; if (!chk && window.formasPagamento.length > 1) { window.formasPagamento = [window.formasPagamento[0]]; } aplicarCoresDosBotoes(); atualizarTabelaCaixa(); }
       function togglePagamento(forma) { var chkMisto = document.getElementById('chkMisto').checked; if (chkMisto) { if (window.formasPagamento.includes(forma)) { if (window.formasPagamento.length > 1) { window.formasPagamento = window.formasPagamento.filter(f => f !== forma); } } else { window.formasPagamento.push(forma); } } else { window.formasPagamento = [forma]; } aplicarCoresDosBotoes(); atualizarTabelaCaixa(); }
       function aplicarCoresDosBotoes() { document.getElementById('pag-dinheiro').classList.toggle('ativo', window.formasPagamento.includes('dinheiro')); document.getElementById('pag-pix').classList.toggle('ativo', window.formasPagamento.includes('pix')); document.getElementById('pag-credito').classList.toggle('ativo', window.formasPagamento.includes('credito')); document.getElementById('pag-debito').classList.toggle('ativo', window.formasPagamento.includes('debito')); }
-      function atualizarTabelaCaixa() { var tbody = document.getElementById('listaCarrinho'); var subtotal = 0; if (window.carrinho.length === 0) { tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#999; padding: 20px;">Aguardando itens...</td></tr>'; document.getElementById('txtTotal').innerText = "R$ 0,00"; document.getElementById('linhaSubtotal').style.display = 'none'; document.getElementById('linhaDesconto').style.display = 'none'; document.getElementById('valorDesconto').value = ''; renderizarPaineis(); return; } var html = ''; var temCredito = window.formasPagamento.includes('credito'); for (var i = 0; i < window.carrinho.length; i++) { var p = window.carrinho[i]; var precoBruto = temCredito ? p.precoParc : p.precoVista; var preco = limpaValorHTML(precoBruto); var subtotalItem = preco * p.quantidadeComprada; subtotal += subtotalItem; var precoFormatado = preco.toFixed(2).replace('.', ','); html += `<tr> <td> <div class="box-qtd"> <button class="btn-qtd" onclick="alterarQtd(${i}, -1)">-</button> <span class="texto-qtd">${p.quantidadeComprada}</span> <button class="btn-qtd" onclick="alterarQtd(${i}, 1)">+</button> </div> ${p.item} <br><small style="color:#666;">Tam: ${p.tamanho}</small> </td> <td style="vertical-align: middle;"><b>R$ ${precoFormatado}</b></td> <td style="vertical-align: middle;"><button class="btn-remover" onclick="removerDoCarrinho(${i})">X</button></td> </tr>`; } tbody.innerHTML = html; var descInput = document.getElementById('valorDesconto').value.replace(',', '.'); var valorDesc = parseFloat(descInput) || 0; var tipoDesc = document.querySelector('input[name="tipoDesconto"]:checked').value; var totalFinal = subtotal; var valorDescontadoReais = 0; if (valorDesc > 0) { if (tipoDesc === 'valor') { valorDescontadoReais = valorDesc; } else if (tipoDesc === 'porcentagem') { valorDescontadoReais = subtotal * (valorDesc / 100); } totalFinal = subtotal - valorDescontadoReais; } if (totalFinal < 0) totalFinal = 0; if (valorDescontadoReais > 0) { document.getElementById('linhaSubtotal').style.display = 'block'; document.getElementById('linhaSubtotal').innerText = "Subtotal: R$ " + subtotal.toFixed(2).replace('.', ','); document.getElementById('linhaDesconto').style.display = 'block'; document.getElementById('linhaDesconto').innerText = "Desconto: - R$ " + valorDescontadoReais.toFixed(2).replace('.', ','); } else { document.getElementById('linhaSubtotal').style.display = 'none'; document.getElementById('linhaDesconto').style.display = 'none'; } document.getElementById('txtTotal').innerText = "R$ " + totalFinal.toFixed(2).replace('.', ','); renderizarPaineis(); }
-      function renderizarPaineis() { var numFormas = window.formasPagamento.length; var pSimples = document.getElementById('opcoes-dinheiro-simples'); var pCartao = document.getElementById('opcoes-cartao'); var pDivisao = document.getElementById('painel-divisao'); pSimples.style.display = 'none'; pCartao.style.display = 'none'; pDivisao.style.display = 'none'; var temCredito = window.formasPagamento.includes('credito'); var temDebito = window.formasPagamento.includes('debito'); var temDinheiro = window.formasPagamento.includes('dinheiro'); var temPix = window.formasPagamento.includes('pix'); if (numFormas === 1) { if (temDinheiro) { pSimples.style.display = 'block'; calcularTrocoSimples(); } if (temCredito || temDebito) { pCartao.style.display = 'block'; document.getElementById('div-parcelas').style.display = temCredito ? 'block' : 'none'; document.getElementById('opt-link').disabled = temDebito; } } else { pDivisao.style.display = 'block'; document.getElementById('linha-div-dinheiro').style.display = temDinheiro ? 'block' : 'none'; document.getElementById('linha-div-pix').style.display = temPix ? 'block' : 'none'; document.getElementById('linha-div-credito').style.display = temCredito ? 'block' : 'none'; document.getElementById('linha-div-debito').style.display = temDebito ? 'block' : 'none'; if (temCredito || temDebito) { pCartao.style.display = 'block'; document.getElementById('div-parcelas').style.display = temCredito ? 'block' : 'none'; document.getElementById('opt-link').disabled = (temDebito && !temCredito); } calcDivisao(); } }
+      function atualizarTabelaCaixa() { 
+          var tbody = document.getElementById('listaCarrinho'); 
+          var subtotal = 0; 
+          
+          if (window.carrinho.length === 0) { 
+              tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#999; padding: 20px;">Aguardando itens...</td></tr>'; 
+              document.getElementById('txtTotal').innerText = "R$ 0,00"; 
+              document.getElementById('linhaSubtotal').style.display = 'none'; 
+              document.getElementById('linhaDesconto').style.display = 'none'; 
+              document.getElementById('valorDesconto').value = ''; 
+              renderizarPaineis(); 
+              return; 
+          } 
+          
+          var html = ''; 
+          var temCredito = window.formasPagamento.includes('credito');
+          var temDebito = window.formasPagamento.includes('debito');
+          
+          // ==========================================
+          // A MÁGICA DA TAXA DA MAQUININHA
+          // ==========================================
+          var taxaAplicada = 0;
+          if (temCredito || temDebito) {
+              let bandeira = document.getElementById('bandeira-cartao').value; // Visa/Master, Elo, Link
+              let parcelas = document.getElementById('parcelas-cartao').value; // 1, 2, 3...
+              
+              let prefixo = 'visa';
+              if (bandeira === 'Elo') prefixo = 'elo';
+              if (bandeira === 'Link') prefixo = 'link';
+              
+              let sufixo = temDebito ? 'Débito' : parcelas;
+              let chave = prefixo + '_' + sufixo;
+              
+              // Vai lá no armazenamento do navegador buscar a tabela que você preencheu
+              let taxasSalvas = JSON.parse(localStorage.getItem('taxasMaquininhaLOJA')) || {};
+              taxaAplicada = parseFloat(taxasSalvas[chave]) || 0;
+          }
+
+          for (var i = 0; i < window.carrinho.length; i++) { 
+              var p = window.carrinho[i]; 
+              var precoBase = limpaValorHTML(p.precoVista); 
+              var precoComTaxa = precoBase;
+              
+              // Se tiver taxa da maquineta, repassa a % em cima do valor do produto
+              if (taxaAplicada > 0) {
+                  precoComTaxa = precoBase + (precoBase * (taxaAplicada / 100));
+              }
+              
+              var subtotalItem = precoComTaxa * p.quantidadeComprada; 
+              subtotal += subtotalItem; 
+              var precoFormatado = precoComTaxa.toFixed(2).replace('.', ','); 
+              
+              html += `<tr> 
+                  <td> 
+                      <div class="box-qtd"> 
+                          <button class="btn-qtd" onclick="alterarQtd(${i}, -1)">-</button> 
+                          <span class="texto-qtd">${p.quantidadeComprada}</span> 
+                          <button class="btn-qtd" onclick="alterarQtd(${i}, 1)">+</button> 
+                      </div> 
+                      ${p.item} <br><small style="color:#666;">Tam: ${p.tamanho}</small> 
+                  </td> 
+                  <td style="vertical-align: middle;"><b>R$ ${precoFormatado}</b></td> 
+                  <td style="vertical-align: middle;"><button class="btn-remover" onclick="removerDoCarrinho(${i})">X</button></td> 
+              </tr>`; 
+          } 
+          tbody.innerHTML = html; 
+          
+          var descInput = document.getElementById('valorDesconto').value.replace(',', '.'); 
+          var valorDesc = parseFloat(descInput) || 0; 
+          var tipoDesc = document.querySelector('input[name="tipoDesconto"]:checked').value; 
+          var totalFinal = subtotal; 
+          var valorDescontadoReais = 0; 
+          
+          if (valorDesc > 0) { 
+              if (tipoDesc === 'valor') { valorDescontadoReais = valorDesc; } 
+              else if (tipoDesc === 'porcentagem') { valorDescontadoReais = subtotal * (valorDesc / 100); } 
+              totalFinal = subtotal - valorDescontadoReais; 
+          } 
+          
+          if (totalFinal < 0) totalFinal = 0; 
+          
+          if (valorDescontadoReais > 0) { 
+              document.getElementById('linhaSubtotal').style.display = 'block'; 
+              document.getElementById('linhaSubtotal').innerText = "Subtotal: R$ " + subtotal.toFixed(2).replace('.', ','); 
+              document.getElementById('linhaDesconto').style.display = 'block'; 
+              document.getElementById('linhaDesconto').innerText = "Desconto: - R$ " + valorDescontadoReais.toFixed(2).replace('.', ','); 
+          } else { 
+              document.getElementById('linhaSubtotal').style.display = 'none'; 
+              document.getElementById('linhaDesconto').style.display = 'none'; 
+          } 
+          document.getElementById('txtTotal').innerText = "R$ " + totalFinal.toFixed(2).replace('.', ','); 
+          renderizarPaineis(); 
+      }
       function calcularTrocoSimples() { var total = limpaValorHTML(document.getElementById('txtTotal').innerText); var recebido = limpaValorHTML(document.getElementById('valorRecebidoSimples').value); var troco = recebido - total; if (troco < 0 || isNaN(troco) || document.getElementById('valorRecebidoSimples').value === "") troco = 0; document.getElementById('txtTrocoSimples').innerText = "R$ " + troco.toFixed(2).replace('.', ','); }
       function calcDivisao() { var total = limpaValorHTML(document.getElementById('txtTotal').innerText); var vDin = window.formasPagamento.includes('dinheiro') ? limpaValorHTML(document.getElementById('div-val-dinheiro').value) : 0; var vPix = window.formasPagamento.includes('pix') ? limpaValorHTML(document.getElementById('div-val-pix').value) : 0; var vCred = window.formasPagamento.includes('credito') ? limpaValorHTML(document.getElementById('div-val-credito').value) : 0; var vDeb = window.formasPagamento.includes('debito') ? limpaValorHTML(document.getElementById('div-val-debito').value) : 0; var soma = vDin + vPix + vCred + vDeb; var falta = total - soma; var elFalta = document.getElementById('div-falta'); if (falta > 0.01) { elFalta.innerText = "Faltam R$ " + falta.toFixed(2).replace('.', ','); elFalta.style.color = "#dc3545"; } else if (falta < -0.01) { elFalta.innerText = "Passou R$ " + Math.abs(falta).toFixed(2).replace('.', ','); elFalta.style.color = "#dc3545"; } else { elFalta.innerText = "R$ 0,00 (Perfeito!)"; elFalta.style.color = "#198754"; } if (window.formasPagamento.includes('dinheiro')) { var recebido = limpaValorHTML(document.getElementById('div-rec-dinheiro').value); var troco = recebido - vDin; if (troco < 0 || isNaN(troco) || document.getElementById('div-rec-dinheiro').value === "") troco = 0; document.getElementById('div-troco').innerText = "R$ " + troco.toFixed(2).replace('.', ','); } }
       function finalizarVenda() { if (window.carrinho.length === 0) { alert("Atenção: Adicione produtos ao carrinho!"); return; } var total = limpaValorHTML(document.getElementById('txtTotal').innerText); var pagamentosParaEnviar = []; var bandeira = document.getElementById('bandeira-cartao').value; var parcelas = document.getElementById('parcelas-cartao').value; if (window.formasPagamento.length === 1) { pagamentosParaEnviar.push({ forma: window.formasPagamento[0], valor: total, bandeira: bandeira, parcelas: parcelas }); } else { var vDin = window.formasPagamento.includes('dinheiro') ? limpaValorHTML(document.getElementById('div-val-dinheiro').value) : 0; var vPix = window.formasPagamento.includes('pix') ? limpaValorHTML(document.getElementById('div-val-pix').value) : 0; var vCred = window.formasPagamento.includes('credito') ? limpaValorHTML(document.getElementById('div-val-credito').value) : 0; var vDeb = window.formasPagamento.includes('debito') ? limpaValorHTML(document.getElementById('div-val-debito').value) : 0; var soma = vDin + vPix + vCred + vDeb; if (Math.abs(soma - total) > 0.01) { alert("ERRO: A soma dos valores não bate com o Total da Venda."); return; } if (vDin > 0) pagamentosParaEnviar.push({ forma: 'dinheiro', valor: vDin }); if (vPix > 0) pagamentosParaEnviar.push({ forma: 'pix', valor: vPix }); if (vCred > 0) pagamentosParaEnviar.push({ forma: 'credito', valor: vCred, bandeira: bandeira, parcelas: parcelas }); if (vDeb > 0) pagamentosParaEnviar.push({ forma: 'debito', valor: vDeb, bandeira: bandeira }); } var btn = document.getElementById('btnFinalizarVenda'); btn.innerHTML = "⏳ REGISTRANDO..."; btn.disabled = true; var payload = { acao: 'vender', venda: { carrinho: window.carrinho, pagamentos: pagamentosParaEnviar, totalStr: document.getElementById('txtTotal').innerText } }; fetch(URL_GOOGLE, { method: 'POST', body: JSON.stringify(payload) }).then(response => response.json()).then(data => { btn.innerHTML = "✅ FINALIZAR"; btn.disabled = false; if (data.status === "Sucesso") { alert("Venda registrada com sucesso!"); window.carrinho = []; document.getElementById('valorRecebidoSimples').value = ''; document.getElementById('div-val-dinheiro').value = ''; document.getElementById('div-val-pix').value = ''; document.getElementById('div-val-credito').value = ''; document.getElementById('div-val-debito').value = ''; document.getElementById('div-rec-dinheiro').value = ''; document.getElementById('chkMisto').checked = false; window.formasPagamento = ['dinheiro']; aplicarCoresDosBotoes(); atualizarTabelaCaixa(); document.getElementById('codigoBarra').focus(); } else { alert(data.status); } }).catch(err => { btn.innerHTML = "✅ FINALIZAR"; btn.disabled = false; alert("Erro de conexão ao registrar venda!"); }); }
