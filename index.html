@@ -199,7 +199,11 @@
         <div class="cartao-menu financeiro" onclick="alert('Em breve!')">
           <i>📊</i><h3>Gestão / Dashboard</h3>
         </div>
+        <div class="cartao-menu financeiro" onclick="abrirTela('tela-taxas'); carregarTabelaTaxas();" style="border-color: #6f42c1;">
+          <i>⚙️</i><h3 style="color: #6f42c1;">Taxas (Maquininha)</h3>
+        </div>
       </div>
+      
       <br><br>
       <button onclick="fazerLogout()" style="background: transparent; border: none; color: #dc3545; text-decoration: underline; cursor: pointer; font-size: 16px; font-weight: bold;">Sair (Logout)</button>
     </div>
@@ -469,6 +473,36 @@
         </div>
       </div>
     </div> <!-- FIM TELA MEUS ITENS -->
+    <!-- ================= TELA 6: CONFIGURAÇÕES DE TAXAS ================= -->
+    <div id="tela-taxas" class="tela-oculta" style="width: 100%; max-width: 800px; margin: 0 auto; display: flex; flex-direction: column;">
+      <div class="cabecalho-estoque">
+        <h2 style="margin: 0; color: #333;">⚙️ Configurações da Maquininha</h2>
+        <button class="btn-voltar-menu" style="margin: 0;" onclick="abrirTela('tela-menu')">⬅ Voltar ao Menu</button>
+      </div>
+
+      <div class="bloco-form" style="border-left-color: #6f42c1;">
+        <div class="titulo-bloco">Tabela de Taxas (%)</div>
+        <p style="font-size: 13px; color: #666; margin-top: 0;">Preencha com as taxas exatas do seu plano. O sistema usará isso para calcular seus preços de venda com cartão automaticamente.</p>
+        
+        <div class="area-tabela" style="max-height: 60vh; overflow-y: auto;">
+          <table>
+            <thead>
+              <tr>
+                <th style="background: #0dcaf0; color: #000;">PARCELAS</th>
+                <th style="background: #0dcaf0; color: #000;">VISA / MASTER (%)</th>
+                <th style="background: #0dcaf0; color: #000;">ELO (%)</th>
+                <th style="background: #0dcaf0; color: #000;">LINK (%)</th>
+              </tr>
+            </thead>
+            <tbody id="corpoTabelaTaxas">
+               <!-- As linhas serão criadas sozinhas pelo JavaScript -->
+            </tbody>
+          </table>
+        </div>
+        
+        <button class="btn-salvar-item" style="background: #6f42c1; margin-top: 15px;" onclick="salvarTaxasMaquininha()">💾 SALVAR TABELA DE TAXAS</button>
+      </div>
+    </div> <!-- FIM TELA TAXAS -->
 
     <!-- ================= JANELA MODAL DA ENGRENAGEM ================= -->
     <div id="modalEngrenagem" class="modal-overlay">
@@ -542,6 +576,7 @@
           document.getElementById('tela-caixa').classList.add('tela-oculta'); 
           document.getElementById('tela-estoque').classList.add('tela-oculta'); 
           if(document.getElementById('tela-lista-itens')) document.getElementById('tela-lista-itens').classList.add('tela-oculta');
+          if(document.getElementById('tela-taxas')) document.getElementById('tela-taxas').classList.add('tela-oculta');
           
           document.getElementById(idDaTela).classList.remove('tela-oculta'); 
           if(idDaTela === 'tela-caixa') { setTimeout(function(){ document.getElementById('codigoBarra').focus(); }, 100); } 
@@ -902,6 +937,51 @@
                   linha.style.display = 'none';
               }
           });
+      }
+      // ==========================================
+      // LÓGICA DAS TAXAS DA MAQUININHA
+      // ==========================================
+      function carregarTabelaTaxas() {
+          let tbody = document.getElementById('corpoTabelaTaxas');
+          let html = '';
+          // Puxa as taxas salvas na memória do navegador do cliente
+          let taxasSalvas = JSON.parse(localStorage.getItem('taxasMaquininhaLOJA')) || {};
+          let linhas = ['Débito', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
+          
+          linhas.forEach(linha => {
+              let valVisa = taxasSalvas[`visa_${linha}`] || '';
+              let valElo = taxasSalvas[`elo_${linha}`] || '';
+              let valLink = taxasSalvas[`link_${linha}`] || '';
+              
+              let label = linha === 'Débito' ? 'DÉBITO' : linha;
+              let bgLink = linha === 'Débito' ? 'background:#e9ecef; cursor:not-allowed;' : '';
+              let lockLink = linha === 'Débito' ? 'disabled' : '';
+              
+              html += `<tr>
+                  <td style="font-weight:bold; text-align:center;">${label}</td>
+                  <td><input type="number" id="taxa_visa_${linha}" value="${valVisa}" placeholder="0.00" class="input-opcao" style="margin:0; text-align:center; border: 1px solid #ccc;"></td>
+                  <td><input type="number" id="taxa_elo_${linha}" value="${valElo}" placeholder="0.00" class="input-opcao" style="margin:0; text-align:center; border: 1px solid #ccc;"></td>
+                  <td><input type="number" id="taxa_link_${linha}" value="${valLink}" placeholder="0.00" class="input-opcao" style="margin:0; text-align:center; border: 1px solid #ccc; ${bgLink}" ${lockLink}></td>
+              </tr>`;
+          });
+          tbody.innerHTML = html;
+      }
+
+      function salvarTaxasMaquininha() {
+          let taxas = {};
+          let linhas = ['Débito', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
+          
+          linhas.forEach(linha => {
+              taxas[`visa_${linha}`] = document.getElementById(`taxa_visa_${linha}`).value;
+              taxas[`elo_${linha}`] = document.getElementById(`taxa_elo_${linha}`).value;
+              if(linha !== 'Débito') {
+                  taxas[`link_${linha}`] = document.getElementById(`taxa_link_${linha}`).value;
+              }
+          });
+          
+          // Salva na memória do navegador do lojista
+          localStorage.setItem('taxasMaquininhaLOJA', JSON.stringify(taxas));
+          alert("✅ TAXAS ATUALIZADAS!\n\nAs taxas foram salvas com sucesso. O sistema agora usará esses valores para calcular os preços de venda.");
       }
     </script>
   </body>
