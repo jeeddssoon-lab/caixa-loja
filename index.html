@@ -590,7 +590,83 @@
       function limpaValorHTML(val) { if (typeof val === 'number') return val; if (!val) return 0; var s = String(val).replace('R$', '').trim(); if (s.indexOf(',') > -1 && s.indexOf('.') > -1) s = s.replace(/\./g, '').replace(',', '.'); else if (s.indexOf(',') > -1) s = s.replace(',', '.'); return parseFloat(s) || 0; }
       function verificarEnter(evento) { if (evento.keyCode === 13) { var termoBusca = document.getElementById('codigoBarra').value.trim(); if (termoBusca !== "") buscarProdutoCaixa(termoBusca); } }
 
-      function buscarProdutoCaixa(termo) { var msgBox = document.getElementById('msgCaixa'); var areaBusca = document.getElementById('areaResultadosCaixa'); if (!termo.includes('*') && !isNaN(termo)) { termo = "*" + termo + "*"; } msgBox.innerHTML = "Buscando: " + termo + "..."; msgBox.style.color = "#0d6efd"; areaBusca.style.display = 'none'; var tipoBusca = (termo.includes('*') || !isNaN(termo.replace(/\*/g,''))) ? 'codigo' : 'nome'; var pacoteDeBusca = { acao: 'buscar', termo: termo, tipoBusca: tipoBusca }; fetch(URL_GOOGLE, { method: 'POST', body: JSON.stringify(pacoteDeBusca), headers: { "Content-Type": "text/plain;charset=utf-8" } }).then(response => response.json()).then(data => { document.getElementById('codigoBarra').value = ""; document.getElementById('codigoBarra').focus(); if (data.status === "sucesso" && data.dados && data.dados.length > 0) { msgBox.innerHTML = ""; var resultados = data.dados; if (resultados.length === 1 || tipoBusca === 'codigo') { adicionarAoCarrinho(resultados[0]); } else { window.resultadosAtuais = resultados; mostrarListaParaEscolha(resultados); } } else { msgBox.innerHTML = "❌ Produto não encontrado no estoque!"; msgBox.style.color = "#dc3545"; setTimeout(function(){ msgBox.innerHTML = ""; }, 3000); } }).catch(err => { msgBox.innerHTML = "❌ Erro de conexão com a planilha!"; console.error(err); }); }
+      function buscarProdutoCaixa(termo) { 
+          var msgBox = document.getElementById('msgCaixa'); 
+          var areaBusca = document.getElementById('areaResultadosCaixa'); 
+          
+          if (!termo.includes('*') && !isNaN(termo) && termo.trim() !== '') { 
+              termo = "*" + termo + "*"; 
+          } 
+          
+          msgBox.innerHTML = "Buscando: " + termo + "..."; 
+          msgBox.style.color = "#0d6efd"; 
+          areaBusca.style.display = 'none'; 
+          
+          var tipoBusca = (termo.includes('*') || !isNaN(termo.replace(/\*/g,''))) ? 'codigo' : 'nome'; 
+
+          // Nova Lógica de Busca no Firebase
+          let queryRef;
+          let resultadosDaNuvem = [];
+
+          if (tipoBusca === 'codigo') {
+              // Se for código, vai direto no alvo (muito rápido)
+              queryRef = db.collection("produtos").where("codigo", "==", termo).get();
+          } else {
+              // Se for nome, traz os produtos e a gente filtra (pois o usuário pode digitar só um pedaço do nome)
+              queryRef = db.collection("produtos").orderBy("nome").get();
+          }
+
+          queryRef.then((snapshot) => {
+              document.getElementById('codigoBarra').value = ""; 
+              document.getElementById('codigoBarra').focus(); 
+
+              snapshot.forEach((doc) => {
+                  let p = doc.data();
+                  p.idFirebase = doc.id; // Salva o ID real para podermos dar baixa no estoque depois
+                  
+                  if (tipoBusca === 'codigo') {
+                      resultadosDaNuvem.push(p);
+                  } else {
+                      // Filtro de texto (ignora maiúsculas e minúsculas)
+                      if (p.nome && p.nome.toLowerCase().includes(termo.toLowerCase())) {
+                          resultadosDaNuvem.push(p);
+                      }
+                  }
+              });
+
+              if (resultadosDaNuvem.length > 0) { 
+                  msgBox.innerHTML = ""; 
+                  
+                  // Traduz os dados da Nuvem para o formato que o seu Carrinho já entende
+                  var resultadosFormatados = resultadosDaNuvem.map(p => {
+                      return {
+                          codigo: p.codigo || '',
+                          item: p.nome || 'Produto sem nome',
+                          tamanho: p.detalhesExtras || '', // Usamos os detalhes extras no lugar de "tamanho"
+                          fornecedor: p.fornecedor || '',
+                          precoVista: p.precoVenda || 0,
+                          precoParc: p.precoVenda || 0, // Por enquanto é igual. Vai mudar na Etapa 2!
+                          quantidade: p.quantidade || 0,
+                          idFirebase: p.idFirebase
+                      };
+                  });
+
+                  if (resultadosFormatados.length === 1 || tipoBusca === 'codigo') { 
+                      adicionarAoCarrinho(resultadosFormatados[0]); 
+                  } else { 
+                      window.resultadosAtuais = resultadosFormatados; 
+                      mostrarListaParaEscolha(resultadosFormatados); 
+                  } 
+              } else { 
+                  msgBox.innerHTML = "❌ Produto não encontrado no estoque!"; 
+                  msgBox.style.color = "#dc3545"; 
+                  setTimeout(function(){ msgBox.innerHTML = ""; }, 3000); 
+              } 
+          }).catch((error) => {
+              msgBox.innerHTML = "❌ Erro de conexão com o banco de dados!"; 
+              console.error("Erro na busca do Firebase:", error); 
+          });
+      }
       function mostrarListaParaEscolha(resultados) { var area = document.getElementById('areaResultadosCaixa'); var html = '<div class="cabecalho-busca">Múltiplos itens encontrados. Selecione o correto abaixo:</div>'; for (var i = 0; i < resultados.length; i++) { var p = resultados[i]; var temCredito = window.formasPagamento.includes('credito'); var valorBruto = temCredito ? p.precoParc : p.precoVista; var valorReal = limpaValorHTML(valorBruto); var valorExibir = "R$ " + valorReal.toFixed(2).replace('.', ','); html += ` <div class="item-resultado" onclick="selecionarProdutoCaixa(${i})"> <div class="info-busca"> <b style="color:#0d6efd; font-size:16px;">${p.item}</b> (${p.fornecedor})<br> Tam: <b>${p.tamanho}</b> | Cód: ${p.codigo} <br> <span style="color:#198754; font-weight:bold;">${valorExibir}</span> </div> <button class="btn-add-lupa">🔍 SELECIONAR</button> </div> `; } area.innerHTML = html; area.style.display = 'block'; }
       function selecionarProdutoCaixa(index) { document.getElementById('areaResultadosCaixa').style.display = 'none'; adicionarAoCarrinho(window.resultadosAtuais[index]); document.getElementById('codigoBarra').focus(); }
       function adicionarAoCarrinho(produto) { var itemExistente = window.carrinho.find(function(p) { return p.codigo === produto.codigo; }); if (itemExistente) { if (itemExistente.quantidadeComprada + 1 > itemExistente.quantidade) { alert("⚠️ ESTOQUE INSUFICIENTE!\n\nVocê só tem " + itemExistente.quantidade + " unidade(s) no estoque."); return; } itemExistente.quantidadeComprada += 1; } else { if (produto.quantidade < 1) { alert("⚠️ ESTOQUE ZERADO!\n\nEste produto está esgotado no sistema."); return; } produto.quantidadeComprada = 1; window.carrinho.push(produto); } atualizarTabelaCaixa(); }
