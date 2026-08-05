@@ -11,6 +11,21 @@
       body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #e9ecef; margin: 0; padding: 10px; display: flex; justify-content: center; flex-direction: column; align-items: center;}
       
       /* ========================================== */
+      /* LAYOUT DE IMPRESSÃO (ETIQUETAS INTELIGENTES)*/
+      /* ========================================== */
+      @media print {
+        body * { visibility: hidden; }
+        #area-impressao, #area-impressao * { visibility: visible; }
+        #area-impressao { position: absolute; left: 0; top: 0; width: 100%; display: flex; flex-wrap: wrap; align-content: flex-start; }
+        
+        .etiqueta { border: 1px dashed #999; width: 4.8cm; height: 3.5cm; padding: 5px; text-align: center; margin: 2px; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box; page-break-inside: avoid; overflow: hidden; background: white;}
+        .etiqueta h4 { margin: 0 0 2px 0; font-size: 11px; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #000; }
+        .etiqueta p { font-size: 14px; font-weight: bold; margin: 0 0 2px 0; color: #000; line-height: 1.1; }
+        .etiqueta .detalhes-eti { font-size: 9px; font-weight: normal; color: #333; margin-bottom: 3px; line-height: 1.1; }
+        .etiqueta svg { width: 100%; max-height: 35px; margin-top: auto;}
+      }
+
+      /* ========================================== */
       /* ESTILOS GERAIS E OCULTAÇÃO                 */
       /* ========================================== */
       .tela-oculta { display: none !important; }
@@ -475,6 +490,10 @@
     </div>
 
     <!-- ================= SCRIPTS ================= -->
+    <!-- MOTORES DO FIREBASE -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+
     <script>
       // CHAVES DO FIREBASE
       const firebaseConfig = {
