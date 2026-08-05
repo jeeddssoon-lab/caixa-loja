@@ -5,23 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Sistema de Gestão - PDV</title>
     <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2/dist/quagga.min.js"></script>
-    <!-- Módulo Gerador de Código de Barras -->
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     
     <style>
       body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #e9ecef; margin: 0; padding: 10px; display: flex; justify-content: center; flex-direction: column; align-items: center;}
       
       /* ========================================== */
-      /* LAYOUT DE IMPRESSÃO (ETIQUETAS)            */
+      /* LAYOUT DE IMPRESSÃO (ETIQUETAS INTELIGENTES)*/
       /* ========================================== */
       @media print {
         body * { visibility: hidden; }
         #area-impressao, #area-impressao * { visibility: visible; }
         #area-impressao { position: absolute; left: 0; top: 0; width: 100%; display: flex; flex-wrap: wrap; align-content: flex-start; }
-        .etiqueta { border: 1px dashed #999; width: 4.5cm; height: 3cm; padding: 5px; text-align: center; margin: 2px; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box; page-break-inside: avoid; }
+        
+        .etiqueta { border: 1px dashed #999; width: 4.8cm; height: 3.5cm; padding: 5px; text-align: center; margin: 2px; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box; page-break-inside: avoid; overflow: hidden; background: white;}
         .etiqueta h4 { margin: 0 0 2px 0; font-size: 11px; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #000; }
-        .etiqueta p { font-size: 16px; font-weight: bold; margin: 0 0 2px 0; color: #000; }
-        .etiqueta svg { width: 100%; max-height: 40px; }
+        .etiqueta p { font-size: 14px; font-weight: bold; margin: 0 0 2px 0; color: #000; line-height: 1.1; }
+        .etiqueta .detalhes-eti { font-size: 9px; font-weight: normal; color: #333; margin-bottom: 3px; line-height: 1.1; }
+        .etiqueta svg { width: 100%; max-height: 35px; margin-top: auto;}
       }
 
       /* ========================================== */
@@ -55,111 +56,79 @@
       .btn-voltar-menu:hover { background: #5a6268; }
 
       /* ========================================== */
-      /* CAIXA (PDV)                                */
+      /* CAIXA E ESTOQUE (Estilos Mantidos)         */
       /* ========================================== */
       #tela-caixa { width: 100%; max-width: 1200px; display: flex; flex-direction: column; }
       .pdv-container { display: flex; gap: 15px; width: 100%; height: 90vh; }
-      
       .col-esquerda { flex: 2; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
       h2 { margin-top: 0; color: #333; border-bottom: 2px solid #0d6efd; padding-bottom: 10px; font-size: 20px; }
-      
       .caixa-leitor { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
       .linha-busca { display: flex; gap: 8px; width: 100%; }
       .input-codigo { flex: 1; padding: 15px; font-size: 18px; border: 2px solid #0d6efd; border-radius: 5px; background-color: #f8f9fa; font-weight: bold; box-sizing: border-box;}
       .input-codigo:focus { outline: none; border-color: #198754; background-color: #fff; box-shadow: 0 0 5px rgba(25, 135, 84, 0.5); }
-      
       .btn-camera { background: #212529; color: white; border: none; border-radius: 5px; padding: 0 15px; font-size: 24px; cursor: pointer; transition: 0.2s; display: flex; justify-content: center; align-items: center; }
       .btn-camera:hover { background: #495057; }
-      
-      #box-camera { display: none; margin-top: 10px; border: 2px solid #212529; border-radius: 5px; overflow: hidden; position: relative; background: #000; width: 100%; max-width: 500px; height: 300px; margin-left: auto; margin-right: auto; }
-      #interactive.viewport { width: 100%; height: 100%; }
-      #interactive.viewport video { width: 100%; height: 100%; object-fit: cover; }
+      #box-camera, #box-camera-estoque { display: none; margin-top: 10px; border: 2px solid #212529; border-radius: 5px; overflow: hidden; position: relative; background: #000; width: 100%; max-width: 500px; height: 300px; margin-left: auto; margin-right: auto; }
+      #interactive.viewport, #interactive-estoque.viewport { width: 100%; height: 100%; }
+      #interactive.viewport video, #interactive-estoque.viewport video { width: 100%; height: 100%; object-fit: cover; }
       .linha-guia { position: absolute; top: 50%; left: 10%; width: 80%; height: 2px; background: red; z-index: 5; box-shadow: 0 0 4px red; }
-      .btn-fechar-camera { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); background: #dc3545; color: white; border: none; padding: 8px 16px; border-radius: 20px; font-weight: bold; cursor: pointer; z-index: 10; box-shadow: 0 2px 5px rgba(0,0,0,0.5);}
-      
+      .btn-fechar-camera { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); background: #dc3545; color: white; border: none; padding: 8px 16px; border-radius: 20px; font-weight: bold; cursor: pointer; z-index: 10;}
       .mensagem-caixa { font-size: 13px; font-weight: bold; min-height: 18px; color: #dc3545; }
-
       #areaResultadosCaixa { display: none; background: #fff; border: 2px solid #198754; border-radius: 5px; max-height: 250px; overflow-y: auto; margin-bottom: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
       .cabecalho-busca { background: #e9ecef; padding: 8px; font-size: 12px; font-weight: bold; text-align: center; border-bottom: 1px solid #ccc; color: #555; }
       .item-resultado { padding: 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; }
       .item-resultado:hover { background: #f1f8ff; }
-      
       .area-tabela { flex: 1; overflow-y: auto; border: 1px solid #ddd; border-radius: 5px; }
       table { width: 100%; border-collapse: collapse; }
       th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; font-size: 14px; }
       th { background-color: #f8f9fa; color: #555; position: sticky; top: 0; }
       .btn-remover { background: #dc3545; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; }
-      
       .col-direita { flex: 1; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow-y: auto; }
-      
       .painel-total { background: #212529; color: #00ff00; text-align: right; padding: 15px; border-radius: 8px; margin-bottom: 15px; }
       .titulo-total { font-size: 16px; color: #adb5bd; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
       .valor-total { font-size: 38px; font-weight: bold; margin: 0; line-height: 1; }
-      
       .secao-pagamento { margin-top: auto; }
       .titulo-pagamento { font-size: 14px; color: #555; font-weight: bold; margin: 0; }
       .grid-pagamento { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
-      
       .btn-pag { padding: 12px; font-size: 14px; font-weight: bold; border: 2px solid #dee2e6; border-radius: 5px; cursor: pointer; background: #fff; color: #495057; transition: 0.2s; }
       .btn-pag:hover { background: #f8f9fa; }
       .btn-pag.ativo { background: #0d6efd; color: white; border-color: #0d6efd; }
-
       .caixa-opcoes { display: none; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px; padding: 10px; margin-bottom: 15px; }
       .label-opcao { font-size: 12px; font-weight: bold; color: #555; display: block; margin-bottom: 5px; }
       .input-opcao { width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; background: white; font-weight: bold; box-sizing: border-box; }
-      
       .linha-troco { display: flex; justify-content: space-between; align-items: center; margin-top: 5px; padding-top: 10px; border-top: 1px dashed #ccc; }
       .titulo-troco { font-weight: bold; color: #555; font-size: 14px; }
       .valor-troco { font-size: 26px; font-weight: bold; color: #dc3545; }
-      
       .btn-finalizar { width: 100%; background: #198754; color: white; border: none; padding: 15px; font-size: 18px; font-weight: bold; border-radius: 5px; cursor: pointer; text-transform: uppercase; transition: 0.3s; margin-top: 10px;}
       .btn-finalizar:hover { background: #157347; }
       .btn-finalizar:disabled { background: #6c757d; cursor: not-allowed; }
-      
-      .lbl-combinada { cursor: pointer; font-size: 13px; font-weight: bold; background: #fff3cd; color: #856404; padding: 6px 12px; border-radius: 5px; border: 1px solid #ffeeba; display: flex; align-items: center; gap: 5px; transition: 0.2s;}
-      .lbl-combinada:hover { background: #ffeeba; }
+      .lbl-combinada { cursor: pointer; font-size: 13px; font-weight: bold; background: #fff3cd; color: #856404; padding: 6px 12px; border-radius: 5px; border: 1px solid #ffeeba; display: flex; align-items: center; gap: 5px;}
       .lbl-combinada input { cursor: pointer; width: 16px; height: 16px; margin: 0; }
-
       .btn-qtd { background: #e9ecef; border: 1px solid #ced4da; border-radius: 4px; width: 30px; height: 30px; font-weight: bold; font-size: 18px; cursor: pointer; color: #495057; display: inline-flex; justify-content: center; align-items: center; transition: 0.2s; }
       .btn-qtd:hover { background: #ced4da; color: #212529; }
       .box-qtd { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
       .texto-qtd { font-size: 16px; font-weight: bold; color: #0d6efd; min-width: 20px; text-align: center; }
 
       /* ========================================== */
-      /* TELA DE ESTOQUE (NOVO LAYOUT CONTÍNUO)     */
+      /* TELAS ESTOQUE, ITENS E MODAL GERAL         */
       /* ========================================== */
       #tela-estoque { width: 100%; max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; }
       .cabecalho-estoque { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid #ccc; padding-bottom: 10px;}
-      
-      .botoes-seletor { display: flex; gap: 10px; margin-bottom: 20px; }
-      .btn-seletor { flex: 1; padding: 12px; font-size: 16px; font-weight: bold; background: white; border: 2px solid #dee2e6; border-radius: 8px; cursor: pointer; transition: 0.2s; color: #555; }
-      .btn-seletor.ativo { background: #e7f1ff; border-color: #0d6efd; color: #0d6efd; }
-
       .bloco-form { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 15px; border-left: 5px solid #0d6efd; }
       .titulo-bloco { font-size: 16px; font-weight: bold; color: #333; margin-top: 0; margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 5px; display: flex; justify-content: space-between; align-items: center; }
-      
       .linha-form { display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; align-items: flex-end;}
       .grupo-input { flex: 1; min-width: 150px; display: flex; flex-direction: column; }
       .grupo-input label { font-size: 12px; font-weight: bold; color: #555; margin-bottom: 4px; }
       .grupo-input input, .grupo-input select { padding: 8px 10px; border: 1px solid #ced4da; border-radius: 5px; font-size: 14px; font-weight: bold; background: #f8f9fa; box-sizing: border-box; width: 100%;}
-      .grupo-input input:focus { outline: none; border-color: #0d6efd; background: white; }
-
       .btn-acao { background: #f8f9fa; border: 1px dashed #6c757d; color: #495057; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 12px; transition: 0.2s; margin-top: 5px; }
       .btn-acao:hover { background: #e2e3e5; border-color: #495057; }
-      
       .linha-custo-extra { display: flex; gap: 8px; align-items: flex-end; margin-top: 8px; background: #fff3cd; padding: 8px; border-radius: 5px; border: 1px solid #ffeeba; }
       .btn-remover-custo { background: #dc3545; color: white; border: none; width: 35px; height: 35px; border-radius: 5px; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center;}
-      
       .painel-resultado-estoque { background: #212529; color: white; padding: 2px 15px; border-radius: 8px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 5px;}
       .lbl-painel-est { font-size: 11px; color: #adb5bd; margin: 0 0 2px 0; }
       .val-painel-est { font-size: 18px; font-weight: bold; color: #ffc107; margin:0;}
-      
       .btn-salvar-item { color: white; border: none; padding: 12px 15px; border-radius: 5px; font-size: 16px; font-weight: bold; width: 100%; cursor: pointer; text-transform: uppercase; margin-top: 10px; transition: 0.2s;}
-      .btn-salvar-item:hover { opacity: 0.9; }
-
-      /* ========================================== */
-      /* MODAL DA ENGRENAGEM                        */
-      /* ========================================== */
+      
       .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 1000; }
       .modal-box { background: white; padding: 25px; border-radius: 10px; width: 90%; max-width: 450px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
       .modal-box h3 { margin-top: 0; color: #0d6efd; font-size: 20px; }
@@ -181,7 +150,7 @@
   </head>
   <body>
 
-    <!-- ESSA É A FOLHA INVISÍVEL QUE VAI IMPRIMIR AS ETIQUETAS -->
+    <!-- FOLHA INVISÍVEL QUE VAI IMPRIMIR AS ETIQUETAS -->
     <div id="area-impressao"></div>
 
     <!-- ================= TELA 1: LOGIN ================= -->
@@ -221,41 +190,32 @@
           <i>⚙️</i><h3 style="color: #6f42c1;">Taxas (Maquininha)</h3>
         </div>
       </div>
-      
       <br><br>
       <button onclick="fazerLogout()" style="background: transparent; border: none; color: #dc3545; text-decoration: underline; cursor: pointer; font-size: 16px; font-weight: bold;">Sair (Logout)</button>
     </div>
 
     <!-- ================= TELA 3: ESTOQUE (LAYOUT NOVO E COMPACTO) ================= -->
     <div id="tela-estoque" class="tela-oculta">
-      
       <div class="cabecalho-estoque">
         <h2 style="margin: 0; color: #333;">📦 Entrada de Mercadorias</h2>
         <button class="btn-voltar-menu" style="margin: 0;" onclick="abrirTela('tela-menu')">⬅ Voltar ao Menu</button>
       </div>
 
-      <!-- 1. ORIGEM DA NOTA (Fica Fixo) -->
+      <!-- 1. ORIGEM DA NOTA -->
       <div class="bloco-form" style="border-left-color: #6c757d; background: #f8f9fa;">
         <div class="titulo-bloco">1. Fornecedor / NF-e (Preencha uma vez)</div>
         <div class="linha-form">
-          <div class="grupo-input" style="flex: 2;">
-            <label>Fornecedor (Razão Social / Nome Fantasia):</label>
-            <input type="text" id="cadFornecedor" placeholder="Ex: Distribuidora XYZ">
-          </div>
-          <div class="grupo-input">
-            <label>Número da Nota Fiscal:</label>
-            <input type="text" id="cadNF" placeholder="Opcional">
-          </div>
+          <div class="grupo-input" style="flex: 2;"><label>Fornecedor (Razão Social / Nome Fantasia):</label><input type="text" id="cadFornecedor" placeholder="Ex: Distribuidora XYZ"></div>
+          <div class="grupo-input"><label>Número da Nota Fiscal:</label><input type="text" id="cadNF" placeholder="Opcional"></div>
         </div>
       </div>
 
-      <!-- 2. PRODUTO (Limpa a cada adição) -->
+      <!-- 2. PRODUTO -->
       <div class="bloco-form" style="border-left-color: #0d6efd;">
         <div class="titulo-bloco">
           <span>2. Detalhes do Produto</span>
           <button class="btn-acao" style="margin:0; border-color:#0d6efd; color:#0d6efd; padding: 5px 10px;" onclick="abrirModalEngrenagem()">⚙️ Configurar Campos</button>
         </div>
-        
         <div class="linha-form">
           <div class="grupo-input" style="min-width: 250px;">
             <label>Código de Barras:</label>
@@ -264,118 +224,71 @@
               <button class="btn-camera" style="padding: 0 12px; margin: 0; border-radius: 5px; height: 36px;" onclick="abrirCameraEstoque()" title="Câmera">📷</button>
             </div>
           </div>
-          <div class="grupo-input" style="flex: 2; min-width: 250px;">
-            <label>Nome do Produto:</label>
-            <input type="text" id="cadNome" placeholder="Ex: Filtro de Óleo">
-          </div>
+          <div class="grupo-input" style="flex: 2; min-width: 250px;"><label>Nome do Produto:</label><input type="text" id="cadNome" placeholder="Ex: Filtro de Óleo"></div>
         </div>
         
-        <!-- Câmera Oculta -->
-        <div id="box-camera-estoque" style="display: none; margin-top: 10px; border: 2px solid #212529; border-radius: 5px; overflow: hidden; position: relative; background: #000; width: 100%; max-width: 500px; height: 300px; margin-left: auto; margin-right: auto;">
-           <div class="linha-guia"></div>
-           <div id="interactive-estoque" class="viewport" style="width: 100%; height: 100%;"></div>
-           <button class="btn-fechar-camera" onclick="fecharCameraEstoque()">FECHAR</button>
-        </div>
+        <div id="box-camera-estoque"><div class="linha-guia"></div><div id="interactive-estoque" class="viewport"></div><button class="btn-fechar-camera" onclick="fecharCameraEstoque()">FECHAR</button></div>
 
         <div class="linha-form">
-          <div class="grupo-input" style="min-width: 80px;">
-            <label>Medida:</label>
-            <select id="cadMedida"><option value="UN">UN</option><option value="KG">KG</option><option value="CX">CX</option><option value="LT">LT</option><option value="MT">MT</option></select>
-          </div>
-          <div class="grupo-input" style="min-width: 80px;">
-            <label>Quantidade:</label>
-            <input type="number" id="cadQtd" placeholder="Qtd" value="1">
-          </div>
-          <div class="grupo-input" style="min-width: 120px;">
-            <label>Custo Base (R$):</label>
-            <input type="number" id="cadCustoFabrica" placeholder="0.00" onkeyup="calcularPreco()">
-          </div>
-          <div class="grupo-input" style="min-width: 120px;">
-            <label>Margem Lucro (%):</label>
-            <input type="number" id="cadMargem" placeholder="Ex: 100" onkeyup="calcularPreco()">
-          </div>
+          <div class="grupo-input" style="min-width: 80px;"><label>Medida:</label><select id="cadMedida"><option value="UN">UN</option><option value="KG">KG</option><option value="CX">CX</option></select></div>
+          <div class="grupo-input" style="min-width: 80px;"><label>Quantidade:</label><input type="number" id="cadQtd" value="1"></div>
+          <div class="grupo-input" style="min-width: 120px;"><label>Custo Base (R$):</label><input type="number" id="cadCustoFabrica" placeholder="0.00" onkeyup="calcularPreco()"></div>
+          <div class="grupo-input" style="min-width: 120px;"><label>Margem Lucro (%):</label><input type="number" id="cadMargem" placeholder="Ex: 100" onkeyup="calcularPreco()"></div>
         </div>
 
-        <!-- Engrenagem / Campos dinâmicos (Aparecem aqui) -->
         <div class="linha-form" id="area-campos-dinamicos" style="margin-top: 5px;"></div>
 
-        <!-- Modificadores de Preço -->
         <div style="background: #e9ecef; padding: 10px; border-radius: 5px; margin-top: 10px;">
           <button class="btn-acao" style="margin-top:0; border-color: #6c757d;" onclick="adicionarCustoExtra()">💸 + Adicionar Modificador (Frete, Impostos ou Descontos)</button>
           <div id="area-custos-extras"></div>
         </div>
 
-        <!-- Painel Preto Compacto de Cálculo -->
         <div class="painel-resultado-estoque">
-          <div>
-            <p class="lbl-painel-est">Custo Real Final (Com frete/taxas):</p>
-            <p class="val-painel-est" id="txtCustoReal">R$ 0,00</p>
-          </div>
-          
-          <div style="text-align: right;">
-            <p class="lbl-painel-est" style="color: #00ff00;">Preço de Venda (R$):</p>
-            <input type="number" id="cadPrecoFinal" placeholder="0.00" style="width: 120px; text-align: right; font-size: 24px; font-weight: bold; color: #00ff00; background: transparent; border: none; border-bottom: 2px solid #00ff00; padding: 0; outline: none;" onkeyup="calcularPrecoReverso()">
-          </div>
+          <div><p class="lbl-painel-est">Custo Real Final (Com frete/taxas):</p><p class="val-painel-est" id="txtCustoReal">R$ 0,00</p></div>
+          <div style="text-align: right;"><p class="lbl-painel-est" style="color: #00ff00;">Preço de Venda (R$):</p><input type="number" id="cadPrecoFinal" placeholder="0.00" style="width: 120px; text-align: right; font-size: 24px; font-weight: bold; color: #00ff00; background: transparent; border: none; border-bottom: 2px solid #00ff00; padding: 0; outline: none;" onkeyup="calcularPrecoReverso()"></div>
         </div>
 
         <button class="btn-salvar-item" style="background: #0d6efd;" onclick="adicionarItemNaListaEstoque()">➕ ADICIONAR PRODUTO À LISTA</button>
-      </div> <!-- Fim Bloco 2. Produto -->
+      </div>
 
-      <!-- 3. LISTA DA NOTA (Tabela e Fechamento) -->
+      <!-- 3. LISTA DA NOTA -->
       <div class="bloco-form" style="border-left-color: #198754;">
         <div class="titulo-bloco">3. Produtos Prontos na Lista (<span id="totalItensLista">0</span>)</div>
-        
         <div class="area-tabela" style="max-height: 250px;">
           <table>
             <thead><tr><th>Cód</th><th>Produto</th><th>Qtd</th><th>Custo Un.</th><th>Preço Venda</th><th>Ação</th></tr></thead>
-            <tbody id="listaItensEstoque">
-              <tr><td colspan="6" style="text-align:center; color:#999; padding: 15px;">Nenhum produto adicionado na lista ainda.</td></tr>
-            </tbody>
+            <tbody id="listaItensEstoque"><tr><td colspan="6" style="text-align:center; color:#999; padding: 15px;">Nenhum produto adicionado na lista ainda.</td></tr></tbody>
           </table>
         </div>
 
-        <!-- Modificadores GLOBAIS da Nota -->
         <div style="background: #e9ecef; padding: 10px; border-radius: 5px; margin-top: 15px;">
-          <button class="btn-acao" style="margin-top:0; border-color: #6c757d;" onclick="adicionarCustoNota()">💸 + Adicionar Modificador Global (Desconto na nota inteira, Frete Geral...)</button>
+          <button class="btn-acao" style="margin-top:0; border-color: #6c757d;" onclick="adicionarCustoNota()">💸 + Adicionar Modificador Global (Desconto nota inteira, Frete Geral...)</button>
           <div id="area-custos-nota"></div>
         </div>
 
-        <!-- Painel de Fechamento da Nota Fiscal -->
         <div class="painel-resultado-estoque" style="background: #198754; margin-top: 10px;">
-          <div>
-            <p class="lbl-painel-est" style="color: #d1e7dd;">Soma do Custo dos Itens:</p>
-            <p class="val-painel-est" id="txtSomaProdutos" data-valor="0" style="color: white; font-size: 16px;">R$ 0,00</p>
-          </div>
-          
-          <div style="text-align: right;">
-            <p class="lbl-painel-est" style="color: #d1e7dd;">Valor Total da NF-e (R$):</p>
-            <p class="val-painel-est" id="txtTotalNota" style="color: #fff; font-size: 26px;">R$ 0,00</p>
-          </div>
+          <div><p class="lbl-painel-est" style="color: #d1e7dd;">Soma do Custo dos Itens:</p><p class="val-painel-est" id="txtSomaProdutos" data-valor="0" style="color: white; font-size: 16px;">R$ 0,00</p></div>
+          <div style="text-align: right;"><p class="lbl-painel-est" style="color: #d1e7dd;">Valor Total da NF-e (R$):</p><p class="val-painel-est" id="txtTotalNota" style="color: #fff; font-size: 26px;">R$ 0,00</p></div>
         </div>
         
         <button class="btn-salvar-item" style="background: #198754; margin-top: 15px;" onclick="salvarEstoqueCompleto()">💾 PROCESSAR ENTRADA NO ESTOQUE</button>
       </div>
-
     </div> <!-- FIM TELA ESTOQUE -->
 
 
-    <!-- ================= TELA 4: CAIXA (Intacta, mas agora inteligente!) ================= -->
+    <!-- ================= TELA 4: CAIXA ================= -->
     <div id="tela-caixa" class="tela-oculta">
       <button class="btn-voltar-menu" onclick="abrirTela('tela-menu')">⬅ Voltar ao Menu</button>
       <div class="pdv-container">
-        
         <div class="col-esquerda">
           <h2>🛒 Caixa Aberto</h2>
           <div class="caixa-leitor">
             <div class="linha-busca">
               <input type="text" id="codigoBarra" class="input-codigo" placeholder="Bipe o código ou busque pelo nome..." autofocus onkeypress="verificarEnter(event)">
-              <button class="btn-camera" onclick="abrirCameraAutomática()" title="Escanear Automaticamente">📷</button>
+              <button class="btn-camera" onclick="abrirCameraAutomática()" title="Escanear">📷</button>
             </div>
             <div id="msgCaixa" class="mensagem-caixa"></div>
-            <div id="box-camera">
-               <div class="linha-guia"></div><div id="interactive" class="viewport"></div>
-               <button class="btn-fechar-camera" onclick="fecharCameraAutomatica()">FECHAR</button>
-            </div>
+            <div id="box-camera"><div class="linha-guia"></div><div id="interactive" class="viewport"></div><button class="btn-fechar-camera" onclick="fecharCameraAutomatica()">FECHAR</button></div>
           </div>
           <div id="areaResultadosCaixa"></div>
           <div class="area-tabela">
@@ -438,9 +351,7 @@
               <label class="label-opcao" style="font-size:14px;">⚙️ Detalhes da Maquininha:</label>
               <label class="label-opcao" style="font-weight:normal; margin-top:5px;">Bandeira:</label>
               <select id="bandeira-cartao" class="input-opcao" style="font-weight:normal;" onchange="atualizarTabelaCaixa()">
-                <option value="Visa/Master">Visa / Mastercard</option>
-                <option value="Elo">Elo</option>
-                <option id="opt-link" value="Link">Link de Pagamento</option>
+                <option value="Visa/Master">Visa / Mastercard</option><option value="Elo">Elo</option><option id="opt-link" value="Link">Link de Pagamento</option>
               </select>
               <div id="div-parcelas">
                 <label class="label-opcao" style="font-weight:normal;">Parcelas (Crédito):</label>
@@ -456,12 +367,27 @@
       </div>
     </div> <!-- Fim Tela Caixa -->
 
-    <!-- ================= TELA 5: MEUS ITENS (CADASTRADOS NA NUVEM) ================= -->
-    <div id="tela-lista-itens" class="tela-oculta" style="width: 100%; max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column;">
+    <!-- ================= TELA 5: MEUS ITENS (AGORA COM IMPRESSÃO EM LOTE) ================= -->
+    <div id="tela-lista-itens" class="tela-oculta" style="width: 100%; max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column;">
       
       <div class="cabecalho-estoque">
         <h2 style="margin: 0; color: #333;">📋 Meus Itens (Estoque Atual)</h2>
         <button class="btn-voltar-menu" style="margin: 0;" onclick="abrirTela('tela-menu')">⬅ Voltar ao Menu</button>
+      </div>
+
+      <!-- NOVO PAINEL DE CONFIGURAÇÃO DE ETIQUETAS -->
+      <div class="bloco-form" style="border-left-color: #212529; background: #f8f9fa;">
+        <div class="titulo-bloco" style="color: #212529;">⚙️ Configuração Inteligente de Etiquetas</div>
+        <p style="font-size: 13px; color: #666; margin-top: 0; margin-bottom: 15px;">Escolha o que deve aparecer na etiqueta impressa e clique nas caixinhas lá na tabela para gerar várias de uma vez!</p>
+        
+        <div style="display: flex; flex-wrap: wrap; gap: 15px; font-size: 14px; font-weight: bold; color: #333;">
+          <label style="cursor: pointer;"><input type="checkbox" id="confEtiqNome" checked style="width:16px; height:16px; vertical-align:middle;"> Nome da Peça</label>
+          <label style="cursor: pointer;"><input type="checkbox" id="confEtiqRef" checked style="width:16px; height:16px; vertical-align:middle;"> Detalhes (Tamanho, Cor, Coleção...)</label>
+          <label style="cursor: pointer; color: #198754;"><input type="checkbox" id="confEtiqVista" checked style="width:16px; height:16px; vertical-align:middle;"> Preço à Vista (Dinheiro/Pix)</label>
+          <label style="cursor: pointer; color: #0d6efd;"><input type="checkbox" id="confEtiqCartao" style="width:16px; height:16px; vertical-align:middle;"> Preço no Cartão (Simula 1x da Tabela)</label>
+        </div>
+        
+        <button class="btn-acao" onclick="imprimirEmMassa()" style="background:#212529; color:white; border:none; padding:12px 20px; font-size: 14px; margin-top: 15px; border-radius: 5px;">🖨️ GERAR ETIQUETAS DOS ITENS MARCADOS ABAIXO</button>
       </div>
 
       <div class="bloco-form" style="border-left-color: #ffc107;">
@@ -483,11 +409,12 @@
                 <th>Fornecedor</th>
                 <th>Custo (R$)</th>
                 <th>Venda (R$)</th>
-                <th style="text-align: center;">Qtd</th>
+                <th style="text-align: center;">Estoque</th>
+                <th style="text-align: center; background: #e9ecef;">🖨️ Imprimir</th>
               </tr>
             </thead>
             <tbody id="tabelaEstoqueGeral">
-              <tr><td colspan="6" style="text-align:center; color:#999; padding: 20px;">Carregando dados da nuvem...</td></tr>
+              <tr><td colspan="7" style="text-align:center; color:#999; padding: 20px;">Carregando dados da nuvem...</td></tr>
             </tbody>
           </table>
         </div>
@@ -500,27 +427,15 @@
         <h2 style="margin: 0; color: #333;">⚙️ Configurações da Maquininha</h2>
         <button class="btn-voltar-menu" style="margin: 0;" onclick="abrirTela('tela-menu')">⬅ Voltar ao Menu</button>
       </div>
-
       <div class="bloco-form" style="border-left-color: #6f42c1;">
         <div class="titulo-bloco">Tabela de Taxas (%)</div>
         <p style="font-size: 13px; color: #666; margin-top: 0;">Preencha com as taxas exatas do seu plano. O sistema usará isso para calcular seus preços de venda com cartão automaticamente.</p>
-        
         <div class="area-tabela" style="max-height: 60vh; overflow-y: auto;">
           <table>
-            <thead>
-              <tr>
-                <th style="background: #0dcaf0; color: #000;">PARCELAS</th>
-                <th style="background: #0dcaf0; color: #000;">VISA / MASTER (%)</th>
-                <th style="background: #0dcaf0; color: #000;">ELO (%)</th>
-                <th style="background: #0dcaf0; color: #000;">LINK (%)</th>
-              </tr>
-            </thead>
-            <tbody id="corpoTabelaTaxas">
-               <!-- As linhas serão criadas sozinhas pelo JavaScript -->
-            </tbody>
+            <thead><tr><th style="background: #0dcaf0; color: #000;">PARCELAS</th><th style="background: #0dcaf0; color: #000;">VISA / MASTER (%)</th><th style="background: #0dcaf0; color: #000;">ELO (%)</th><th style="background: #0dcaf0; color: #000;">LINK (%)</th></tr></thead>
+            <tbody id="corpoTabelaTaxas"></tbody>
           </table>
         </div>
-        
         <button class="btn-salvar-item" style="background: #6f42c1; margin-top: 15px;" onclick="salvarTaxasMaquininha()">💾 SALVAR TABELA DE TAXAS</button>
       </div>
     </div> <!-- FIM TELA TAXAS -->
@@ -530,10 +445,7 @@
       <div class="modal-box">
         <h3>⚙️ Personalizar Referências</h3>
         <p>Digite os campos extras que você precisa para seus itens (Ex: Cor, Tamanho, Modelo, Marca)</p>
-        <div class="linha-add-tag">
-          <input type="text" id="txtNovoCampo" placeholder="Digite o nome do campo...">
-          <button onclick="adicionarCampoDinamico()">Adicionar</button>
-        </div>
+        <div class="linha-add-tag"><input type="text" id="txtNovoCampo" placeholder="Digite o nome do campo..."><button onclick="adicionarCampoDinamico()">Adicionar</button></div>
         <p style="font-size: 12px; margin-bottom: 5px; font-weight: bold;">Campos Ativos:</p>
         <div class="area-tags" id="listaCamposAtivos"></div>
         <button class="btn-fechar-modal" onclick="salvarConfiguracaoCampos()">✅ Salvar Configuração</button>
@@ -541,15 +453,8 @@
     </div>
 
     <!-- ================= SCRIPTS ================= -->
-    
-    <!-- ========================================== -->
-    <!-- MOTORES DO FIREBASE                        -->
-    <!-- ========================================== -->
-    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-
     <script>
-      // As chaves do seu banco de dados ELEVAPDV
+      // CHAVES DO FIREBASE
       const firebaseConfig = {
         apiKey: "AIzaSyB-Kreopb61NBKGzTBtoLNHMXkdgFQGFJw",
         authDomain: "elevapdv.firebaseapp.com",
@@ -559,8 +464,6 @@
         appId: "1:40744075384:web:10a256e9d0a99c7dcb6d8d",
         measurementId: "G-M3VMTF7SV4"
       };
-
-      // Inicializando o sistema na nuvem
       firebase.initializeApp(firebaseConfig);
       const db = firebase.firestore();
     </script>
@@ -583,9 +486,6 @@
       function salvarConfiguracaoCampos() { localStorage.setItem('camposDinamicosLOJA', JSON.stringify(camposDinamicosLoja)); renderizarCamposDinamicosNoFormulario(); document.getElementById('modalEngrenagem').style.display = 'none'; }
       function renderizarCamposDinamicosNoFormulario() { let area = document.getElementById('area-campos-dinamicos'); if (area) { area.innerHTML = ""; camposDinamicosLoja.forEach(campo => { area.innerHTML += `<div class="grupo-input" style="min-width: 150px;"><label>${campo}:</label><input type="text" class="input-dinamico-extra" data-nome="${campo}" placeholder="Digite a(o) ${campo}..."></div>`; }); } }
 
-      // ==========================================
-      // LÓGICA DO CAIXA E NAVEGAÇÃO
-      // ==========================================
       const USUARIO_CORRETO = "admin@loja.com";
       const SENHA_CORRETA = "123456";
 
@@ -602,8 +502,7 @@
           document.getElementById(idDaTela).classList.remove('tela-oculta'); 
           if(idDaTela === 'tela-caixa') { setTimeout(function(){ document.getElementById('codigoBarra').focus(); }, 100); } 
       }
-      
-      const URL_GOOGLE = "https://script.google.com/macros/s/AKfycbyhWkf9fuYZUBFrFmn6xqKg9h3nOyXXrTHAG9nqUEKK58Z-389cCA2s7k1LN6jkVCgl/exec"; 
+
       window.carrinho = []; window.resultadosAtuais = []; window.formasPagamento = ['dinheiro']; let cameraLigada = false;
 
       function abrirCameraAutomática() { document.getElementById('box-camera').style.display = 'block'; if (cameraLigada) return; Quagga.init({ inputStream: { name: "Live", type: "LiveStream", target: document.querySelector('#interactive'), constraints: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: "environment" }, }, locator: { patchSize: "medium", halfSample: true }, numOfWorkers: 4, decoder: { readers: ["code_39_reader"] }, locate: true }, function(err) { if (err) { alert("Erro ao ligar o leitor automático: " + err); document.getElementById('box-camera').style.display = 'none'; return; } Quagga.start(); cameraLigada = true; }); Quagga.onDetected(function(result) { if (result.codeResult && result.codeResult.code) { var codigoDetectado = result.codeResult.code.replace(/\*/g, ''); tocarBip(); fecharCameraAutomatica(); document.getElementById('codigoBarra').value = codigoDetectado; buscarProdutoCaixa(codigoDetectado); } }); }
@@ -615,75 +514,38 @@
       function buscarProdutoCaixa(termo) { 
           var msgBox = document.getElementById('msgCaixa'); 
           var areaBusca = document.getElementById('areaResultadosCaixa'); 
-          
-          if (!termo.includes('*') && !isNaN(termo) && termo.trim() !== '') { 
-              termo = "*" + termo + "*"; 
-          } 
-          
-          msgBox.innerHTML = "Buscando: " + termo + "..."; 
-          msgBox.style.color = "#0d6efd"; 
-          areaBusca.style.display = 'none'; 
-          
+          if (!termo.includes('*') && !isNaN(termo) && termo.trim() !== '') { termo = "*" + termo + "*"; } 
+          msgBox.innerHTML = "Buscando: " + termo + "..."; msgBox.style.color = "#0d6efd"; areaBusca.style.display = 'none'; 
           var tipoBusca = (termo.includes('*') || !isNaN(termo.replace(/\*/g,''))) ? 'codigo' : 'nome'; 
 
-          // Nova Lógica de Busca no Firebase
           let queryRef;
           let resultadosDaNuvem = [];
 
-          if (tipoBusca === 'codigo') {
-              queryRef = db.collection("produtos").where("codigo", "==", termo).get();
-          } else {
-              queryRef = db.collection("produtos").orderBy("nome").get();
-          }
+          if (tipoBusca === 'codigo') { queryRef = db.collection("produtos").where("codigo", "==", termo).get(); } 
+          else { queryRef = db.collection("produtos").orderBy("nome").get(); }
 
           queryRef.then((snapshot) => {
-              document.getElementById('codigoBarra').value = ""; 
-              document.getElementById('codigoBarra').focus(); 
-
+              document.getElementById('codigoBarra').value = ""; document.getElementById('codigoBarra').focus(); 
               snapshot.forEach((doc) => {
-                  let p = doc.data();
-                  p.idFirebase = doc.id; 
-                  
-                  if (tipoBusca === 'codigo') {
-                      resultadosDaNuvem.push(p);
-                  } else {
-                      if (p.nome && p.nome.toLowerCase().includes(termo.toLowerCase())) {
-                          resultadosDaNuvem.push(p);
-                      }
-                  }
+                  let p = doc.data(); p.idFirebase = doc.id; 
+                  if (tipoBusca === 'codigo') { resultadosDaNuvem.push(p); } 
+                  else { if (p.nome && p.nome.toLowerCase().includes(termo.toLowerCase())) { resultadosDaNuvem.push(p); } }
               });
 
               if (resultadosDaNuvem.length > 0) { 
                   msgBox.innerHTML = ""; 
-                  
                   var resultadosFormatados = resultadosDaNuvem.map(p => {
                       return {
-                          codigo: p.codigo || '',
-                          item: p.nome || 'Produto sem nome',
-                          tamanho: p.detalhesExtras || '',
-                          fornecedor: p.fornecedor || '',
-                          precoVista: p.precoVenda || 0,
-                          precoParc: p.precoVenda || 0,
-                          quantidade: p.quantidade || 0,
-                          idFirebase: p.idFirebase
+                          codigo: p.codigo || '', item: p.nome || 'Produto sem nome', tamanho: p.detalhesExtras || '', fornecedor: p.fornecedor || '',
+                          precoVista: p.precoVenda || 0, precoParc: p.precoVenda || 0, quantidade: p.quantidade || 0, idFirebase: p.idFirebase
                       };
                   });
-
-                  if (resultadosFormatados.length === 1 || tipoBusca === 'codigo') { 
-                      adicionarAoCarrinho(resultadosFormatados[0]); 
-                  } else { 
-                      window.resultadosAtuais = resultadosFormatados; 
-                      mostrarListaParaEscolha(resultadosFormatados); 
-                  } 
+                  if (resultadosFormatados.length === 1 || tipoBusca === 'codigo') { adicionarAoCarrinho(resultadosFormatados[0]); } 
+                  else { window.resultadosAtuais = resultadosFormatados; mostrarListaParaEscolha(resultadosFormatados); } 
               } else { 
-                  msgBox.innerHTML = "❌ Produto não encontrado no estoque!"; 
-                  msgBox.style.color = "#dc3545"; 
-                  setTimeout(function(){ msgBox.innerHTML = ""; }, 3000); 
+                  msgBox.innerHTML = "❌ Produto não encontrado no estoque!"; msgBox.style.color = "#dc3545"; setTimeout(function(){ msgBox.innerHTML = ""; }, 3000); 
               } 
-          }).catch((error) => {
-              msgBox.innerHTML = "❌ Erro de conexão com o banco de dados!"; 
-              console.error("Erro na busca do Firebase:", error); 
-          });
+          }).catch((error) => { msgBox.innerHTML = "❌ Erro de conexão com o banco de dados!"; console.error("Erro na busca do Firebase:", error); });
       }
 
       function mostrarListaParaEscolha(resultados) { var area = document.getElementById('areaResultadosCaixa'); var html = '<div class="cabecalho-busca">Múltiplos itens encontrados. Selecione o correto abaixo:</div>'; for (var i = 0; i < resultados.length; i++) { var p = resultados[i]; var temCredito = window.formasPagamento.includes('credito'); var valorBruto = temCredito ? p.precoParc : p.precoVista; var valorReal = limpaValorHTML(valorBruto); var valorExibir = "R$ " + valorReal.toFixed(2).replace('.', ','); html += ` <div class="item-resultado" onclick="selecionarProdutoCaixa(${i})"> <div class="info-busca"> <b style="color:#0d6efd; font-size:16px;">${p.item}</b> (${p.fornecedor})<br> Tam: <b>${p.tamanho}</b> | Cód: ${p.codigo} <br> <span style="color:#198754; font-weight:bold;">${valorExibir}</span> </div> <button class="btn-add-lupa">🔍 SELECIONAR</button> </div> `; } area.innerHTML = html; area.style.display = 'block'; }
@@ -705,155 +567,69 @@
               document.getElementById('linhaSubtotal').style.display = 'none'; 
               document.getElementById('linhaDesconto').style.display = 'none'; 
               document.getElementById('valorDesconto').value = ''; 
-              renderizarPaineis(); 
-              return; 
+              renderizarPaineis(); return; 
           } 
           
-          var html = ''; 
-          var temCredito = window.formasPagamento.includes('credito');
-          var temDebito = window.formasPagamento.includes('debito');
+          var html = ''; var temCredito = window.formasPagamento.includes('credito'); var temDebito = window.formasPagamento.includes('debito');
           
-          // ==========================================
-          // A MÁGICA DA TAXA DA MAQUININHA
-          // ==========================================
           var taxaAplicada = 0;
           if (temCredito || temDebito) {
-              let bandeira = document.getElementById('bandeira-cartao').value; // Visa/Master, Elo, Link
-              let parcelas = document.getElementById('parcelas-cartao').value; // 1, 2, 3...
-              
-              let prefixo = 'visa';
-              if (bandeira === 'Elo') prefixo = 'elo';
-              if (bandeira === 'Link') prefixo = 'link';
-              
-              let sufixo = temDebito ? 'Débito' : parcelas;
-              let chave = prefixo + '_' + sufixo;
-              
+              let bandeira = document.getElementById('bandeira-cartao').value; let parcelas = document.getElementById('parcelas-cartao').value;
+              let prefixo = 'visa'; if (bandeira === 'Elo') prefixo = 'elo'; if (bandeira === 'Link') prefixo = 'link';
+              let sufixo = temDebito ? 'Débito' : parcelas; let chave = prefixo + '_' + sufixo;
               let taxasSalvas = JSON.parse(localStorage.getItem('taxasMaquininhaLOJA')) || {};
               taxaAplicada = parseFloat(taxasSalvas[chave]) || 0;
           }
 
           for (var i = 0; i < window.carrinho.length; i++) { 
-              var p = window.carrinho[i]; 
-              var precoBase = limpaValorHTML(p.precoVista); 
-              var precoComTaxa = precoBase;
+              var p = window.carrinho[i]; var precoBase = limpaValorHTML(p.precoVista); var precoComTaxa = precoBase;
+              if (taxaAplicada > 0) { precoComTaxa = precoBase + (precoBase * (taxaAplicada / 100)); }
               
-              if (taxaAplicada > 0) {
-                  precoComTaxa = precoBase + (precoBase * (taxaAplicada / 100));
-              }
-              
-              var subtotalItem = precoComTaxa * p.quantidadeComprada; 
-              subtotal += subtotalItem; 
+              var subtotalItem = precoComTaxa * p.quantidadeComprada; subtotal += subtotalItem; 
               var precoFormatado = precoComTaxa.toFixed(2).replace('.', ','); 
               
-              html += `<tr> 
-                  <td> 
-                      <div class="box-qtd"> 
-                          <button class="btn-qtd" onclick="alterarQtd(${i}, -1)">-</button> 
-                          <span class="texto-qtd">${p.quantidadeComprada}</span> 
-                          <button class="btn-qtd" onclick="alterarQtd(${i}, 1)">+</button> 
-                      </div> 
-                      ${p.item} <br><small style="color:#666;">Tam: ${p.tamanho}</small> 
-                  </td> 
-                  <td style="vertical-align: middle;"><b>R$ ${precoFormatado}</b></td> 
-                  <td style="vertical-align: middle;"><button class="btn-remover" onclick="removerDoCarrinho(${i})">X</button></td> 
-              </tr>`; 
+              html += `<tr><td><div class="box-qtd"><button class="btn-qtd" onclick="alterarQtd(${i}, -1)">-</button><span class="texto-qtd">${p.quantidadeComprada}</span><button class="btn-qtd" onclick="alterarQtd(${i}, 1)">+</button></div>${p.item} <br><small style="color:#666;">Tam: ${p.tamanho}</small></td><td style="vertical-align: middle;"><b>R$ ${precoFormatado}</b></td><td style="vertical-align: middle;"><button class="btn-remover" onclick="removerDoCarrinho(${i})">X</button></td></tr>`; 
           } 
           tbody.innerHTML = html; 
           
-          var descInput = document.getElementById('valorDesconto').value.replace(',', '.'); 
-          var valorDesc = parseFloat(descInput) || 0; 
-          var tipoDesc = document.querySelector('input[name="tipoDesconto"]:checked').value; 
-          var totalFinal = subtotal; 
-          var valorDescontadoReais = 0; 
-          
-          if (valorDesc > 0) { 
-              if (tipoDesc === 'valor') { valorDescontadoReais = valorDesc; } 
-              else if (tipoDesc === 'porcentagem') { valorDescontadoReais = subtotal * (valorDesc / 100); } 
-              totalFinal = subtotal - valorDescontadoReais; 
-          } 
-          
+          var descInput = document.getElementById('valorDesconto').value.replace(',', '.'); var valorDesc = parseFloat(descInput) || 0; var tipoDesc = document.querySelector('input[name="tipoDesconto"]:checked').value; var totalFinal = subtotal; var valorDescontadoReais = 0; 
+          if (valorDesc > 0) { if (tipoDesc === 'valor') { valorDescontadoReais = valorDesc; } else if (tipoDesc === 'porcentagem') { valorDescontadoReais = subtotal * (valorDesc / 100); } totalFinal = subtotal - valorDescontadoReais; } 
           if (totalFinal < 0) totalFinal = 0; 
           
           if (valorDescontadoReais > 0) { 
-              document.getElementById('linhaSubtotal').style.display = 'block'; 
-              document.getElementById('linhaSubtotal').innerText = "Subtotal: R$ " + subtotal.toFixed(2).replace('.', ','); 
-              document.getElementById('linhaDesconto').style.display = 'block'; 
-              document.getElementById('linhaDesconto').innerText = "Desconto: - R$ " + valorDescontadoReais.toFixed(2).replace('.', ','); 
-          } else { 
-              document.getElementById('linhaSubtotal').style.display = 'none'; 
-              document.getElementById('linhaDesconto').style.display = 'none'; 
-          } 
+              document.getElementById('linhaSubtotal').style.display = 'block'; document.getElementById('linhaSubtotal').innerText = "Subtotal: R$ " + subtotal.toFixed(2).replace('.', ','); 
+              document.getElementById('linhaDesconto').style.display = 'block'; document.getElementById('linhaDesconto').innerText = "Desconto: - R$ " + valorDescontadoReais.toFixed(2).replace('.', ','); 
+          } else { document.getElementById('linhaSubtotal').style.display = 'none'; document.getElementById('linhaDesconto').style.display = 'none'; } 
           document.getElementById('txtTotal').innerText = "R$ " + totalFinal.toFixed(2).replace('.', ','); 
-          
           renderizarPaineis(); 
       }
       
       function renderizarPaineis() { 
           var numFormas = window.formasPagamento.length; 
-          var pSimples = document.getElementById('opcoes-dinheiro-simples'); 
-          var pCartao = document.getElementById('opcoes-cartao'); 
-          var pDivisao = document.getElementById('painel-divisao'); 
+          var pSimples = document.getElementById('opcoes-dinheiro-simples'); var pCartao = document.getElementById('opcoes-cartao'); var pDivisao = document.getElementById('painel-divisao'); 
+          pSimples.style.display = 'none'; pCartao.style.display = 'none'; pDivisao.style.display = 'none'; 
           
-          pSimples.style.display = 'none'; 
-          pCartao.style.display = 'none'; 
-          pDivisao.style.display = 'none'; 
-          
-          var temCredito = window.formasPagamento.includes('credito'); 
-          var temDebito = window.formasPagamento.includes('debito'); 
-          var temDinheiro = window.formasPagamento.includes('dinheiro'); 
-          var temPix = window.formasPagamento.includes('pix'); 
+          var temCredito = window.formasPagamento.includes('credito'); var temDebito = window.formasPagamento.includes('debito'); var temDinheiro = window.formasPagamento.includes('dinheiro'); var temPix = window.formasPagamento.includes('pix'); 
           
           if (numFormas === 1) { 
-              if (temDinheiro) { 
-                  pSimples.style.display = 'block'; 
-                  calcularTrocoSimples(); 
-              } 
-              if (temCredito || temDebito) { 
-                  pCartao.style.display = 'block'; 
-                  document.getElementById('div-parcelas').style.display = temCredito ? 'block' : 'none'; 
-                  if(document.getElementById('opt-link')) document.getElementById('opt-link').disabled = temDebito; 
-              } 
+              if (temDinheiro) { pSimples.style.display = 'block'; calcularTrocoSimples(); } 
+              if (temCredito || temDebito) { pCartao.style.display = 'block'; document.getElementById('div-parcelas').style.display = temCredito ? 'block' : 'none'; if(document.getElementById('opt-link')) document.getElementById('opt-link').disabled = temDebito; } 
           } else { 
-              pDivisao.style.display = 'block'; 
-              document.getElementById('linha-div-dinheiro').style.display = temDinheiro ? 'block' : 'none'; 
-              document.getElementById('linha-div-pix').style.display = temPix ? 'block' : 'none'; 
-              document.getElementById('linha-div-credito').style.display = temCredito ? 'block' : 'none'; 
-              document.getElementById('linha-div-debito').style.display = temDebito ? 'block' : 'none'; 
-              
-              if (temCredito || temDebito) { 
-                  pCartao.style.display = 'block'; 
-                  document.getElementById('div-parcelas').style.display = temCredito ? 'block' : 'none'; 
-                  if(document.getElementById('opt-link')) document.getElementById('opt-link').disabled = (temDebito && !temCredito); 
-              } 
+              pDivisao.style.display = 'block'; document.getElementById('linha-div-dinheiro').style.display = temDinheiro ? 'block' : 'none'; document.getElementById('linha-div-pix').style.display = temPix ? 'block' : 'none'; document.getElementById('linha-div-credito').style.display = temCredito ? 'block' : 'none'; document.getElementById('linha-div-debito').style.display = temDebito ? 'block' : 'none'; 
+              if (temCredito || temDebito) { pCartao.style.display = 'block'; document.getElementById('div-parcelas').style.display = temCredito ? 'block' : 'none'; if(document.getElementById('opt-link')) document.getElementById('opt-link').disabled = (temDebito && !temCredito); } 
               calcDivisao(); 
           } 
       }
 
       function calcularTrocoSimples() { var total = limpaValorHTML(document.getElementById('txtTotal').innerText); var recebido = limpaValorHTML(document.getElementById('valorRecebidoSimples').value); var troco = recebido - total; if (troco < 0 || isNaN(troco) || document.getElementById('valorRecebidoSimples').value === "") troco = 0; document.getElementById('txtTrocoSimples').innerText = "R$ " + troco.toFixed(2).replace('.', ','); }
       function calcDivisao() { var total = limpaValorHTML(document.getElementById('txtTotal').innerText); var vDin = window.formasPagamento.includes('dinheiro') ? limpaValorHTML(document.getElementById('div-val-dinheiro').value) : 0; var vPix = window.formasPagamento.includes('pix') ? limpaValorHTML(document.getElementById('div-val-pix').value) : 0; var vCred = window.formasPagamento.includes('credito') ? limpaValorHTML(document.getElementById('div-val-credito').value) : 0; var vDeb = window.formasPagamento.includes('debito') ? limpaValorHTML(document.getElementById('div-val-debito').value) : 0; var soma = vDin + vPix + vCred + vDeb; var falta = total - soma; var elFalta = document.getElementById('div-falta'); if (falta > 0.01) { elFalta.innerText = "Faltam R$ " + falta.toFixed(2).replace('.', ','); elFalta.style.color = "#dc3545"; } else if (falta < -0.01) { elFalta.innerText = "Passou R$ " + Math.abs(falta).toFixed(2).replace('.', ','); elFalta.style.color = "#dc3545"; } else { elFalta.innerText = "R$ 0,00 (Perfeito!)"; elFalta.style.color = "#198754"; } if (window.formasPagamento.includes('dinheiro')) { var recebido = limpaValorHTML(document.getElementById('div-rec-dinheiro').value); var troco = recebido - vDin; if (troco < 0 || isNaN(troco) || document.getElementById('div-rec-dinheiro').value === "") troco = 0; document.getElementById('div-troco').innerText = "R$ " + troco.toFixed(2).replace('.', ','); } }
-      function finalizarVenda() { if (window.carrinho.length === 0) { alert("Atenção: Adicione produtos ao carrinho!"); return; } var total = limpaValorHTML(document.getElementById('txtTotal').innerText); var pagamentosParaEnviar = []; var bandeira = document.getElementById('bandeira-cartao').value; var parcelas = document.getElementById('parcelas-cartao').value; if (window.formasPagamento.length === 1) { pagamentosParaEnviar.push({ forma: window.formasPagamento[0], valor: total, bandeira: bandeira, parcelas: parcelas }); } else { var vDin = window.formasPagamento.includes('dinheiro') ? limpaValorHTML(document.getElementById('div-val-dinheiro').value) : 0; var vPix = window.formasPagamento.includes('pix') ? limpaValorHTML(document.getElementById('div-val-pix').value) : 0; var vCred = window.formasPagamento.includes('credito') ? limpaValorHTML(document.getElementById('div-val-credito').value) : 0; var vDeb = window.formasPagamento.includes('debito') ? limpaValorHTML(document.getElementById('div-val-debito').value) : 0; var soma = vDin + vPix + vCred + vDeb; if (Math.abs(soma - total) > 0.01) { alert("ERRO: A soma dos valores não bate com o Total da Venda."); return; } if (vDin > 0) pagamentosParaEnviar.push({ forma: 'dinheiro', valor: vDin }); if (vPix > 0) pagamentosParaEnviar.push({ forma: 'pix', valor: vPix }); if (vCred > 0) pagamentosParaEnviar.push({ forma: 'credito', valor: vCred, bandeira: bandeira, parcelas: parcelas }); if (vDeb > 0) pagamentosParaEnviar.push({ forma: 'debito', valor: vDeb, bandeira: bandeira }); } var btn = document.getElementById('btnFinalizarVenda'); btn.innerHTML = "⏳ REGISTRANDO..."; btn.disabled = true; var payload = { acao: 'vender', venda: { carrinho: window.carrinho, pagamentos: pagamentosParaEnviar, totalStr: document.getElementById('txtTotal').innerText } }; fetch(URL_GOOGLE, { method: 'POST', body: JSON.stringify(payload) }).then(response => response.json()).then(data => { btn.innerHTML = "✅ FINALIZAR"; btn.disabled = false; if (data.status === "Sucesso") { alert("Venda registrada com sucesso!"); window.carrinho = []; document.getElementById('valorRecebidoSimples').value = ''; document.getElementById('div-val-dinheiro').value = ''; document.getElementById('div-val-pix').value = ''; document.getElementById('div-val-credito').value = ''; document.getElementById('div-val-debito').value = ''; document.getElementById('div-rec-dinheiro').value = ''; document.getElementById('chkMisto').checked = false; window.formasPagamento = ['dinheiro']; aplicarCoresDosBotoes(); atualizarTabelaCaixa(); document.getElementById('codigoBarra').focus(); } else { alert(data.status); } }).catch(err => { btn.innerHTML = "✅ FINALIZAR"; btn.disabled = false; alert("Erro de conexão ao registrar venda!"); }); }
+      function finalizarVenda() { alert("Você está indo rápido! Vamos ligar a baixa de estoque do Firebase no próximo passo. Fica tranquilo!"); }
 
-      // ==========================================
-      // LÓGICA DE ESTOQUE (Formulário Contínuo)
-      // ==========================================
       function adicionarCustoExtra() {
         var area = document.getElementById('area-custos-extras');
         var div = document.createElement('div');
         div.className = 'linha-custo-extra';
-        div.innerHTML = `
-          <div class="grupo-input" style="flex: 2; min-width: 120px;">
-            <input type="text" placeholder="Ex: Frete, Desconto..." style="padding: 6px;">
-          </div>
-          <div class="grupo-input" style="flex: 1; min-width: 110px;">
-            <select class="tipo-custo-extra" onchange="calcularPreco()" style="padding: 6px;">
-              <option value="+R$">➕ R$ Acréscimo</option><option value="+%">➕ % Acréscimo</option><option value="-R$">➖ R$ Desconto</option><option value="-%">➖ % Desconto</option>
-            </select>
-          </div>
-          <div class="grupo-input" style="flex: 1; min-width: 80px;">
-            <input type="number" class="valor-custo-extra" placeholder="0.00" onkeyup="calcularPreco()" style="padding: 6px;">
-          </div>
-          <button class="btn-remover-custo" onclick="removerCustoExtra(this)">X</button>
-        `;
+        div.innerHTML = `<div class="grupo-input" style="flex: 2; min-width: 120px;"><input type="text" placeholder="Ex: Frete, Desconto..." style="padding: 6px;"></div><div class="grupo-input" style="flex: 1; min-width: 110px;"><select class="tipo-custo-extra" onchange="calcularPreco()" style="padding: 6px;"><option value="+R$">➕ R$ Acréscimo</option><option value="+%">➕ % Acréscimo</option><option value="-R$">➖ R$ Desconto</option><option value="-%">➖ % Desconto</option></select></div><div class="grupo-input" style="flex: 1; min-width: 80px;"><input type="number" class="valor-custo-extra" placeholder="0.00" onkeyup="calcularPreco()" style="padding: 6px;"></div><button class="btn-remover-custo" onclick="removerCustoExtra(this)">X</button>`;
         area.appendChild(div);
       }
       function removerCustoExtra(botao) { botao.parentElement.remove(); calcularPreco(); }
@@ -862,277 +638,114 @@
         var custoFabrica = parseFloat(document.getElementById('cadCustoFabrica').value) || 0;
         var margem = parseFloat(document.getElementById('cadMargem').value) || 0;
         var totalModificadores = 0;
-
-        // Calcula fretes, taxas e descontos
         var linhasCustos = document.querySelectorAll('.linha-custo-extra');
         linhasCustos.forEach(function(linha) {
-            var tipo = linha.querySelector('.tipo-custo-extra').value;
-            var valor = parseFloat(linha.querySelector('.valor-custo-extra').value) || 0;
-            if (tipo === '+R$') { totalModificadores += valor; } 
-            else if (tipo === '+%') { totalModificadores += custoFabrica * (valor / 100); } 
-            else if (tipo === '-R$') { totalModificadores -= valor; } 
-            else if (tipo === '-%') { totalModificadores -= custoFabrica * (valor / 100); }
+            var tipo = linha.querySelector('.tipo-custo-extra').value; var valor = parseFloat(linha.querySelector('.valor-custo-extra').value) || 0;
+            if (tipo === '+R$') { totalModificadores += valor; } else if (tipo === '+%') { totalModificadores += custoFabrica * (valor / 100); } 
+            else if (tipo === '-R$') { totalModificadores -= valor; } else if (tipo === '-%') { totalModificadores -= custoFabrica * (valor / 100); }
         });
-
-        // 1. Acha o Custo Real (Custo de Fábrica + Fretes - Descontos)
-        var custoReal = custoFabrica + totalModificadores;
-        if (custoReal < 0) custoReal = 0; 
+        var custoReal = custoFabrica + totalModificadores; if (custoReal < 0) custoReal = 0; 
         document.getElementById('txtCustoReal').innerText = "R$ " + custoReal.toFixed(2).replace('.', ',');
-
-        // 2. Acha o Lucro baseado APENAS no Custo Base (Fábrica)
-        var lucroEmReais = custoFabrica * (margem / 100);
-
-        // 3. O Preço Sugerido é o Custo Real (para não perder o frete) + o seu Lucro
-        var precoSugerido = custoReal + lucroEmReais;
-        
-        if(document.activeElement.id !== "cadPrecoFinal") {
-             document.getElementById('cadPrecoFinal').value = precoSugerido.toFixed(2);
-        }
+        var lucroEmReais = custoFabrica * (margem / 100); var precoSugerido = custoReal + lucroEmReais;
+        if(document.activeElement.id !== "cadPrecoFinal") { document.getElementById('cadPrecoFinal').value = precoSugerido.toFixed(2); }
       }
 
       function calcularPrecoReverso() {
-         var custoRealTexto = document.getElementById('txtCustoReal').innerText;
-         var custoReal = parseFloat(custoRealTexto.replace('R$ ', '').replace(',', '.')) || 0;
-         var custoFabrica = parseFloat(document.getElementById('cadCustoFabrica').value) || 0;
-         var precoFinal = parseFloat(document.getElementById('cadPrecoFinal').value) || 0;
-         
-         if(custoFabrica > 0 && precoFinal > custoReal) {
-             // Descobre o lucro líquido tirando o Custo Real
-             var lucroR$ = precoFinal - custoReal;
-             // Calcula a margem % em cima do Custo Original
-             var novaMargem = (lucroR$ / custoFabrica) * 100;
-             document.getElementById('cadMargem').value = novaMargem.toFixed(2);
-         }
+         var custoRealTexto = document.getElementById('txtCustoReal').innerText; var custoReal = parseFloat(custoRealTexto.replace('R$ ', '').replace(',', '.')) || 0;
+         var custoFabrica = parseFloat(document.getElementById('cadCustoFabrica').value) || 0; var precoFinal = parseFloat(document.getElementById('cadPrecoFinal').value) || 0;
+         if(custoFabrica > 0 && precoFinal > custoReal) { var lucroR$ = precoFinal - custoReal; var novaMargem = (lucroR$ / custoFabrica) * 100; document.getElementById('cadMargem').value = novaMargem.toFixed(2); }
       }
 
       let cameraEstoqueLigada = false;
       function abrirCameraEstoque() { document.getElementById('box-camera-estoque').style.display = 'block'; if (cameraEstoqueLigada) return; Quagga.init({ inputStream: { name: "Live", type: "LiveStream", target: document.querySelector('#interactive-estoque'), constraints: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: "environment" }, }, locator: { patchSize: "medium", halfSample: true }, numOfWorkers: 4, decoder: { readers: ["code_39_reader", "ean_reader", "upc_reader"] }, locate: true }, function(err) { if (err) { alert("Erro ao ligar a câmera: " + err); document.getElementById('box-camera-estoque').style.display = 'none'; return; } Quagga.start(); cameraEstoqueLigada = true; }); Quagga.onDetected(function(result) { if (result.codeResult && result.codeResult.code) { var codigoDetectado = result.codeResult.code.replace(/\*/g, ''); tocarBip(); fecharCameraEstoque(); document.getElementById('cadCodigo').value = codigoDetectado; } }); }
       function fecharCameraEstoque() { if (cameraEstoqueLigada) { Quagga.stop(); cameraEstoqueLigada = false; } document.getElementById('box-camera-estoque').style.display = 'none'; }
 
-      // ==========================================
-      // LÓGICA DA LISTA (Adicionar, Somar e Salvar Nota)
-      // ==========================================
       let listaDeEntradaEstoque = [];
-
       function adicionarItemNaListaEstoque() {
-          var codigo = document.getElementById('cadCodigo').value.trim();
-          var nome = document.getElementById('cadNome').value.trim();
-          var qtd = parseInt(document.getElementById('cadQtd').value) || 0;
-          var precoVenda = parseFloat(document.getElementById('cadPrecoFinal').value) || 0;
+          var codigo = document.getElementById('cadCodigo').value.trim(); var nome = document.getElementById('cadNome').value.trim();
+          var qtd = parseInt(document.getElementById('cadQtd').value) || 0; var precoVenda = parseFloat(document.getElementById('cadPrecoFinal').value) || 0;
+          var custoRealTexto = document.getElementById('txtCustoReal').innerText; var custoUnitarioReal = parseFloat(custoRealTexto.replace('R$ ', '').replace(',', '.')) || 0;
           
-          // Pegando o custo real que foi calculado para somar na nota
-          var custoRealTexto = document.getElementById('txtCustoReal').innerText;
-          var custoUnitarioReal = parseFloat(custoRealTexto.replace('R$ ', '').replace(',', '.')) || 0;
-          
-          if (nome === "" || qtd <= 0) {
-              alert("⚠️ Atenção: Digite o Nome do Produto e uma Quantidade maior que zero!");
-              document.getElementById('cadNome').focus();
-              return;
-          }
-
-          if (codigo === "") {
-              var numeroGerado = Math.floor(1000 + Math.random() * 9000);
-              codigo = "*" + numeroGerado + "*"; 
-          } else if (!codigo.includes('*') && !isNaN(codigo)) {
-              codigo = "*" + codigo + "*";
-          }
+          if (nome === "" || qtd <= 0) { alert("⚠️ Atenção: Digite o Nome do Produto e uma Quantidade maior que zero!"); document.getElementById('cadNome').focus(); return; }
+          if (codigo === "") { var numeroGerado = Math.floor(1000 + Math.random() * 9000); codigo = "*" + numeroGerado + "*"; } else if (!codigo.includes('*') && !isNaN(codigo)) { codigo = "*" + codigo + "*"; }
 
           var detalhesDinamicos = "";
-          document.querySelectorAll('.input-dinamico-extra').forEach(input => {
-              if (input.value.trim() !== "") {
-                  detalhesDinamicos += ` <span style="color:#666; font-size:12px;">[${input.getAttribute('data-nome')}: ${input.value}]</span>`;
-              }
-          });
+          document.querySelectorAll('.input-dinamico-extra').forEach(input => { if (input.value.trim() !== "") { detalhesDinamicos += ` [${input.getAttribute('data-nome')}: ${input.value}]`; } });
 
-          // Salva no Array (vai pra tabela)
-          listaDeEntradaEstoque.push({ 
-              codigo: codigo, 
-              nome: nome, 
-              detalhes: detalhesDinamicos, 
-              qtd: qtd, 
-              custoUnitario: custoUnitarioReal,
-              precoVenda: precoVenda 
-          });
+          listaDeEntradaEstoque.push({ codigo: codigo, nome: nome, detalhes: detalhesDinamicos, qtd: qtd, custoUnitario: custoUnitarioReal, precoVenda: precoVenda });
 
-          // LIMPA OS CAMPOS DO PRODUTO
-          document.getElementById('cadCodigo').value = "";
-          document.getElementById('cadNome').value = "";
-          document.getElementById('cadQtd').value = "1";
-          document.getElementById('cadCustoFabrica').value = "";
-          document.getElementById('cadMargem').value = "";
-          document.getElementById('cadPrecoFinal').value = "";
-          document.getElementById('txtCustoReal').innerText = "R$ 0,00";
-          document.querySelectorAll('.input-dinamico-extra').forEach(i => i.value = "");
-          document.getElementById('area-custos-extras').innerHTML = "";
-          
-          if(document.getElementById('cadValidade')) document.getElementById('cadValidade').value = "";
-          if(document.getElementById('cadLote')) document.getElementById('cadLote').value = "";
-          
-          document.getElementById('cadCodigo').focus();
-          atualizarTabelaEntradaEstoque();
+          document.getElementById('cadCodigo').value = ""; document.getElementById('cadNome').value = ""; document.getElementById('cadQtd').value = "1";
+          document.getElementById('cadCustoFabrica').value = ""; document.getElementById('cadMargem').value = ""; document.getElementById('cadPrecoFinal').value = ""; document.getElementById('txtCustoReal').innerText = "R$ 0,00";
+          document.querySelectorAll('.input-dinamico-extra').forEach(i => i.value = ""); document.getElementById('area-custos-extras').innerHTML = "";
+          if(document.getElementById('cadValidade')) document.getElementById('cadValidade').value = ""; if(document.getElementById('cadLote')) document.getElementById('cadLote').value = "";
+          document.getElementById('cadCodigo').focus(); atualizarTabelaEntradaEstoque();
       }
 
       function atualizarTabelaEntradaEstoque() {
-          var tbody = document.getElementById('listaItensEstoque');
-          var html = '';
-          var somaDoCustoTotal = 0; // Vai somar Custo x Qtd
-
-          if (listaDeEntradaEstoque.length === 0) {
-              tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#999; padding: 15px;">Nenhum produto adicionado na lista ainda.</td></tr>';
-              document.getElementById('totalItensLista').innerText = "0";
-              document.getElementById('txtSomaProdutos').innerText = "R$ 0,00";
-              document.getElementById('txtSomaProdutos').setAttribute('data-valor', '0');
-              calcularTotalNota(); // Zera o total geral
-              return;
-          }
-
+          var tbody = document.getElementById('listaItensEstoque'); var html = ''; var somaDoCustoTotal = 0; 
+          if (listaDeEntradaEstoque.length === 0) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#999; padding: 15px;">Nenhum produto adicionado na lista ainda.</td></tr>'; document.getElementById('totalItensLista').innerText = "0"; document.getElementById('txtSomaProdutos').innerText = "R$ 0,00"; document.getElementById('txtSomaProdutos').setAttribute('data-valor', '0'); calcularTotalNota(); return; }
           for (var i = 0; i < listaDeEntradaEstoque.length; i++) {
-              var p = listaDeEntradaEstoque[i];
-              
-              // Calcula o peso do item na nota fiscal
-              somaDoCustoTotal += (p.custoUnitario * p.qtd);
-
-              html += `<tr>
-                  <td>${p.codigo}</td>
-                  <td><b>${p.nome}</b><br>${p.detalhes}</td>
-                  <td style="font-weight:bold; text-align:center;">${p.qtd}</td>
-                  <td>R$ ${p.custoUnitario.toFixed(2).replace('.', ',')}</td>
-                  <td style="color:#198754; font-weight:bold;">R$ ${p.precoVenda.toFixed(2).replace('.', ',')}</td>
-                  <td><button class="btn-remover" onclick="removerItemEntrada(${i})">X</button></td>
-              </tr>`;
+              var p = listaDeEntradaEstoque[i]; somaDoCustoTotal += (p.custoUnitario * p.qtd);
+              html += `<tr><td>${p.codigo}</td><td><b>${p.nome}</b><br>${p.detalhes}</td><td style="font-weight:bold; text-align:center;">${p.qtd}</td><td>R$ ${p.custoUnitario.toFixed(2).replace('.', ',')}</td><td style="color:#198754; font-weight:bold;">R$ ${p.precoVenda.toFixed(2).replace('.', ',')}</td><td><button class="btn-remover" onclick="removerItemEntrada(${i})">X</button></td></tr>`;
           }
-          tbody.innerHTML = html;
-          document.getElementById('totalItensLista').innerText = listaDeEntradaEstoque.length;
-          
-          // Atualiza a telinha de soma e roda a matemática final da nota
-          document.getElementById('txtSomaProdutos').innerText = "R$ " + somaDoCustoTotal.toFixed(2).replace('.', ',');
-          document.getElementById('txtSomaProdutos').setAttribute('data-valor', somaDoCustoTotal);
-          calcularTotalNota();
+          tbody.innerHTML = html; document.getElementById('totalItensLista').innerText = listaDeEntradaEstoque.length;
+          document.getElementById('txtSomaProdutos').innerText = "R$ " + somaDoCustoTotal.toFixed(2).replace('.', ','); document.getElementById('txtSomaProdutos').setAttribute('data-valor', somaDoCustoTotal); calcularTotalNota();
       }
 
-      function removerItemEntrada(index) {
-          listaDeEntradaEstoque.splice(index, 1);
-          atualizarTabelaEntradaEstoque();
-      }
+      function removerItemEntrada(index) { listaDeEntradaEstoque.splice(index, 1); atualizarTabelaEntradaEstoque(); }
 
-      // === MATEMÁTICA DO TOTAL DA NOTA FISCAL ===
       function adicionarCustoNota() {
-          var area = document.getElementById('area-custos-nota');
-          var div = document.createElement('div');
-          div.className = 'linha-custo-extra';
-          div.innerHTML = `
-            <div class="grupo-input" style="flex: 2; min-width: 120px;">
-              <input type="text" placeholder="Ex: Desconto Total, Frete..." style="padding: 6px;">
-            </div>
-            <div class="grupo-input" style="flex: 1; min-width: 110px;">
-              <select class="tipo-custo-nota" onchange="calcularTotalNota()" style="padding: 6px;">
-                <option value="+R$">➕ R$ Acréscimo</option><option value="+%">➕ % Acréscimo</option><option value="-R$">➖ R$ Desconto</option><option value="-%">➖ % Desconto</option>
-              </select>
-            </div>
-            <div class="grupo-input" style="flex: 1; min-width: 80px;">
-              <input type="number" class="valor-custo-nota" placeholder="0.00" onkeyup="calcularTotalNota()" style="padding: 6px;">
-            </div>
-            <button class="btn-remover-custo" onclick="removerCustoNota(this)">X</button>
-          `;
+          var area = document.getElementById('area-custos-nota'); var div = document.createElement('div'); div.className = 'linha-custo-extra';
+          div.innerHTML = `<div class="grupo-input" style="flex: 2; min-width: 120px;"><input type="text" placeholder="Ex: Desconto Total, Frete..." style="padding: 6px;"></div><div class="grupo-input" style="flex: 1; min-width: 110px;"><select class="tipo-custo-nota" onchange="calcularTotalNota()" style="padding: 6px;"><option value="+R$">➕ R$ Acréscimo</option><option value="+%">➕ % Acréscimo</option><option value="-R$">➖ R$ Desconto</option><option value="-%">➖ % Desconto</option></select></div><div class="grupo-input" style="flex: 1; min-width: 80px;"><input type="number" class="valor-custo-nota" placeholder="0.00" onkeyup="calcularTotalNota()" style="padding: 6px;"></div><button class="btn-remover-custo" onclick="removerCustoNota(this)">X</button>`;
           area.appendChild(div);
       }
       function removerCustoNota(botao) { botao.parentElement.remove(); calcularTotalNota(); }
 
       function calcularTotalNota() {
-          var somaProdutos = parseFloat(document.getElementById('txtSomaProdutos').getAttribute('data-valor')) || 0;
-          var totalModificadoresGlobais = 0;
-
+          var somaProdutos = parseFloat(document.getElementById('txtSomaProdutos').getAttribute('data-valor')) || 0; var totalModificadoresGlobais = 0;
           var linhasCustos = document.querySelectorAll('#area-custos-nota .linha-custo-extra');
           linhasCustos.forEach(function(linha) {
-              var tipo = linha.querySelector('.tipo-custo-nota').value;
-              var valor = parseFloat(linha.querySelector('.valor-custo-nota').value) || 0;
-              if (tipo === '+R$') { totalModificadoresGlobais += valor; } 
-              else if (tipo === '+%') { totalModificadoresGlobais += somaProdutos * (valor / 100); } 
-              else if (tipo === '-R$') { totalModificadoresGlobais -= valor; } 
-              else if (tipo === '-%') { totalModificadoresGlobais -= somaProdutos * (valor / 100); }
+              var tipo = linha.querySelector('.tipo-custo-nota').value; var valor = parseFloat(linha.querySelector('.valor-custo-nota').value) || 0;
+              if (tipo === '+R$') { totalModificadoresGlobais += valor; } else if (tipo === '+%') { totalModificadoresGlobais += somaProdutos * (valor / 100); } else if (tipo === '-R$') { totalModificadoresGlobais -= valor; } else if (tipo === '-%') { totalModificadoresGlobais -= somaProdutos * (valor / 100); }
           });
-
-          var totalFinalDaNota = somaProdutos + totalModificadoresGlobais;
-          if (totalFinalDaNota < 0) totalFinalDaNota = 0; 
+          var totalFinalDaNota = somaProdutos + totalModificadoresGlobais; if (totalFinalDaNota < 0) totalFinalDaNota = 0; 
           document.getElementById('txtTotalNota').innerText = "R$ " + totalFinalDaNota.toFixed(2).replace('.', ',');
       }
 
       async function salvarEstoqueCompleto() {
-          var fornecedor = document.getElementById('cadFornecedor').value.trim();
-          var nf = document.getElementById('cadNF').value.trim();
-          var totalDaNota = document.getElementById('txtTotalNota').innerText;
+          var fornecedor = document.getElementById('cadFornecedor').value.trim(); var nf = document.getElementById('cadNF').value.trim(); var totalDaNota = document.getElementById('txtTotalNota').innerText;
+          if (listaDeEntradaEstoque.length === 0) { alert("⚠️ A lista está vazia! Adicione os produtos clicando no botão azul primeiro."); return; }
 
-          if (listaDeEntradaEstoque.length === 0) {
-              alert("⚠️ A lista está vazia! Adicione os produtos clicando no botão azul primeiro.");
-              return;
-          }
-
-          // Muda o botão para mostrar que está carregando
-          var btnSalvar = document.querySelector('.btn-salvar-item[onclick="salvarEstoqueCompleto()"]');
-          var textoOriginal = btnSalvar.innerHTML;
-          btnSalvar.innerHTML = "⏳ SALVANDO NA NUVEM...";
-          btnSalvar.disabled = true;
-          btnSalvar.style.opacity = "0.7";
+          var btnSalvar = document.querySelector('.btn-salvar-item[onclick="salvarEstoqueCompleto()"]'); var textoOriginal = btnSalvar.innerHTML;
+          btnSalvar.innerHTML = "⏳ SALVANDO NA NUVEM..."; btnSalvar.disabled = true; btnSalvar.style.opacity = "0.7";
 
           try {
-              // Faz um laço (loop) para salvar cada produto da lista lá no Firebase
               for (let i = 0; i < listaDeEntradaEstoque.length; i++) {
                   let item = listaDeEntradaEstoque[i];
-                  
-                  // Cria uma pasta chamada "produtos" no Firebase e joga os dados dentro
                   await db.collection("produtos").add({
-                      codigo: item.codigo,
-                      nome: item.nome,
-                      detalhesExtras: item.detalhes.replace(/<[^>]*>?/gm, ''), // Tira as tags HTML dos detalhes
-                      quantidade: item.qtd,
-                      custoUnitario: item.custoUnitario,
-                      precoVenda: item.precoVenda,
-                      fornecedor: fornecedor,
-                      notaFiscal: nf,
-                      dataCadastro: firebase.firestore.FieldValue.serverTimestamp() // Pega a data e hora oficial do servidor
+                      codigo: item.codigo, nome: item.nome, detalhesExtras: item.detalhes, quantidade: item.qtd, custoUnitario: item.custoUnitario, precoVenda: item.precoVenda, fornecedor: fornecedor, notaFiscal: nf, dataCadastro: firebase.firestore.FieldValue.serverTimestamp()
                   });
               }
-
-              alert("✅ SUCESSO ABSOLUTO!\n\nOs " + listaDeEntradaEstoque.length + " produtos foram salvos de verdade no seu Banco de Dados!");
-              
-              // Zera a lista e os campos globais após salvar
-              listaDeEntradaEstoque = [];
-              document.getElementById('cadFornecedor').value = "";
-              document.getElementById('cadNF').value = "";
-              document.getElementById('area-custos-nota').innerHTML = "";
-              atualizarTabelaEntradaEstoque();
-
-          } catch (error) {
-              console.error("Erro ao salvar:", error);
-              alert("❌ ERRO AO SALVAR!\nVerifique sua internet. Detalhe: " + error.message);
-          } finally {
-              // Devolve o botão ao estado normal
-              btnSalvar.innerHTML = textoOriginal;
-              btnSalvar.disabled = false;
-              btnSalvar.style.opacity = "1";
-          }
+              alert("✅ SUCESSO ABSOLUTO!\n\nOs " + listaDeEntradaEstoque.length + " produtos foram salvos no Banco de Dados!");
+              listaDeEntradaEstoque = []; document.getElementById('cadFornecedor').value = ""; document.getElementById('cadNF').value = ""; document.getElementById('area-custos-nota').innerHTML = ""; atualizarTabelaEntradaEstoque();
+          } catch (error) { console.error("Erro ao salvar:", error); alert("❌ ERRO AO SALVAR!\nVerifique sua internet. Detalhe: " + error.message);
+          } finally { btnSalvar.innerHTML = textoOriginal; btnSalvar.disabled = false; btnSalvar.style.opacity = "1"; }
       }
 
       // ==========================================
-      // LÓGICA DA LISTAGEM DO ESTOQUE (NUVEM)
+      // NOVA TABELA DE ESTOQUE + ETIQUETAS
       // ==========================================
       function carregarEstoqueGeral() {
           var tbody = document.getElementById('tabelaEstoqueGeral');
-          tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#0d6efd; padding: 20px; font-weight: bold;">⏳ Puxando produtos da nuvem...</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#0d6efd; padding: 20px; font-weight: bold;">⏳ Puxando produtos da nuvem...</td></tr>';
 
           try {
-              // Vai na coleção "produtos" do Firebase e traz todos ordenados por nome
               db.collection("produtos").orderBy("nome").get().then((querySnapshot) => {
                   tbody.innerHTML = "";
-                  
-                  if (querySnapshot.empty) {
-                      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#999; padding: 20px;">Nenhum produto cadastrado no banco de dados.</td></tr>';
-                      return;
-                  }
+                  if (querySnapshot.empty) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#999; padding: 20px;">Nenhum produto cadastrado.</td></tr>'; return; }
 
                   querySnapshot.forEach((doc) => {
-                      var p = doc.data();
-                      var tr = document.createElement('tr');
+                      var p = doc.data(); var tr = document.createElement('tr');
                       
                       tr.innerHTML = `
                           <td>${p.codigo || '-'}</td>
@@ -1140,127 +753,137 @@
                           <td style="font-size: 13px; color: #555;">${p.fornecedor || '-'}</td>
                           <td>R$ ${(p.custoUnitario || 0).toFixed(2).replace('.', ',')}</td>
                           <td style="color:#198754; font-weight:bold; font-size: 16px;">R$ ${(p.precoVenda || 0).toFixed(2).replace('.', ',')}</td>
-                          <td style="font-weight:bold; text-align:center; font-size: 16px; background: #f8f9fa;">
-                              ${p.quantidade || 0}<br>
-                              <button class="btn-acao" onclick="prepararImpressao('${p.codigo}', '${(p.nome || '').replace(/'/g, "\\'")}', ${p.precoVenda})" style="margin-top: 5px; background: #212529; color: white; border: none; font-size: 10px; padding: 5px 8px;">🏷️ IMPRIMIR</button>
+                          <td style="font-weight:bold; text-align:center; font-size: 16px; background: #f8f9fa;">${p.quantidade || 0}</td>
+                          <td style="text-align:center; background:#fff; border-left: 2px solid #dee2e6;">
+                             <label style="font-size:11px; font-weight:bold; color:#333; display:block; cursor:pointer;">
+                               <input type="checkbox" class="chk-etiqueta" data-cod="${p.codigo}" data-nome="${(p.nome || '').replace(/'/g, "\\'")}" data-ref="${(p.detalhesExtras || '').replace(/'/g, "\\'")}" data-preco="${p.precoVenda || 0}" style="width:16px; height:16px; cursor:pointer; vertical-align:middle; margin-bottom: 5px;"> Selecionar
+                             </label>
+                             <input type="number" class="qtd-etiqueta" value="1" title="Quantidade para imprimir" style="width: 45px; padding: 4px; font-size: 13px; text-align: center; border: 1px solid #ccc; border-radius: 4px; font-weight:bold;">
                           </td>
                       `;
                       tbody.appendChild(tr);
                   });
-              }).catch((error) => {
-                  console.error("Erro Firebase:", error);
-                  tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:red; padding: 20px;">❌ Erro de Conexão: ' + error.message + '</td></tr>';
-              });
-          } catch(e) {
-              console.error("Erro Interno:", e);
-              tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:red; padding: 20px;">❌ Erro no Código: ' + e.message + ' (Verifique se as chaves do Firebase foram colocadas no topo)</td></tr>';
-          }
+              }).catch((error) => { console.error("Erro Firebase:", error); tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:red; padding: 20px;">❌ Erro de Conexão.</td></tr>'; });
+          } catch(e) { console.error("Erro Interno:", e); tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:red; padding: 20px;">❌ Erro no Código.</td></tr>'; }
       }
 
       function filtrarEstoque() {
           var termo = document.getElementById('buscaEstoque').value.toLowerCase();
           var linhas = document.querySelectorAll('#tabelaEstoqueGeral tr');
-          
           linhas.forEach(function(linha) {
-              if(linha.innerText.toLowerCase().includes(termo)) {
-                  linha.style.display = '';
-              } else {
-                  linha.style.display = 'none';
-              }
+              if(linha.innerText.toLowerCase().includes(termo)) { linha.style.display = ''; } else { linha.style.display = 'none'; }
           });
       }
-      
+
       // ==========================================
-      // LÓGICA DAS TAXAS DA MAQUININHA
+      // O NOVO "CÉREBRO" DAS ETIQUETAS
       // ==========================================
+      function imprimirEmMassa() {
+          let caixinhasMarcadas = document.querySelectorAll('.chk-etiqueta:checked');
+          if (caixinhasMarcadas.length === 0) {
+              alert('⚠️ Opa! Você precisa marcar pelo menos um produto na tabela lá embaixo para poder imprimir!');
+              return;
+          }
+
+          // Lê o que você configurou no painel
+          let confNome = document.getElementById('confEtiqNome').checked;
+          let confRef = document.getElementById('confEtiqRef').checked;
+          let confVista = document.getElementById('confEtiqVista').checked;
+          let confCartao = document.getElementById('confEtiqCartao').checked;
+
+          // Se marcou Cartão, pega a taxa do banco de dados (Visa 1x como padrão)
+          let taxaAplicada = 0;
+          if (confCartao) {
+              let taxasSalvas = JSON.parse(localStorage.getItem('taxasMaquininhaLOJA')) || {};
+              taxaAplicada = parseFloat(taxasSalvas['visa_1']) || 0; 
+          }
+
+          let area = document.getElementById('area-impressao');
+          area.innerHTML = ''; 
+          let codigosParaDesenhar = [];
+          let contadorGeral = 0;
+
+          // Passa por cada produto que você marcou
+          caixinhasMarcadas.forEach(chk => {
+              let codigoRaw = chk.getAttribute('data-cod');
+              let nome = chk.getAttribute('data-nome');
+              let ref = chk.getAttribute('data-ref');
+              let precoVista = parseFloat(chk.getAttribute('data-preco')) || 0;
+              let qtdEtiq = parseInt(chk.nextElementSibling.value) || 1;
+
+              // Ignora se não tiver código de barras
+              if (!codigoRaw || codigoRaw === '-' || codigoRaw === "") return;
+
+              let codigoLimpo = codigoRaw.replace(/\*/g, '');
+              let txtPrecoVista = precoVista.toFixed(2).replace('.', ',');
+              let txtPrecoCartao = (precoVista + (precoVista * (taxaAplicada / 100))).toFixed(2).replace('.', ',');
+
+              // Monta o "Miolo" da Etiqueta de acordo com suas configurações
+              let mioloHTML = '';
+              if (confNome) mioloHTML += `<h4>${nome}</h4>`;
+              if (confRef && ref !== '') mioloHTML += `<div class="detalhes-eti">${ref}</div>`;
+              
+              if (confVista && confCartao) {
+                  mioloHTML += `<p style="font-size:13px; margin-bottom:1px;">R$ ${txtPrecoVista} <span style="font-size:9px; font-weight:normal;">(Din/Pix)</span></p>`;
+                  mioloHTML += `<p style="font-size:13px; margin-bottom:2px;">💳 R$ ${txtPrecoCartao} <span style="font-size:9px; font-weight:normal;">(1x C.C)</span></p>`;
+              } else if (confVista) {
+                  mioloHTML += `<p>R$ ${txtPrecoVista}</p>`;
+              } else if (confCartao) {
+                  mioloHTML += `<p>💳 R$ ${txtPrecoCartao} <span style="font-size:9px; font-weight:normal;">(Cartão)</span></p>`;
+              }
+
+              // Multiplica a etiqueta pela quantidade que você digitou na caixinha
+              for (let i = 0; i < qtdEtiq; i++) {
+                  let tagId = `barcode-lote-${contadorGeral}`;
+                  let div = document.createElement('div');
+                  div.className = 'etiqueta';
+                  div.innerHTML = `${mioloHTML}<svg id="${tagId}"></svg>`;
+                  area.appendChild(div);
+                  
+                  codigosParaDesenhar.push({ id: tagId, code: codigoLimpo });
+                  contadorGeral++;
+              }
+          });
+
+          if (codigosParaDesenhar.length === 0) {
+              alert('Nenhum item selecionado possui Código de Barras cadastrado para gerar a etiqueta!');
+              return;
+          }
+
+          // O "Desenhista" pinta todos os códigos de barras de uma vez só
+          codigosParaDesenhar.forEach(item => {
+              JsBarcode(`#${item.id}`, item.code, {
+                  format: "CODE39",
+                  width: 1.5,
+                  height: 35,
+                  displayValue: true,
+                  fontSize: 12,
+                  margin: 0
+              });
+          });
+
+          // Abre a tela de impressão do Windows
+          setTimeout(() => { 
+              window.print(); 
+              setTimeout(() => { area.innerHTML = ''; }, 1000); // Esconde as etiquetas dps que você imprime
+          }, 500);
+      }
+
       function carregarTabelaTaxas() {
-          let tbody = document.getElementById('corpoTabelaTaxas');
-          let html = '';
-          // Puxa as taxas salvas na memória do navegador do cliente
+          let tbody = document.getElementById('corpoTabelaTaxas'); let html = '';
           let taxasSalvas = JSON.parse(localStorage.getItem('taxasMaquininhaLOJA')) || {};
           let linhas = ['Débito', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
-          
           linhas.forEach(linha => {
-              let valVisa = taxasSalvas[`visa_${linha}`] || '';
-              let valElo = taxasSalvas[`elo_${linha}`] || '';
-              let valLink = taxasSalvas[`link_${linha}`] || '';
-              
-              let label = linha === 'Débito' ? 'DÉBITO' : linha;
-              let bgLink = linha === 'Débito' ? 'background:#e9ecef; cursor:not-allowed;' : '';
-              let lockLink = linha === 'Débito' ? 'disabled' : '';
-              
-              html += `<tr>
-                  <td style="font-weight:bold; text-align:center;">${label}</td>
-                  <td><input type="number" id="taxa_visa_${linha}" value="${valVisa}" placeholder="0.00" class="input-opcao" style="margin:0; text-align:center; border: 1px solid #ccc;"></td>
-                  <td><input type="number" id="taxa_elo_${linha}" value="${valElo}" placeholder="0.00" class="input-opcao" style="margin:0; text-align:center; border: 1px solid #ccc;"></td>
-                  <td><input type="number" id="taxa_link_${linha}" value="${valLink}" placeholder="0.00" class="input-opcao" style="margin:0; text-align:center; border: 1px solid #ccc; ${bgLink}" ${lockLink}></td>
-              </tr>`;
+              let valVisa = taxasSalvas[`visa_${linha}`] || ''; let valElo = taxasSalvas[`elo_${linha}`] || ''; let valLink = taxasSalvas[`link_${linha}`] || '';
+              let label = linha === 'Débito' ? 'DÉBITO' : linha; let bgLink = linha === 'Débito' ? 'background:#e9ecef; cursor:not-allowed;' : ''; let lockLink = linha === 'Débito' ? 'disabled' : '';
+              html += `<tr><td style="font-weight:bold; text-align:center;">${label}</td><td><input type="number" id="taxa_visa_${linha}" value="${valVisa}" placeholder="0.00" class="input-opcao" style="margin:0; text-align:center; border: 1px solid #ccc;"></td><td><input type="number" id="taxa_elo_${linha}" value="${valElo}" placeholder="0.00" class="input-opcao" style="margin:0; text-align:center; border: 1px solid #ccc;"></td><td><input type="number" id="taxa_link_${linha}" value="${valLink}" placeholder="0.00" class="input-opcao" style="margin:0; text-align:center; border: 1px solid #ccc; ${bgLink}" ${lockLink}></td></tr>`;
           });
           tbody.innerHTML = html;
       }
-
       function salvarTaxasMaquininha() {
-          let taxas = {};
-          let linhas = ['Débito', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
-          
-          linhas.forEach(linha => {
-              taxas[`visa_${linha}`] = document.getElementById(`taxa_visa_${linha}`).value;
-              taxas[`elo_${linha}`] = document.getElementById(`taxa_elo_${linha}`).value;
-              if(linha !== 'Débito') {
-                  taxas[`link_${linha}`] = document.getElementById(`taxa_link_${linha}`).value;
-              }
-          });
-          
-          // Salva na memória do navegador do lojista
-          localStorage.setItem('taxasMaquininhaLOJA', JSON.stringify(taxas));
-          alert("✅ TAXAS ATUALIZADAS!\n\nAs taxas foram salvas com sucesso. O sistema agora usará esses valores para calcular os preços de venda.");
-      }
-
-      // ==========================================
-      // GERADOR DE ETIQUETAS
-      // ==========================================
-      function prepararImpressao(codigo, nome, preco) {
-          if (!codigo || codigo === '-' || codigo === "") { 
-              alert('❌ Este item não tem código de barras cadastrado!'); 
-              return; 
-          }
-          
-          let qtd = prompt("🏷️ Quantas etiquetas você quer imprimir para: " + nome + "?", "1");
-          
-          if (qtd && parseInt(qtd) > 0) {
-              let area = document.getElementById('area-impressao');
-              area.innerHTML = ''; // Limpa a folha
-              
-              let formatado = parseFloat(preco).toFixed(2).replace('.', ',');
-              let codigoLimpo = codigo.replace(/\*/g, ''); // Tira os asteriscos pro gerador
-              
-              // 1. Cria os quadradinhos das etiquetas no HTML
-              for(let i = 0; i < parseInt(qtd); i++) {
-                  let div = document.createElement('div');
-                  div.className = 'etiqueta';
-                  div.innerHTML = `<h4>${nome}</h4><p>R$ ${formatado}</p><svg id="barcode-${codigoLimpo}-${i}"></svg>`;
-                  area.appendChild(div);
-              }
-              
-              // 2. Chama o "desenhista" para pintar o código de barras dentro de cada quadrado
-              for(let i = 0; i < parseInt(qtd); i++) {
-                  JsBarcode(`#barcode-${codigoLimpo}-${i}`, codigoLimpo, {
-                      format: "CODE39",
-                      width: 1.5,
-                      height: 40,
-                      displayValue: true,
-                      fontSize: 12,
-                      margin: 0
-                  });
-              }
-              
-              // 3. Abre a janela nativa de impressão do Windows/Navegador
-              setTimeout(() => { 
-                  window.print(); 
-                  // Depois que fechar a aba de impressão, limpa as etiquetas invisíveis para não bugar o sistema
-                  setTimeout(() => { area.innerHTML = ''; }, 1000);
-              }, 500);
-          }
+          let taxas = {}; let linhas = ['Débito', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
+          linhas.forEach(linha => { taxas[`visa_${linha}`] = document.getElementById(`taxa_visa_${linha}`).value; taxas[`elo_${linha}`] = document.getElementById(`taxa_elo_${linha}`).value; if(linha !== 'Débito') { taxas[`link_${linha}`] = document.getElementById(`taxa_link_${linha}`).value; } });
+          localStorage.setItem('taxasMaquininhaLOJA', JSON.stringify(taxas)); alert("✅ TAXAS ATUALIZADAS!\n\nAs taxas foram salvas com sucesso.");
       }
     </script>
   </body>
