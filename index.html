@@ -510,7 +510,7 @@
       </div>
     </div>
 
-    <!-- ================= SCRIPTS GERAIS ================= -->
+    <!-- ================= SCRIPTS ================= -->
     <script>
       let camposDinamicosLoja = JSON.parse(localStorage.getItem('camposDinamicosLOJA')) || [];
 
@@ -548,7 +548,6 @@
           document.getElementById(idDaTela).classList.remove('tela-oculta'); 
           
           if(idDaTela === 'tela-caixa') { setTimeout(function(){ document.getElementById('codigoBarra').focus(); }, 100); } 
-          // Atualiza a prévia e a lista ao entrar na tela de etiquetas
           if(idDaTela === 'tela-etiquetas') { carregarListaEtiquetas(); setTimeout(atualizarPrevia, 200); }
       }
 
