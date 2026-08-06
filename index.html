@@ -5,16 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Sistema de Gestão - PDV</title>
     
-    <!-- MOTORES DO LEITOR E DA ETIQUETA -->
+    <!-- ========================================== -->
+    <!-- MOTORES E BIBLIOTECAS (FALTOU ISSO AQUI!)  -->
+    <!-- ========================================== -->
     <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2/dist/quagga.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
-    
-    <!-- MOTORES DO BANCO DE DADOS (FIREBASE) -->
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
     
     <style>
       body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #e9ecef; margin: 0; padding: 10px; display: flex; justify-content: center; flex-direction: column; align-items: center;}
+      
+      /* ========================================== */
+      /* LAYOUT DE IMPRESSÃO (GRID AVANÇADO)        */
+      /* ========================================== */
+      @media print {
+        body * { visibility: hidden; }
+        #area-impressao, #area-impressao * { visibility: visible; }
+        #area-impressao { position: absolute; left: 0; top: 0; width: 100%; }
+        
+        .etiqueta { border: 1px dashed #999; padding: 5px; text-align: center; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box; page-break-inside: avoid; overflow: hidden; background: white;}
+        .etiqueta h4 { margin: 0 0 2px 0; font-size: 11px; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #000; }
+        .etiqueta p { font-size: 14px; font-weight: bold; margin: 0 0 2px 0; color: #000; line-height: 1.1; }
+        .etiqueta .detalhes-eti { font-size: 9px; font-weight: normal; color: #333; margin-bottom: 3px; line-height: 1.1; }
+        .etiqueta svg { width: 100%; max-height: 35px; margin-top: auto;}
+      }
+
+      /* ========================================== */
+      /* ESTILOS GERAIS E OCULTAÇÃO                 */
+      /* ========================================== */
       .tela-oculta { display: none !important; }
       
       /* ========================================== */
@@ -38,11 +57,12 @@
       .cartao-menu:hover { transform: translateY(-5px); border-color: #0d6efd; box-shadow: 0 6px 15px rgba(13, 110, 253, 0.2); }
       .cartao-menu i { font-size: 40px; margin-bottom: 15px; display: block; font-style: normal; }
       .cartao-menu h3 { margin: 0; font-size: 18px; color: #333; border-bottom: none; padding-bottom: 0;}
+      
       .btn-voltar-menu { background: #6c757d; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-bottom: 15px; align-self: flex-start; transition: 0.2s; }
       .btn-voltar-menu:hover { background: #5a6268; }
 
       /* ========================================== */
-      /* ESTILOS DE CAIXA E ESTOQUE MANTIDOS        */
+      /* CAIXA E ESTOQUE (Estilos Mantidos)         */
       /* ========================================== */
       #tela-caixa, #tela-etiquetas { width: 100%; max-width: 1200px; display: flex; flex-direction: column; }
       .pdv-container { display: flex; gap: 15px; width: 100%; height: 90vh; }
@@ -95,6 +115,9 @@
       .box-qtd { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
       .texto-qtd { font-size: 16px; font-weight: bold; color: #0d6efd; min-width: 20px; text-align: center; }
 
+      /* ========================================== */
+      /* TELAS ESTOQUE E MODAL GERAL                */
+      /* ========================================== */
       #tela-estoque { width: 100%; max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; }
       .cabecalho-estoque { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid #ccc; padding-bottom: 10px;}
       .bloco-form { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 15px; border-left: 5px solid #0d6efd; }
@@ -512,6 +535,20 @@
 
     <!-- ================= SCRIPTS ================= -->
     <script>
+      // CHAVES DO FIREBASE
+      const firebaseConfig = {
+        apiKey: "AIzaSyB-Kreopb61NBKGzTBtoLNHMXkdgFQGFJw",
+        authDomain: "elevapdv.firebaseapp.com",
+        projectId: "elevapdv",
+        storageBucket: "elevapdv.firebasestorage.app",
+        messagingSenderId: "40744075384",
+        appId: "1:40744075384:web:10a256e9d0a99c7dcb6d8d",
+        measurementId: "G-M3VMTF7SV4"
+      };
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore();
+    </script>
+    <script>
       let camposDinamicosLoja = JSON.parse(localStorage.getItem('camposDinamicosLOJA')) || [];
 
       window.onload = function() {
@@ -535,7 +572,6 @@
 
       function fazerLogin() { var email = document.getElementById("emailLogin").value.trim(); var senha = document.getElementById("senhaLogin").value.trim(); var lembrar = document.getElementById("lembrarCheck").checked; var msg = document.getElementById("msgLogin"); if (email === USUARIO_CORRETO && senha === SENHA_CORRETA) { msg.style.display = "none"; if (lembrar) { localStorage.setItem("lembrarLogin", "sim"); localStorage.setItem("emailSalvo", email); localStorage.setItem("senhaSalva", senha); } else { localStorage.clear(); } abrirTela('tela-menu'); } else { msg.style.display = "block"; } }
       function fazerLogout() { abrirTela('tela-login'); document.getElementById("senhaLogin").value = ""; }
-      
       function abrirTela(idDaTela) { 
           document.getElementById('tela-login').classList.add('tela-oculta'); 
           document.getElementById('tela-menu').classList.add('tela-oculta'); 
@@ -546,8 +582,8 @@
           if(document.getElementById('tela-etiquetas')) document.getElementById('tela-etiquetas').classList.add('tela-oculta');
           
           document.getElementById(idDaTela).classList.remove('tela-oculta'); 
-          
           if(idDaTela === 'tela-caixa') { setTimeout(function(){ document.getElementById('codigoBarra').focus(); }, 100); } 
+          
           if(idDaTela === 'tela-etiquetas') { carregarListaEtiquetas(); setTimeout(atualizarPrevia, 200); }
       }
 
@@ -749,7 +785,7 @@
       }
 
       // ==========================================
-      // LÓGICA DA LISTAGEM DO ESTOQUE (LIMPA)
+      // LÓGICA DA LISTAGEM DO ESTOQUE
       // ==========================================
       function carregarEstoqueGeral() {
           var tbody = document.getElementById('tabelaEstoqueGeral');
@@ -840,76 +876,17 @@
           linhas.forEach(function(linha) { if(linha.innerText.toLowerCase().includes(termo)) { linha.style.display = ''; } else { linha.style.display = 'none'; } });
       }
 
-      // NOVO MOTOR DE CSS: APLICA O MESMO ESTILO NA TELA E NA IMPRESSORA
-      function atualizarEstilosDinamicos() {
+      // FUNÇÃO QUE GERA A PRÉVIA NA TELA
+      function atualizarPrevia() {
+          let loja = document.getElementById('etiqLoja').value.trim();
+          let fLoja = parseInt(document.getElementById('etiqFonteLoja').value) || 10;
           let w = parseFloat(document.getElementById('etiqLargura').value) || 4.8;
           let h = parseFloat(document.getElementById('etiqAltura').value) || 3.5;
           let fTit = parseInt(document.getElementById('etiqFonteTit').value) || 11;
           let fPre = parseInt(document.getElementById('etiqFontePre').value) || 14;
           let barAlt = parseInt(document.getElementById('etiqBarraAlt').value) || 35;
+          let barLarg = parseFloat(document.getElementById('etiqBarraLarg').value) || 1.5;
           
-          let colunas = parseInt(document.getElementById('etiqColunas').value) || 2;
-          let gapX = parseFloat(document.getElementById('etiqGapX').value) || 0.2;
-          let gapY = parseFloat(document.getElementById('etiqGapY').value) || 0.2;
-
-          let style = document.getElementById('css-dinamico-etiquetas');
-          if (!style) {
-              style = document.createElement('style');
-              style.id = 'css-dinamico-etiquetas';
-              document.head.appendChild(style);
-          }
-          
-          style.innerHTML = `
-              .etiqueta-box {
-                  width: ${w}cm !important;
-                  height: ${h}cm !important;
-                  padding: 4px !important;
-                  text-align: center !important;
-                  display: flex !important;
-                  flex-direction: column !important;
-                  justify-content: flex-start !important;
-                  align-items: center !important;
-                  box-sizing: border-box !important;
-                  overflow: hidden !important;
-                  background: white !important;
-                  color: #000 !important;
-                  font-family: Arial, sans-serif !important;
-              }
-              #box-previa .etiqueta-box {
-                  border: 1px dashed #999 !important; /* Pontilhado só na tela */
-              }
-              .etiqueta-box h4 { margin: 0 0 2px 0 !important; font-size: ${fTit}px !important; text-transform: uppercase !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; font-weight: bold !important; color: #000 !important; }
-              .etiqueta-box .detalhes-eti { font-size: 9px !important; font-weight: normal !important; color: #333 !important; margin-bottom: 2px !important; line-height: 1.1 !important; }
-              .etiqueta-box p { font-size: ${fPre}px !important; font-weight: bold !important; margin: 0 0 2px 0 !important; line-height: 1.1 !important; color: #000 !important; }
-              .etiqueta-box p.preco-menor { font-size: ${fPre - 2}px !important; margin-bottom: 1px !important; }
-              
-              /* O pulo do gato: A imagem 100% de largura pra esticar nativamente */
-              .etiqueta-box img.barcode { width: 100% !important; height: ${barAlt}px !important; object-fit: contain !important; margin-top: auto !important; }
-
-              @media print {
-                  @page { margin: 0; }
-                  body { margin: 0; background: white; padding: 0; }
-                  body * { visibility: hidden; }
-                  #area-impressao, #area-impressao * { visibility: visible; }
-                  #area-impressao {
-                      position: absolute; left: 0; top: 0;
-                      display: grid !important;
-                      grid-template-columns: repeat(${colunas}, ${w}cm) !important;
-                      column-gap: ${gapX}cm !important;
-                      row-gap: ${gapY}cm !important;
-                      justify-content: start !important;
-                      align-content: start !important;
-                      padding: 0 !important; margin: 0 !important;
-                      width: 100% !important;
-                  }
-                  .etiqueta-box { border: none !important; }
-              }
-          `;
-      }
-
-      function gerarMioloEtiqueta(nome, ref, precoBase) {
-          let loja = document.getElementById('etiqLoja').value.trim();
-          let fLoja = parseInt(document.getElementById('etiqFonteLoja').value) || 10;
           let confNome = document.getElementById('etiqChkNome').checked;
           let confRef = document.getElementById('etiqChkRef').checked;
           let confVista = document.getElementById('etiqChkVista').checked;
@@ -922,54 +899,94 @@
               taxaAplicada = parseFloat(taxasSalvas['visa_' + parcelasSimuladas]) || 0; 
           }
 
+          let precoBase = 129.90; // Preço fictício só para a prévia
           let txtPrecoVista = precoBase.toFixed(2).replace('.', ',');
           let txtPrecoCartao = (precoBase + (precoBase * (taxaAplicada / 100))).toFixed(2).replace('.', ',');
 
-          let html = '';
-          if (loja !== '') html += `<div style="font-size:${fLoja}px; font-weight:bold; margin-bottom:2px; text-transform:uppercase; color:#000;">${loja}</div>`;
-          if (confNome) html += `<h4>${nome}</h4>`;
-          if (confRef && ref !== '') html += `<div class="detalhes-eti">${ref}</div>`;
+          let mioloHTML = '';
+          if (loja !== '') mioloHTML += `<div style="font-size:${fLoja}px; font-weight:bold; margin-bottom:2px; text-transform:uppercase;">${loja}</div>`;
+          if (confNome) mioloHTML += `<h4 style="margin: 0 0 2px 0; font-size: ${fTit}px !important; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #000;">PRODUTO EXEMPLO</h4>`;
+          if (confRef) mioloHTML += `<div class="detalhes-eti" style="font-size: 9px; font-weight: normal; color: #333; margin-bottom: 3px; line-height: 1.1;">Tam: M - Cor: Azul</div>`;
           
           if (confVista && confCartao) {
-              html += `<p class="preco-menor">R$ ${txtPrecoVista} <span style="font-size:9px; font-weight:normal;">(Din/Pix)</span></p>`;
-              html += `<p style="margin-bottom:2px;">💳 R$ ${txtPrecoCartao} <span style="font-size:9px; font-weight:normal;">(${parcelasSimuladas}x C.C)</span></p>`;
+              mioloHTML += `<p style="font-size:${fPre - 2}px !important; font-weight: bold; margin: 0 0 1px 0; color: #000; line-height: 1.1;">R$ ${txtPrecoVista} <span style="font-size:9px; font-weight:normal;">(Din/Pix)</span></p>`;
+              mioloHTML += `<p style="font-size:${fPre - 2}px !important; font-weight: bold; margin: 0 0 2px 0; color: #000; line-height: 1.1;">💳 R$ ${txtPrecoCartao} <span style="font-size:9px; font-weight:normal;">(${parcelasSimuladas}x C.C)</span></p>`;
           } else if (confVista) {
-              html += `<p>R$ ${txtPrecoVista}</p>`;
+              mioloHTML += `<p style="font-size:${fPre}px !important; font-weight: bold; margin: 0 0 2px 0; color: #000; line-height: 1.1;">R$ ${txtPrecoVista}</p>`;
           } else if (confCartao) {
-              html += `<p>💳 R$ ${txtPrecoCartao} <span style="font-size:9px; font-weight:normal;">(${parcelasSimuladas}x Cartão)</span></p>`;
+              mioloHTML += `<p style="font-size:${fPre}px !important; font-weight: bold; margin: 0 0 2px 0; color: #000; line-height: 1.1;">💳 R$ ${txtPrecoCartao} <span style="font-size:9px; font-weight:normal;">(${parcelasSimuladas}x Cartão)</span></p>`;
           }
-          return html;
-      }
 
-      function atualizarPrevia() {
-          atualizarEstilosDinamicos();
-          let barAlt = parseInt(document.getElementById('etiqBarraAlt').value) || 35;
-          let barLarg = parseFloat(document.getElementById('etiqBarraLarg').value) || 1.5;
-          
-          let mioloHTML = gerarMioloEtiqueta("PRODUTO EXEMPLO", "Tam: M - Cor: Azul", 129.90);
-          
           let previewBox = document.getElementById('box-previa');
           previewBox.innerHTML = `
-              <div class="etiqueta-box">
+              <div style="width: ${w}cm; height: ${h}cm; border: 1px dashed #999; padding: 5px; text-align: center; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box; background: white; overflow: hidden;">
                   ${mioloHTML}
-                  <img id="barcode-preview" class="barcode">
+                  <svg id="barcode-preview" style="width: 100%; max-height: ${barAlt}px; margin-top: auto;"></svg>
               </div>
           `;
 
-          // Desenha usando o JsBarcode injetando numa Tag IMG! 
-          // O código "1001" é para ficar fiel aos códigos curtos do seu banco.
-          JsBarcode("#barcode-preview", "1001", {
-              format: "CODE128", width: barLarg, height: barAlt, displayValue: true, fontSize: 12, margin: 0
+          // Desenha o código de barras com a Escala escolhida
+          JsBarcode("#barcode-preview", "123456789", {
+              format: "CODE39", width: barLarg, height: barAlt, displayValue: true, fontSize: 10, margin: 0
           });
       }
 
+      // FUNÇÃO DE IMPRESSÃO EM MASSA
       function gerarImpressaoEtiquetas() {
-          atualizarEstilosDinamicos(); // Garante que as colunas e larguras estão ok
-          let barAlt = parseInt(document.getElementById('etiqBarraAlt').value) || 35;
-          let barLarg = parseFloat(document.getElementById('etiqBarraLarg').value) || 1.5;
-
           let area = document.getElementById('area-impressao');
           area.innerHTML = ''; 
+
+          let loja = document.getElementById('etiqLoja').value.trim();
+          let fLoja = parseInt(document.getElementById('etiqFonteLoja').value) || 10;
+          let w = parseFloat(document.getElementById('etiqLargura').value) || 4.8;
+          let h = parseFloat(document.getElementById('etiqAltura').value) || 3.5;
+          let fTit = parseInt(document.getElementById('etiqFonteTit').value) || 11;
+          let fPre = parseInt(document.getElementById('etiqFontePre').value) || 14;
+          let barAlt = parseInt(document.getElementById('etiqBarraAlt').value) || 35;
+          let barLarg = parseFloat(document.getElementById('etiqBarraLarg').value) || 1.5;
+          
+          let colunas = parseInt(document.getElementById('etiqColunas').value) || 1;
+          let gapX = parseFloat(document.getElementById('etiqGapX').value) || 0;
+          let gapY = parseFloat(document.getElementById('etiqGapY').value) || 0;
+
+          let confNome = document.getElementById('etiqChkNome').checked;
+          let confRef = document.getElementById('etiqChkRef').checked;
+          let confVista = document.getElementById('etiqChkVista').checked;
+          let confCartao = document.getElementById('etiqChkCartao').checked;
+          let parcelasSimuladas = document.getElementById('etiqParcelas').value;
+
+          let taxaAplicada = 0;
+          if (confCartao) {
+              let taxasSalvas = JSON.parse(localStorage.getItem('taxasMaquininhaLOJA')) || {};
+              taxaAplicada = parseFloat(taxasSalvas['visa_' + parcelasSimuladas]) || 0; 
+          }
+
+          let estiloDinamico = document.createElement('style');
+          estiloDinamico.innerHTML = `
+              @media print {
+                  @page { margin: 0; } 
+                  body { margin: 0; }
+                  #area-impressao {
+                      display: grid !important;
+                      grid-template-columns: repeat(${colunas}, ${w}cm) !important;
+                      column-gap: ${gapX}cm !important;
+                      row-gap: ${gapY}cm !important;
+                      justify-content: start !important;
+                      align-content: start !important;
+                      padding: 0 !important;
+                      margin: 0 !important;
+                  }
+                  .etiqueta { 
+                      width: ${w}cm !important; 
+                      height: ${h}cm !important; 
+                      margin: 0 !important; 
+                      border: none !important; 
+                  }
+                  .etiqueta h4 { font-size: ${fTit}px !important; }
+                  .etiqueta p { font-size: ${fPre}px !important; }
+              }
+          `;
+          area.appendChild(estiloDinamico);
 
           let codigosParaDesenhar = [];
           let contadorGeral = 0;
@@ -987,15 +1004,28 @@
 
                   let codigoLimpo = codigoRaw.replace(/\*/g, '');
                   let precoBase = parseFloat(p.precoVenda) || 0;
+                  let txtPrecoVista = precoBase.toFixed(2).replace('.', ',');
+                  let txtPrecoCartao = (precoBase + (precoBase * (taxaAplicada / 100))).toFixed(2).replace('.', ',');
+
+                  let mioloHTML = '';
+                  if (loja !== '') mioloHTML += `<div style="font-size:${fLoja}px; font-weight:bold; margin-bottom:2px; text-transform:uppercase;">${loja}</div>`;
+                  if (confNome) mioloHTML += `<h4>${p.nome}</h4>`;
+                  if (confRef && p.detalhesExtras && p.detalhesExtras.trim() !== '') mioloHTML += `<div class="detalhes-eti">${p.detalhesExtras}</div>`;
                   
-                  let mioloHTML = gerarMioloEtiqueta(p.nome, (p.detalhesExtras || ''), precoBase);
+                  if (confVista && confCartao) {
+                      mioloHTML += `<p style="font-size:${fPre - 2}px !important; margin-bottom:1px;">R$ ${txtPrecoVista} <span style="font-size:9px; font-weight:normal;">(Din/Pix)</span></p>`;
+                      mioloHTML += `<p style="margin-bottom:2px;">💳 R$ ${txtPrecoCartao} <span style="font-size:9px; font-weight:normal;">(${parcelasSimuladas}x C.C)</span></p>`;
+                  } else if (confVista) {
+                      mioloHTML += `<p>R$ ${txtPrecoVista}</p>`;
+                  } else if (confCartao) {
+                      mioloHTML += `<p>💳 R$ ${txtPrecoCartao} <span style="font-size:9px; font-weight:normal;">(${parcelasSimuladas}x Cartão)</span></p>`;
+                  }
 
                   for (let j = 0; j < qtdEtiq; j++) {
                       let tagId = `barcode-lote-${contadorGeral}`;
                       let div = document.createElement('div');
-                      div.className = 'etiqueta-box';
-                      // Agora usamos IMG ao invés de SVG, pro navegador não bugar
-                      div.innerHTML = `${mioloHTML}<img id="${tagId}" class="barcode">`;
+                      div.className = 'etiqueta';
+                      div.innerHTML = `${mioloHTML}<svg id="${tagId}"></svg>`;
                       area.appendChild(div);
                       
                       codigosParaDesenhar.push({ id: tagId, code: codigoLimpo });
@@ -1009,7 +1039,7 @@
 
           codigosParaDesenhar.forEach(item => {
               JsBarcode(`#${item.id}`, item.code, {
-                  format: "CODE128", width: barLarg, height: barAlt, displayValue: true, fontSize: 12, margin: 0
+                  format: "CODE39", width: barLarg, height: barAlt, displayValue: true, fontSize: 10, margin: 0
               });
           });
 
