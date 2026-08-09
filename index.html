@@ -133,13 +133,32 @@
       .tag-item span { color: red; cursor: pointer; font-weight: bold; font-size: 16px; }
       .btn-fechar-modal { background: #198754; color: white; width: 100%; padding: 12px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 16px; }
 
+      /* ========================================== */
+      /* LAYOUT MOBILE RESPONSIVO (CELULAR)         */
+      /* ========================================== */
+      .topbar-mobile { display: none; background: #212529; color: white; padding: 15px 20px; justify-content: space-between; align-items: center; width: 100%; box-sizing: border-box; z-index: 100; position: sticky; top: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+      .topbar-mobile h2 { margin: 0; font-size: 20px; color: white; border: none; padding: 0; }
+      .btn-menu-mobile { background: #0d6efd; color: white; border: none; font-size: 24px; padding: 4px 12px; border-radius: 5px; cursor: pointer; }
+      .overlay-menu { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 104; }
+
       @media (max-width: 768px) {
-        body { padding: 5px; background-color: #fff;}
+        body { padding: 0; background-color: #e9ecef;}
+        .app-container { flex-direction: column; }
+        .topbar-mobile { display: flex; }
+        .main-content { padding: 10px; }
         .pdv-container { flex-direction: column; height: auto; gap: 10px; }
         .area-tabela { max-height: 250px; }
-        .sidebar { width: 60px; padding: 10px 5px; }
-        .sidebar-logo span { display: none; }
-        .sidebar-btn { font-size: 0; padding: 15px; justify-content: center; }
+        
+        /* O CÉREBRO DO MENU LATERAL OCULTO (MENU HAMBÚRGUER) */
+        .sidebar { position: fixed; top: 0; left: -300px; width: 260px; height: 100vh; z-index: 105; transition: left 0.3s ease-in-out; }
+        .sidebar.aberta { left: 0; box-shadow: 5px 0 15px rgba(0,0,0,0.5); }
+        .sidebar-logo span { display: inline; }
+        .sidebar-btn { font-size: 15px; padding: 12px 15px; justify-content: flex-start; }
+        
+        /* Desespremendo a tela de estoque */
+        #tela-estoque { height: auto !important; }
+        #tela-estoque > div { flex-direction: column; overflow: visible; height: auto; }
+        #tela-estoque .col-esquerda, #tela-estoque .col-direita { overflow: visible; height: auto; padding-bottom: 10px; }
       }
     </style>
   </head>
@@ -165,6 +184,12 @@
 
     <!-- ================= NOVO APP CONTAINER (SIDEBAR + CONTEÚDO) ================= -->
     <div id="app-container" class="app-container tela-oculta">
+        <!-- BARRA SUPERIOR E FUNDO ESCURO (SÓ APARECEM NO CELULAR) -->
+        <div class="topbar-mobile">
+            <h2>🏪 GESTÃO PDV</h2>
+            <button class="btn-menu-mobile" onclick="toggleMenuMobile()">☰</button>
+        </div>
+        <div id="overlayMenu" class="overlay-menu" onclick="toggleMenuMobile()"></div>
         
         <!-- BARRA LATERAL ESQUERDA -->
         <nav class="sidebar">
@@ -964,6 +989,11 @@
           if(document.getElementById('tela-config-site')) document.getElementById('tela-config-site').classList.add('tela-oculta');
           
           document.getElementById(idDaTela).classList.remove('tela-oculta'); 
+          // MÁGICA MOBILE: Se estiver no celular, fecha o menu automaticamente ao clicar numa tela
+          if (window.innerWidth <= 768) {
+              let sidebar = document.querySelector('.sidebar');
+              if(sidebar.classList.contains('aberta')) toggleMenuMobile();
+          }
           
           if(botaoClicado) {
               let botoes = document.querySelectorAll('.sidebar-btn');
@@ -2867,6 +2897,21 @@
           
           aplicarCoresDosBotoes();
           atualizarTabelaCaixa();
+      }
+      // ==========================================
+      // LÓGICA DO MENU MOBILE (HAMBÚRGUER)
+      // ==========================================
+      function toggleMenuMobile() {
+          let sidebar = document.querySelector('.sidebar');
+          let overlay = document.getElementById('overlayMenu');
+          
+          if(sidebar.classList.contains('aberta')) {
+              sidebar.classList.remove('aberta');
+              overlay.style.display = 'none';
+          } else {
+              sidebar.classList.add('aberta');
+              overlay.style.display = 'block';
+          }
       }
     </script>
   </body>
