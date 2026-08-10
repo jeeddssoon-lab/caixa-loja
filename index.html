@@ -145,9 +145,12 @@
         body { padding: 0; background-color: #e9ecef;}
         .app-container { flex-direction: column; }
         .topbar-mobile { display: flex; }
-        .main-content { padding: 10px; }
+        
+        /* DESTRAVA A ROLAGEM GERAL DA TELA NO CELULAR */
+        .main-content { padding: 10px; justify-content: flex-start !important; }
+        
         .pdv-container { flex-direction: column; height: auto; gap: 10px; }
-        .area-tabela { max-height: 250px; }
+        .area-tabela { max-height: 300px !important; overflow-y: auto !important; }
         
         /* O CÉREBRO DO MENU LATERAL OCULTO (MENU HAMBÚRGUER) */
         .sidebar { position: fixed; top: 0; left: -300px; width: 260px; height: 100vh; z-index: 105; transition: left 0.3s ease-in-out; }
@@ -155,11 +158,10 @@
         .sidebar-logo span { display: inline; }
         .sidebar-btn { font-size: 15px; padding: 12px 15px; justify-content: flex-start; }
         
-        /* CORREÇÃO DA ROLAGEM NA TELA DE ESTOQUE (CELULAR) */
-        #tela-estoque { height: auto !important; }
-        #tela-estoque > div { flex-direction: column !important; overflow: visible !important; height: auto !important; }
-        #tela-estoque > div > div { height: auto !important; overflow: visible !important; padding-bottom: 15px !important; }
-        #tela-estoque .area-tabela { max-height: 350px !important; overflow-y: auto !important; }
+        /* DESTRAVANDO TOTALMENTE A TELA DE ESTOQUE NO CELULAR */
+        #tela-estoque { height: auto !important; overflow: visible !important; }
+        #tela-estoque > div { flex-direction: column !important; overflow: visible !important; height: auto !important; display: flex !important; }
+        #tela-estoque > div > div { height: auto !important; overflow: visible !important; width: 100% !important; min-width: 0 !important; }
       }
     </style>
   </head>
