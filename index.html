@@ -843,6 +843,24 @@
         </main>
     </div> <!-- FIM DO APP CONTAINER -->
 
+    <!-- ================= JANELA MODAL DE EDITAR CATEGORIA ================= -->
+    <div id="modalEditarCategoria" class="modal-overlay">
+      <div class="modal-box" style="max-width: 350px;">
+        <h3 style="margin-top: 0; color: #0d6efd; display: flex; justify-content: space-between;">
+            📁 Mudar Categoria
+            <span style="cursor: pointer; color: #dc3545;" onclick="fecharModalEditarCategoria()">×</span>
+        </h3>
+        <p style="font-size: 14px; font-weight: bold; color: #555; margin-top: -10px; margin-bottom: 20px;" id="txtNomeProdutoEditCat">Produto XYZ</p>
+
+        <label style="font-size: 12px; font-weight: bold; color: #555;">Selecione a nova Categoria:</label>
+        <select id="selectNovaCategoria" style="width: 100%; padding: 12px; border: 2px solid #0d6efd; border-radius: 5px; margin-top: 5px; margin-bottom: 15px; font-size: 15px; background: #f8f9fa; font-weight: bold;">
+            <!-- O sistema vai puxar as categorias automaticamente pra cá -->
+        </select>
+
+        <button class="btn-salvar-item" style="background: #0d6efd;" onclick="salvarNovaCategoriaProduto()">💾 SALVAR ALTERAÇÃO</button>
+      </div>
+    </div>
+
 
     <!-- ================= SCRIPTS ================= -->
      <!-- ================= JANELA MODAL DE REPOSIÇÃO DE ESTOQUE ================= -->
@@ -1727,11 +1745,10 @@
               querySnapshot.forEach((doc) => {
                   var p = doc.data(); var tr = document.createElement('tr');
                   
-                  // Junta todas as URLs das fotos e manda pro visualizador
                   let imgHtml = "";
                   if (p.fotos && p.fotos.length > 0) {
-                      let fotosJuntasStr = p.fotos.join('|||'); // Une as fotos pra mandar no clique
-                      imgHtml = `<img src="${p.fotos[0]}" onclick="ampliarFoto('${fotosJuntasStr}')" style="width: 45px; height: 45px; object-fit: cover; border-radius: 5px; border: 1px solid #ccc; box-shadow: 0 2px 4px rgba(0,0,0,0.1); cursor: pointer;" title="Ver todas as ${p.fotos.length} fotos">
+                      let fotosJuntasStr = p.fotos.join('|||');
+                      imgHtml = `<img src="${p.fotos[0]}" onclick="ampliarFoto('${fotosJuntasStr}')" style="width: 45px; height: 45px; object-fit: cover; border-radius: 5px; border: 1px solid #ccc; box-shadow: 0 2px 4px rgba(0,0,0,0.1); cursor: pointer;" title="Ver todas as fotos">
                                  ${p.fotos.length > 1 ? `<div style="font-size: 9px; text-align: center; color: #0d6efd; font-weight: bold; margin-top: 2px;">+${p.fotos.length - 1}</div>` : ''}`;
                   } else {
                       imgHtml = `<div style="width: 45px; height: 45px; background: #eee; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 16px; border: 1px solid #ddd;">📷</div>`;
@@ -1740,13 +1757,18 @@
                   tr.innerHTML = `
                       <td style="text-align:center; vertical-align:middle;">${imgHtml}</td>
                       <td style="vertical-align:middle; color:#555;">${p.codigo || '-'}</td>
-                      <td style="vertical-align:middle;"><b style="color:#0d6efd; font-size:15px;">${p.nome || '-'}</b> <br><small style="color:#666;">${p.detalhesExtras || ''}</small></td>
+                      <td style="vertical-align:middle;">
+                          <b style="color:#0d6efd; font-size:15px;">${p.nome || '-'}</b> <br>
+                          <small style="color:#666;">${p.detalhesExtras || ''}</small><br>
+                          <span style="background: #e9ecef; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight:bold; color:#555; display:inline-block; margin-top: 3px;">📁 ${p.categoria || 'Geral'}</span>
+                      </td>
                       <td style="font-size: 13px; color: #555; vertical-align:middle;">${p.fornecedor || '-'}</td>
                       <td style="vertical-align:middle;">R$ ${(p.custoUnitario || 0).toFixed(2).replace('.', ',')}</td>
                       <td style="color:#198754; font-weight:bold; font-size: 16px; vertical-align:middle;">R$ ${(p.precoVenda || 0).toFixed(2).replace('.', ',')}</td>
                       <td style="font-weight:bold; text-align:center; font-size: 16px; background: #f8f9fa; vertical-align:middle;">${p.quantidade || 0}</td>
                       <td style="text-align:center; vertical-align:middle;">
-                          <div style="display: flex; justify-content: center; gap: 5px;">
+                          <div style="display: flex; justify-content: center; gap: 5px; flex-wrap: wrap;">
+                              <button class="btn-acao" style="background:#ffc107; color:#000; border:none; padding: 5px 8px; font-size: 13px; margin:0; border-radius: 4px;" onclick="abrirModalEditarCategoria('${doc.id}', '${encodeURIComponent(p.nome || '')}', '${encodeURIComponent(p.categoria || 'Geral')}')" title="Mudar Categoria">📁</button>
                               <button class="btn-acao" style="background:#0d6efd; color:white; border:none; padding: 5px 8px; font-size: 13px; margin:0; border-radius: 4px;" onclick="abrirTrocaDeFoto('${doc.id}')" title="Adicionar ou Trocar Foto">📷</button>
                               <button class="btn-remover" onclick="excluirPecaDoEstoque('${doc.id}')" title="Excluir Peça Definitivamente">❌</button>
                           </div>
@@ -1784,6 +1806,63 @@
           } catch (error) {
               console.error("Erro ao excluir peça:", error);
               alert("❌ ERRO AO EXCLUIR!\n" + error.message);
+          }
+      }
+      // ==========================================
+      // LÓGICA PARA EDITAR CATEGORIA DE PRODUTO EXISTENTE
+      // ==========================================
+      let idProdutoEditandoCategoria = null;
+
+      function abrirModalEditarCategoria(idProduto, nomeEncoded, catEncoded) {
+          idProdutoEditandoCategoria = idProduto;
+          let nomeProduto = decodeURIComponent(nomeEncoded);
+          let categoriaAtual = decodeURIComponent(catEncoded);
+          
+          document.getElementById('txtNomeProdutoEditCat').innerText = "Peça: " + nomeProduto;
+
+          // Mágica: Clona as categorias que o sistema já carregou na tela de estoque
+          let optionsHtml = document.getElementById('cadCategoria').innerHTML;
+          let select = document.getElementById('selectNovaCategoria');
+          select.innerHTML = optionsHtml;
+
+          // Marca a opção correta que a peça já tem
+          let achou = Array.from(select.options).some(opt => opt.value === categoriaAtual);
+          if(achou) {
+              select.value = categoriaAtual;
+          } else {
+              select.value = "Geral";
+          }
+
+          document.getElementById('modalEditarCategoria').style.display = 'flex';
+      }
+
+      function fecharModalEditarCategoria() {
+          document.getElementById('modalEditarCategoria').style.display = 'none';
+          idProdutoEditandoCategoria = null;
+      }
+
+      async function salvarNovaCategoriaProduto() {
+          if (!idProdutoEditandoCategoria) return;
+
+          let novaCategoria = document.getElementById('selectNovaCategoria').value;
+          let btn = document.querySelector('#modalEditarCategoria .btn-salvar-item');
+          let textoOri = btn.innerHTML;
+
+          btn.innerHTML = "⏳ Salvando...";
+          btn.disabled = true;
+
+          try {
+              await db.collection("produtos").doc(idProdutoEditandoCategoria).update({
+                  categoria: novaCategoria
+              });
+              alert("✅ Categoria atualizada na nuvem com sucesso!");
+              fecharModalEditarCategoria();
+              carregarEstoqueGeral(); // Recarrega a tabela para você ver a mudança na hora
+          } catch(e) {
+              alert("❌ Erro ao salvar: " + e.message);
+          } finally {
+              btn.innerHTML = textoOri;
+              btn.disabled = false;
           }
       }
       // ==========================================
