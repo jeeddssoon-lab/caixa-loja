@@ -155,10 +155,11 @@
         .sidebar-logo span { display: inline; }
         .sidebar-btn { font-size: 15px; padding: 12px 15px; justify-content: flex-start; }
         
-        /* Desespremendo a tela de estoque */
+        /* CORREÇÃO DA ROLAGEM NA TELA DE ESTOQUE (CELULAR) */
         #tela-estoque { height: auto !important; }
-        #tela-estoque > div { flex-direction: column; overflow: visible; height: auto; }
-        #tela-estoque .col-esquerda, #tela-estoque .col-direita { overflow: visible; height: auto; padding-bottom: 10px; }
+        #tela-estoque > div { flex-direction: column !important; overflow: visible !important; height: auto !important; }
+        #tela-estoque > div > div { height: auto !important; overflow: visible !important; padding-bottom: 15px !important; }
+        #tela-estoque .area-tabela { max-height: 350px !important; overflow-y: auto !important; }
       }
     </style>
   </head>
