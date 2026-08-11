@@ -143,6 +143,30 @@
 
       @media (max-width: 768px) {
         body { padding: 0; background-color: #e9ecef;}
+        /* === MÁGICA: PLANILHA HORIZONTAL ESPREMIDINHA NO CELULAR === */
+        #tela-lista-itens table, #modalVariacoesEstoque table { width: 100% !important; table-layout: auto !important; }
+        #tela-lista-itens th, #tela-lista-itens td, #modalVariacoesEstoque th, #modalVariacoesEstoque td { 
+            padding: 4px 2px !important; 
+            font-size: 9px !important; 
+            text-align: center !important; 
+            border-bottom: 1px solid #ddd !important;
+            vertical-align: middle !important;
+            white-space: nowrap !important; /* Proíbe o texto de quebrar linha */
+        }
+        /* O nome do produto pode quebrar linha pra não estourar a tela */
+        #tela-lista-itens td:nth-child(3), #modalVariacoesEstoque td:nth-child(3) { 
+            white-space: normal !important; 
+            text-align: left !important; 
+            min-width: 70px !important; 
+            line-height: 1.1 !important; 
+        }
+        /* Encolhe a Foto */
+        #tela-lista-itens img, #modalVariacoesEstoque img { width: 25px !important; height: 25px !important; border-radius: 4px !important;}
+        #tela-lista-itens td > div[style*="width: 50px"], #modalVariacoesEstoque td > div[style*="width: 40px"] { width: 25px !important; height: 25px !important; font-size: 10px !important; border-radius: 4px !important;}
+        /* Encolhe os textos e botões */
+        #tela-lista-itens b, #modalVariacoesEstoque b { font-size: 10px !important; }
+        #tela-lista-itens span, #modalVariacoesEstoque span { font-size: 8px !important; }
+        .btn-acao, .btn-remover { padding: 4px !important; font-size: 9px !important; margin: 1px !important; }
         .app-container { flex-direction: column; }
         .topbar-mobile { display: flex; }
         
@@ -166,6 +190,12 @@
         #tela-estoque > div > div { height: auto !important; overflow: visible !important; width: 100% !important; min-width: 0 !important; display: block !important; }
         #tela-estoque .bloco-form { display: block !important; height: auto !important; }
         #tela-estoque .area-tabela { min-height: 150px !important; max-height: 400px !important; display: block !important; width: 100% !important; }
+        /* ESTICAR A TELA "MEUS ITENS" ATÉ O CHÃO NO CELULAR */
+            #tela-lista-itens { height: calc(100vh - 80px) !important; }
+            #tela-lista-itens .bloco-form { flex: 1 !important; display: flex !important; flex-direction: column !important; margin-bottom: 0 !important; }
+            #tela-lista-itens .area-tabela { max-height: none !important; flex: 1 !important; }
+        
+    
       }
     </style>
   </head>
@@ -1880,56 +1910,32 @@
       function renderizarTabelaEstoqueGeral(listaProdutos) {
           var tbody = document.getElementById('tabelaEstoqueGeral');
           tbody.innerHTML = "";
-          
-          if (listaProdutos.length === 0) { 
-              tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#999; padding: 20px;">Nenhum produto encontrado.</td></tr>'; 
-              return; 
-          }
+          if (listaProdutos.length === 0) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#999; padding: 20px;">Nenhum produto encontrado.</td></tr>'; return; }
 
-          // 1. Agrupar produtos pelo Nome e Categoria
           let agrupamento = {};
           listaProdutos.forEach(p => {
               let chave = (p.nome + "_" + (p.categoria || "Geral")).toUpperCase().trim();
               if (!agrupamento[chave]) {
-                  agrupamento[chave] = {
-                      nome: p.nome,
-                      categoria: p.categoria || 'Geral',
-                      fornecedor: p.fornecedor || '-',
-                      qtdTotal: 0,
-                      fotosTodas: [],
-                      variacoes: []
-                  };
+                  agrupamento[chave] = { nome: p.nome, categoria: p.categoria || 'Geral', fornecedor: p.fornecedor || '-', qtdTotal: 0, fotosTodas: [], variacoes: [] };
               }
               agrupamento[chave].variacoes.push(p);
               agrupamento[chave].qtdTotal += parseInt(p.quantidade || 0);
-              if (p.fotos && p.fotos.length > 0) {
-                  agrupamento[chave].fotosTodas = agrupamento[chave].fotosTodas.concat(p.fotos);
-              }
+              if (p.fotos && p.fotos.length > 0) agrupamento[chave].fotosTodas = agrupamento[chave].fotosTodas.concat(p.fotos);
           });
+          window.estoqueAgrupadoCache = agrupamento; 
 
-          window.estoqueAgrupadoCache = agrupamento; // Guarda os grupos na memória para a janela!
-
-          // 2. Desenhar as linhas Principais no painel
           Object.keys(agrupamento).forEach(chave => {
               let grupo = agrupamento[chave];
-              
               let trPai = document.createElement('tr');
-              trPai.style.background = "#fff";
-              trPai.style.borderBottom = "1px solid #dee2e6";
-              
-              // 👇 NOVA MÁGICA: Deixa a linha inteira clicável e com efeito visual!
-              trPai.style.cursor = "pointer";
-              trPai.style.transition = "0.2s";
-              trPai.onmouseover = function() { this.style.background = "#f1f8ff"; }; // Fica levemente azul ao passar o mouse
+              trPai.style.background = "#fff"; trPai.style.borderBottom = "1px solid #dee2e6";
+              trPai.style.cursor = "pointer"; trPai.style.transition = "0.2s";
+              trPai.onmouseover = function() { this.style.background = "#f1f8ff"; }; 
               trPai.onmouseout = function() { this.style.background = "#fff"; };
-              trPai.onclick = function() { abrirModalVariacoesEstoque(chave); }; // Abre as variações clicando em qualquer lugar
+              trPai.onclick = function() { abrirModalVariacoesEstoque(chave); }; 
               
               let imgPaiHtml = "";
-              if (grupo.fotosTodas.length > 0) {
-                  imgPaiHtml = `<img src="${grupo.fotosTodas[0]}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px; border: 1px solid #ccc; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">`;
-              } else {
-                  imgPaiHtml = `<div style="width: 50px; height: 50px; background: #eee; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; border: 1px solid #ddd;">📷</div>`;
-              }
+              if (grupo.fotosTodas.length > 0) { imgPaiHtml = `<img src="${grupo.fotosTodas[0]}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 5px; border: 1px solid #ccc;">`;
+              } else { imgPaiHtml = `<div style="width: 40px; height: 40px; background: #eee; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 16px; border: 1px solid #ddd;">📷</div>`; }
 
               let primeiraVariacao = grupo.variacoes[0];
               let custoPrincipal = (primeiraVariacao.custoUnitario || 0).toFixed(2).replace('.', ',');
@@ -1937,24 +1943,21 @@
 
               trPai.innerHTML = `
                   <td style="text-align:center; vertical-align:middle;">${imgPaiHtml}</td>
-                  <td style="text-align:center; vertical-align:middle; color:#ccc;">--</td>
+                  <td style="text-align:center; vertical-align:middle; color:#ccc; font-size: 11px;">--</td>
                   <td style="vertical-align:middle;">
-                      <b style="color:#000; font-size:16px;">${grupo.nome}</b> <br>
-                      <span style="background: #e9ecef; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight:bold; color:#555; display:inline-block; margin-top: 3px;">📁 ${grupo.categoria}</span>
-                      <span style="font-size: 12px; color: #0d6efd; font-weight: bold; margin-left: 8px;">(${grupo.variacoes.length} variações)</span>
+                      <b style="color:#000; font-size:13px;">${grupo.nome}</b> <br>
+                      <span style="background: #e9ecef; padding: 2px 4px; border-radius: 4px; font-size: 9px; font-weight:bold; color:#555; display:inline-block; margin-top: 2px;">📁 ${grupo.categoria}</span>
+                      <span style="font-size: 10px; color: #0d6efd; font-weight: bold;">(${grupo.variacoes.length} var)</span>
                   </td>
-                  <td style="font-size: 13px; color: #555; vertical-align:middle;">${grupo.fornecedor}</td>
-                  
-                  <td style="vertical-align:middle; font-size: 13px;">R$ ${custoPrincipal}</td>
-                  <td style="color:#198754; font-weight:bold; font-size: 15px; vertical-align:middle;">R$ ${vendaPrincipal}</td>
-                  
-                  <td style="font-weight:bold; text-align:center; font-size: 18px; vertical-align:middle; color: #198754;">${grupo.qtdTotal}</td>
+                  <td style="font-size: 11px; color: #555; vertical-align:middle; text-align:center;">${grupo.fornecedor}</td>
+                  <td style="vertical-align:middle; font-size: 12px; text-align:center;">R$ ${custoPrincipal}</td>
+                  <td style="color:#198754; font-weight:bold; font-size: 13px; vertical-align:middle; text-align:center;">R$ ${vendaPrincipal}</td>
+                  <td style="font-weight:bold; text-align:center; font-size: 14px; vertical-align:middle; color: #198754;">${grupo.qtdTotal}</td>
                   <td style="text-align:center; vertical-align:middle;">
-                      <div style="display: flex; justify-content: center; gap: 4px; flex-wrap: wrap;">
-                          <!-- O 'event.stopPropagation()' abaixo é o escudo que impede de abrir a linha ao clicar no botão -->
-                          <button class="btn-acao" style="background:#17a2b8; color:white; border:none; padding: 6px 8px; font-size: 12px; margin:0; border-radius: 4px;" onclick="event.stopPropagation(); abrirModalEditarGrupo('${chave}')" title="Editar Informações Principais">✏️</button>
-                          <button class="btn-acao" style="background:#0d6efd; color:white; border:none; padding: 6px 8px; font-size: 12px; margin:0; border-radius: 4px;" onclick="event.stopPropagation(); abrirTrocaDeFoto('${primeiraVariacao.idFirebase}')" title="Trocar Foto Principal do Item">📷</button>
-                          <button class="btn-acao" style="background:#212529; color:white; border:none; padding: 6px 8px; font-size: 12px; margin:0; border-radius: 4px;" onclick="event.stopPropagation(); abrirModalVariacoesEstoque('${chave}')" title="Ver Detalhes e Quantidades">👁️</button>
+                      <div style="display: flex; justify-content: center; gap: 2px; flex-wrap: wrap;">
+                          <button class="btn-acao" style="background:#17a2b8; color:white; border:none; padding: 4px 6px; font-size: 11px; border-radius: 4px;" onclick="event.stopPropagation(); abrirModalEditarGrupo('${chave}')" title="Editar">✏️</button>
+                          <button class="btn-acao" style="background:#0d6efd; color:white; border:none; padding: 4px 6px; font-size: 11px; border-radius: 4px;" onclick="event.stopPropagation(); abrirTrocaDeFoto('${primeiraVariacao.idFirebase}')" title="Foto">📷</button>
+                          <button class="btn-acao" style="background:#212529; color:white; border:none; padding: 4px 6px; font-size: 11px; border-radius: 4px;" onclick="event.stopPropagation(); abrirModalVariacoesEstoque('${chave}')" title="Ver">👁️</button>
                       </div>
                   </td>
               `;
@@ -1966,89 +1969,62 @@
       // 3. Função que abre a Nova Janela de Variações (AGORA COM EDIÇÃO NA MESMA LINHA)
       // 3. Função que abre a Nova Janela de Variações (AGORA COM EDIÇÃO NA MESMA LINHA)
       function abrirModalVariacoesEstoque(chave) {
-          let grupo = window.estoqueAgrupadoCache[chave];
-          if (!grupo) return;
-          
+          let grupo = window.estoqueAgrupadoCache[chave]; if (!grupo) return;
           document.getElementById('tituloModalVariacoesEstoque').innerText = "📦 Variações: " + grupo.nome;
-          let tbodyModal = document.getElementById('tabelaModalVariacoesEstoque');
-          tbodyModal.innerHTML = "";
+          let tbodyModal = document.getElementById('tabelaModalVariacoesEstoque'); tbodyModal.innerHTML = "";
           
           grupo.variacoes.forEach(v => {
               let tr = document.createElement('tr');
-              
               let imgFilhoHtml = "";
-              if (v.fotos && v.fotos.length > 0) {
-                  let fotosJuntasStr = v.fotos.join('|||');
-                  let imgCapa = v.fotoEspecifica ? v.fotoEspecifica : v.fotos[0];
-                  imgFilhoHtml = `<img src="${imgCapa}" onclick="ampliarFoto('${fotosJuntasStr}')" style="width: 40px; height: 40px; object-fit: cover; border-radius: 5px; border: 1px solid #ccc; cursor: pointer;" title="Ver fotos">`;
-              } else {
-                  imgFilhoHtml = `<div style="width: 40px; height: 40px; background: #e9ecef; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 14px; border: 1px solid #ddd;">📷</div>`;
-              }
+              if (v.fotos && v.fotos.length > 0) { let fotosJuntasStr = v.fotos.join('|||'); let imgCapa = v.fotoEspecifica ? v.fotoEspecifica : v.fotos[0]; imgFilhoHtml = `<img src="${imgCapa}" onclick="ampliarFoto('${fotosJuntasStr}')" style="width: 35px; height: 35px; object-fit: cover; border-radius: 5px; border: 1px solid #ccc; cursor: pointer;" title="Ver fotos">`;
+              } else { imgFilhoHtml = `<div style="width: 35px; height: 35px; background: #e9ecef; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 14px; border: 1px solid #ddd;">📷</div>`; }
 
-              // Preparando os valores
-              let corTag = v.cor && v.cor !== '-' ? v.cor : '';
-              let tamTag = v.tamanho && v.tamanho !== '-' ? v.tamanho : '';
-              let custoVal = (v.custoUnitario || 0).toFixed(2);
-              let vendaVal = (v.precoVenda || 0).toFixed(2);
-              let qtdVal = v.quantidade || 0;
+              let corTag = v.cor && v.cor !== '-' ? v.cor : ''; let tamTag = v.tamanho && v.tamanho !== '-' ? v.tamanho : '';
+              let custoVal = (v.custoUnitario || 0).toFixed(2); let vendaVal = (v.precoVenda || 0).toFixed(2); let qtdVal = v.quantidade || 0;
 
               tr.innerHTML = `
                   <td style="text-align:center; vertical-align:middle;">${imgFilhoHtml}</td>
-                  <td style="vertical-align:middle; color:#555; font-size: 12px;">${v.codigo || '-'}</td>
-                  
-                  <td style="vertical-align:middle;">
-                      <!-- MODO VISÃO -->
+                  <td style="text-align:center; vertical-align:middle; color:#555; font-size: 11px;">${v.codigo || '-'}</td>
+                  <td style="vertical-align:middle; line-height:1.1; text-align:left;">
                       <div id="view_detalhes_${v.idFirebase}">
-                          <span style="color:#444; font-size: 13px;">Cor: <b>${corTag || '-'}</b> | Tam: <b>${tamTag || '-'}</b></span><br>
-                          <small style="color:#888;">${v.detalhesExtras || ''}</small>
+                          <span style="color:#444; font-size: 11px;">Cor: <b>${corTag || '-'}</b><br>Tam: <b>${tamTag || '-'}</b></span><br>
+                          <small style="color:#888; font-size: 9px;">${v.detalhesExtras || ''}</small>
                       </div>
-                      <!-- MODO EDIÇÃO -->
-                      <div id="edit_detalhes_${v.idFirebase}" style="display:none; flex-direction:column; gap:4px;">
-                          <input type="text" id="input_cor_${v.idFirebase}" value="${corTag}" placeholder="Cor" style="width: 100px; padding: 4px; font-size: 12px; border: 1px solid #0d6efd; border-radius: 4px; box-sizing: border-box;">
-                          <input type="text" id="input_tam_${v.idFirebase}" value="${tamTag}" placeholder="Tam" style="width: 100px; padding: 4px; font-size: 12px; border: 1px solid #0d6efd; border-radius: 4px; box-sizing: border-box;">
+                      <div id="edit_detalhes_${v.idFirebase}" style="display:none; flex-direction:column; gap:2px;">
+                          <input type="text" id="input_cor_${v.idFirebase}" value="${corTag}" placeholder="Cor" style="width: 60px; padding: 2px; font-size: 10px; border: 1px solid #0d6efd; border-radius: 3px; text-align:center;">
+                          <input type="text" id="input_tam_${v.idFirebase}" value="${tamTag}" placeholder="Tam" style="width: 60px; padding: 2px; font-size: 10px; border: 1px solid #0d6efd; border-radius: 3px; text-align:center;">
                       </div>
                   </td>
-                  
-                  <td style="font-size: 12px; color: #888; vertical-align:middle;">${v.fornecedor || '-'}</td>
-                  
-                  <td style="vertical-align:middle; font-size: 13px;">
+                  <td style="font-size: 11px; color: #888; text-align:center; vertical-align:middle;">${v.fornecedor || '-'}</td>
+                  <td style="text-align:center; vertical-align:middle; font-size: 11px;">
                       <div id="view_custo_${v.idFirebase}">R$ ${custoVal.replace('.', ',')}</div>
                       <div id="edit_custo_${v.idFirebase}" style="display:none;">
-                          <input type="number" id="input_custo_${v.idFirebase}" value="${custoVal}" step="0.01" style="width: 60px; padding: 4px; font-size: 12px; border: 1px solid #0d6efd; border-radius: 4px; box-sizing: border-box;">
+                          <input type="number" id="input_custo_${v.idFirebase}" value="${custoVal}" step="0.01" style="width: 50px; padding: 2px; font-size: 10px; border: 1px solid #0d6efd; border-radius: 3px; text-align:center;">
                       </div>
                   </td>
-                  
-                  <td style="color:#198754; font-weight:bold; font-size: 15px; vertical-align:middle;">
+                  <td style="text-align:center; color:#198754; font-weight:bold; font-size: 12px; vertical-align:middle;">
                       <div id="view_venda_${v.idFirebase}">R$ ${vendaVal.replace('.', ',')}</div>
                       <div id="edit_venda_${v.idFirebase}" style="display:none;">
-                          <input type="number" id="input_venda_${v.idFirebase}" value="${vendaVal}" step="0.01" style="width: 70px; padding: 4px; font-size: 12px; border: 1px solid #198754; border-radius: 4px; font-weight:bold; color:#198754; box-sizing: border-box;">
+                          <input type="number" id="input_venda_${v.idFirebase}" value="${vendaVal}" step="0.01" style="width: 50px; padding: 2px; font-size: 10px; border: 1px solid #198754; border-radius: 3px; font-weight:bold; color:#198754; text-align:center;">
                       </div>
                   </td>
-                  
-                  <td style="font-weight:bold; text-align:center; font-size: 15px; background: #f8f9fa; vertical-align:middle;">
+                  <td style="text-align:center; font-weight:bold; font-size: 13px; background: #f8f9fa; vertical-align:middle;">
                       <div id="view_qtd_${v.idFirebase}">${qtdVal}</div>
                       <div id="edit_qtd_${v.idFirebase}" style="display:none;">
-                          <input type="number" id="input_qtd_${v.idFirebase}" value="${qtdVal}" style="width: 50px; padding: 4px; font-size: 13px; text-align: center; border: 1px solid #0d6efd; border-radius: 4px; font-weight:bold; box-sizing: border-box;">
+                          <input type="number" id="input_qtd_${v.idFirebase}" value="${qtdVal}" style="width: 35px; padding: 2px; font-size: 11px; text-align: center; border: 1px solid #0d6efd; border-radius: 3px; font-weight:bold;">
                       </div>
                   </td>
-                  
                   <td style="text-align:center; vertical-align:middle;">
-                      <div style="display: flex; justify-content: center; gap: 4px; flex-wrap: wrap;" id="botoes_${v.idFirebase}">
-                          <!-- BOTÃO LÁPIS (EDITAR) -->
-                          <button class="btn-acao" id="btn_edit_${v.idFirebase}" style="background:#17a2b8; color:white; border:none; padding: 6px 8px; font-size: 12px; margin:0; border-radius: 4px;" onclick="ativarEdicaoInline('${v.idFirebase}')" title="Editar Informações">✏️</button>
-                          
-                          <!-- BOTÃO DISQUETE (SALVAR) -->
-                          <button class="btn-acao" id="btn_save_${v.idFirebase}" style="background:#198754; color:white; border:none; padding: 6px 12px; font-size: 12px; margin:0; border-radius: 4px; display:none;" onclick="salvarEdicaoInline('${v.idFirebase}', '${chave}')" title="Salvar Alterações">💾 Salvar</button>
-                          
-                          <!-- OUTROS BOTÕES (Sem a pasta amarela) -->
-                          <button class="btn-acao" id="btn_foto_${v.idFirebase}" style="background:#0d6efd; color:white; border:none; padding: 6px 8px; font-size: 12px; margin:0; border-radius: 4px;" onclick="fecharModalVariacoesEstoque(); abrirTrocaDeFoto('${v.idFirebase}');" title="Adicionar ou Trocar Foto">📷</button>
-                          <button class="btn-remover" id="btn_del_${v.idFirebase}" onclick="fecharModalVariacoesEstoque(); excluirPecaDoEstoque('${v.idFirebase}');" title="Excluir Peça Definitivamente" style="padding: 6px 8px; font-size: 12px; border-radius: 4px;">❌</button>
+                      <div style="display: flex; justify-content: center; gap: 2px; flex-wrap: wrap;" id="botoes_${v.idFirebase}">
+                          <button class="btn-acao" id="btn_edit_${v.idFirebase}" style="background:#17a2b8; color:white; border:none; padding: 4px 6px; font-size: 11px; margin:0; border-radius: 4px;" onclick="ativarEdicaoInline('${v.idFirebase}')">✏️</button>
+                          <button class="btn-acao" id="btn_save_${v.idFirebase}" style="background:#198754; color:white; border:none; padding: 4px 6px; font-size: 11px; margin:0; border-radius: 4px; display:none;" onclick="salvarEdicaoInline('${v.idFirebase}', '${chave}')">💾</button>
+                          <button class="btn-acao" id="btn_foto_${v.idFirebase}" style="background:#0d6efd; color:white; border:none; padding: 4px 6px; font-size: 11px; margin:0; border-radius: 4px;" onclick="fecharModalVariacoesEstoque(); abrirTrocaDeFoto('${v.idFirebase}');">📷</button>
+                          <button class="btn-remover" id="btn_del_${v.idFirebase}" onclick="fecharModalVariacoesEstoque(); excluirPecaDoEstoque('${v.idFirebase}');" style="padding: 4px 6px; font-size: 11px; border-radius: 4px;">❌</button>
                       </div>
                   </td>
               `;
               tbodyModal.appendChild(tr);
           });
-          
           document.getElementById('modalVariacoesEstoque').style.display = 'flex';
       }
 
