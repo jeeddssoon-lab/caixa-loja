@@ -1361,7 +1361,7 @@
                   </div>
               </div>
 
-              <!-- 4. FOTO -->
+              <!-- 4. FOTO (CORRIGIDA) -->
               <div class="grupo-input" style="min-width: 10px;">
                   <label style="font-size: 11px; font-weight: bold; color: #555;">📸 Foto Específica (Opcional):</label>
                   <div style="display: flex; gap: 5px; align-items: center;">
@@ -1457,12 +1457,11 @@
               let custo = parseFloat(linha.querySelector('.var-custo').value) || 0;
               let preco = parseFloat(linha.querySelector('.var-preco').value) || 0;
               
-              // CAPTURA A FOTO ESPECÍFICA (SE TIVER)
+              // CAPTURA A FOTO ESPECÍFICA DE NOVO
               let fotoEspecifica = linha.querySelector('.var-foto-url') ? linha.querySelector('.var-foto-url').value : "";
 
               if (qtd <= 0) return; // Ignora se a pessoa apertou "+" a mais e deixou zerado
 
-              // Gerador mágico de Código caso deixe em branco
               if (codigo === "") { 
                   var numeroGerado = Math.floor(1000 + Math.random() * 9000); 
                   codigo = "*" + numeroGerado + "*"; 
@@ -1472,7 +1471,6 @@
 
               var detalhesModa = `Cor: ${cor} | Tam: ${tamanho}`;
 
-              // MÁGICA DA FOTO: Mistura a específica com a galeria!
               let fotosFinaisDestaVariacao = [];
               if (fotoEspecifica !== "") {
                   fotosFinaisDestaVariacao.push(fotoEspecifica); // A foto específica entra como PRINCIPAL (A primeira)
@@ -1495,6 +1493,7 @@
                   qtd: qtd, 
                   custoUnitario: custo, 
                   precoVenda: preco,
+                  fotoEspecifica: fotoEspecifica, // <--- O SEGREDO ESTÁ AQUI (Gravando quem é a específica!)
                   fotos: fotosFinaisDestaVariacao
               });
               
@@ -1502,21 +1501,18 @@
           });
 
           if(variacoesProcessadas > 0) {
-              document.getElementById('container-variacoes').innerHTML = ""; // Limpa a grade inferior
-              adicionarLinhaVariacao(); // Deixa uma pronta e limpa
+              document.getElementById('container-variacoes').innerHTML = ""; 
+              adicionarLinhaVariacao(); 
               
-              // 👇 A MÁGICA DE LIMPAR A PEÇA PAI AQUI 👇
               document.getElementById('cadNome').value = "";
               document.getElementById('cadCategoria').value = "";
               document.getElementById('cadColecao').value = "";
               
-              // Limpa as fotos da tela e da memória
               urlsFotosGaleria = [];
               document.getElementById('galeria-preview').innerHTML = "";
               
-              atualizarTabelaEntradaEstoque(); // Atualiza a tabela verde
+              atualizarTabelaEntradaEstoque(); 
               
-              // Põe o cursor piscando no Nome pro próximo item da caixa!
               document.getElementById('cadNome').focus();
           } else {
               alert("⚠️ Preencha a quantidade corretamente!");
@@ -1716,7 +1712,7 @@
               for (let i = 0; i < listaDeEntradaEstoque.length; i++) {
                   let item = listaDeEntradaEstoque[i];
                   
-                  // 1. Verifica se já existe uma peça EXATAMENTE IGUAL (Mesmo nome, cor e tamanho)
+                  // Verifica se já existe uma peça EXATAMENTE IGUAL
                   let buscaExata = await db.collection("produtos")
                       .where("nome", "==", item.nome)
                       .where("cor", "==", item.cor)
@@ -1724,7 +1720,6 @@
                       .get();
 
                   if (!buscaExata.empty) {
-                      // Se já existe, SOMA a quantidade na peça que já está lá e atualiza os preços!
                       let docId = buscaExata.docs[0].id;
                       await db.collection("produtos").doc(docId).update({
                           quantidade: firebase.firestore.FieldValue.increment(item.qtd),
@@ -1734,9 +1729,6 @@
                           notaFiscal: nf
                       });
                   } else {
-                      // Se NÃO EXISTE (É um tamanho novo ou uma peça totalmente nova)
-                      
-                      // 2. Resolve o problema da FOTO (Tenta puxar a foto de outra variação se não mandou nova)
                       let fotosFinais = item.fotos;
                       if (!fotosFinais || fotosFinais.length === 0) {
                           let buscaIrmao = await db.collection("produtos")
@@ -1751,7 +1743,6 @@
                           }
                       }
 
-                      // 3. Cria a linha nova no estoque já com a foto puxada
                       await db.collection("produtos").add({
                           codigo: item.codigo, 
                           nome: item.nome, 
@@ -1759,6 +1750,7 @@
                           categoria: item.categoria, 
                           colecao: item.colecao,
                           fotos: fotosFinais,
+                          fotoEspecifica: item.fotoEspecifica || "", // <--- GRAVANDO DE FATO NO FIREBASE
                           cor: item.cor,
                           tamanho: item.tamanho,
                           detalhesExtras: item.detalhes, 
