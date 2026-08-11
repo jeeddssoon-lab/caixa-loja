@@ -1364,7 +1364,11 @@
               <!-- 4. FOTO -->
               <div class="grupo-input" style="min-width: 10px;">
                   <label style="font-size: 11px; font-weight: bold; color: #555;">📸 Foto Específica (Opcional):</label>
-                  <input type="file" class="var-foto-arquivo" accept="image/*" style="font-size: 11px; padding: 6px; background: #f8f9fa; border: 1px dashed #0d6efd; border-radius: 4px; cursor: pointer; width: 100%; box-sizing: border-box;">
+                  <div style="display: flex; gap: 5px; align-items: center;">
+                      <div class="preview-var-foto" style="width: 32px; height: 32px; background: #e9ecef; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 12px; overflow: hidden; border: 1px solid #ced4da; flex-shrink: 0;">📷</div>
+                      <input type="file" accept="image/*" onchange="uploadFotoVariacao(this)" style="font-size: 11px; padding: 6px; background: #f8f9fa; border: 1px dashed #0d6efd; border-radius: 4px; cursor: pointer; width: 100%; box-sizing: border-box;">
+                      <input type="hidden" class="var-foto-url" value="">
+                  </div>
               </div>
           `;
           document.getElementById('container-variacoes').appendChild(div);
@@ -1452,6 +1456,9 @@
               let qtd = parseInt(linha.querySelector('.var-qtd').value) || 0;
               let custo = parseFloat(linha.querySelector('.var-custo').value) || 0;
               let preco = parseFloat(linha.querySelector('.var-preco').value) || 0;
+              
+              // CAPTURA A FOTO ESPECÍFICA (SE TIVER)
+              let fotoEspecifica = linha.querySelector('.var-foto-url') ? linha.querySelector('.var-foto-url').value : "";
 
               if (qtd <= 0) return; // Ignora se a pessoa apertou "+" a mais e deixou zerado
 
@@ -1465,6 +1472,17 @@
 
               var detalhesModa = `Cor: ${cor} | Tam: ${tamanho}`;
 
+              // MÁGICA DA FOTO: Mistura a específica com a galeria!
+              let fotosFinaisDestaVariacao = [];
+              if (fotoEspecifica !== "") {
+                  fotosFinaisDestaVariacao.push(fotoEspecifica); // A foto específica entra como PRINCIPAL (A primeira)
+                  urlsFotosGaleria.forEach(img => {
+                      if(img !== fotoEspecifica) fotosFinaisDestaVariacao.push(img); // Bota as fotos do modelo atrás
+                  });
+              } else {
+                  fotosFinaisDestaVariacao = [...urlsFotosGaleria]; // Se não botou foto específica, usa só as da galeria geral
+              }
+
               listaDeEntradaEstoque.push({ 
                   codigo: codigo, 
                   nome: nome, 
@@ -1477,7 +1495,7 @@
                   qtd: qtd, 
                   custoUnitario: custo, 
                   precoVenda: preco,
-                  fotos: [...urlsFotosGaleria]
+                  fotos: fotosFinaisDestaVariacao
               });
               
               variacoesProcessadas++;
@@ -1504,7 +1522,6 @@
               alert("⚠️ Preencha a quantidade corretamente!");
           }
       }
-
       function atualizarTabelaEntradaEstoque() {
           var tbody = document.getElementById('listaItensEstoque'); var html = ''; var somaDoCustoTotal = 0; 
           if (listaDeEntradaEstoque.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#999; padding: 15px;">Nenhum produto adicionado na lista ainda.</td></tr>'; document.getElementById('totalItensLista').innerText = "0"; document.getElementById('txtSomaProdutos').innerText = "R$ 0,00"; document.getElementById('txtSomaProdutos').setAttribute('data-valor', '0'); calcularTotalNota(); return; }
@@ -2705,6 +2722,8 @@
           fecharModalReposicao();
           primeiraLinha.querySelector('.var-qtd').focus();
       }
+
+      
       // ==========================================
       // LÓGICA DE UPLOAD DA GALERIA (IMGBB)
       // ==========================================
@@ -2713,6 +2732,35 @@
       const CHAVE_IMGBB = '5712c272e44c6e7b747c21a80ab34447'; 
       
       let urlsFotosGaleria = [];
+
+      // ==========================================
+      // LÓGICA DE UPLOAD DA FOTO ESPECÍFICA DA VARIAÇÃO
+      // ==========================================
+      async function uploadFotoVariacao(inputElement) {
+          if(inputElement.files.length === 0) return;
+          
+          let linha = inputElement.closest('.linha-variacao-item');
+          let preview = linha.querySelector('.preview-var-foto');
+          let hiddenUrl = linha.querySelector('.var-foto-url');
+          
+          preview.innerHTML = "⏳";
+          
+          let formData = new FormData(); 
+          formData.append("image", inputElement.files[0]);
+          
+          try {
+              let response = await fetch(`https://api.imgbb.com/1/upload?key=${CHAVE_IMGBB}`, { method: "POST", body: formData });
+              let data = await response.json();
+              if (data.success) {
+                  hiddenUrl.value = data.data.url;
+                  preview.innerHTML = `<img src="${data.data.url}" style="width: 100%; height: 100%; object-fit: cover;">`;
+              } else {
+                  preview.innerHTML = "❌";
+              }
+          } catch(e) {
+              preview.innerHTML = "❌";
+          }
+      }
 
       async function uploadFotosGaleria(inputElement) {
           let files = inputElement.files;
