@@ -842,6 +842,71 @@
 
         </main>
     </div> <!-- FIM DO APP CONTAINER -->
+    <!-- ================= JANELA MODAL DE EDITAR GRUPO PRINCIPAL ================= -->
+    <div id="modalEditarGrupo" class="modal-overlay" style="z-index: 350;">
+      <div class="modal-box" style="max-width: 400px;">
+        <h3 style="margin-top: 0; color: #17a2b8; display: flex; justify-content: space-between;">
+            ✏️ Editar Produto Principal
+            <span style="cursor: pointer; color: #dc3545;" onclick="fecharModalEditarGrupo()">×</span>
+        </h3>
+        <p style="font-size: 12px; color: #666; margin-top: -10px; line-height: 1.2;">Isso vai alterar o nome, categoria e preços de <b>todas</b> as opções e tamanhos desta peça de uma só vez.</p>
+        
+        <div class="linha-form" style="flex-direction: column; gap: 10px; margin-bottom: 15px;">
+            <div class="grupo-input" style="width: 100%;">
+                <label style="font-size: 12px; font-weight: bold; color: #555;">Nome do Produto:</label>
+                <input type="text" id="editGrupoNome" style="width: 100%; box-sizing: border-box; padding: 10px; font-size: 14px; border: 1px solid #ccc; border-radius: 5px;">
+            </div>
+            <div class="grupo-input" style="width: 100%;">
+                <label style="font-size: 12px; font-weight: bold; color: #555;">Categoria:</label>
+                <select id="editGrupoCategoria" style="width: 100%; box-sizing: border-box; padding: 10px; font-size: 14px; border: 1px solid #ccc; border-radius: 5px;"></select>
+            </div>
+            <div class="grupo-input" style="width: 100%;">
+                <label style="font-size: 12px; font-weight: bold; color: #555;">Fornecedor:</label>
+                <input type="text" id="editGrupoFornecedor" style="width: 100%; box-sizing: border-box; padding: 10px; font-size: 14px; border: 1px solid #ccc; border-radius: 5px;">
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <div class="grupo-input" style="flex: 1;">
+                    <label style="font-size: 12px; font-weight: bold; color: #555;">Custo (R$):</label>
+                    <input type="number" id="editGrupoCusto" step="0.01" style="width: 100%; box-sizing: border-box; padding: 10px; font-size: 14px; border: 1px solid #ccc; border-radius: 5px;">
+                </div>
+                <div class="grupo-input" style="flex: 1;">
+                    <label style="font-size: 12px; font-weight: bold; color: #198754;">Venda (R$):</label>
+                    <input type="number" id="editGrupoPreco" step="0.01" style="width: 100%; box-sizing: border-box; padding: 10px; font-size: 14px; border: 1px solid #198754; font-weight: bold; color: #198754; border-radius: 5px;">
+                </div>
+            </div>
+        </div>
+
+        <button class="btn-salvar-item" style="background: #17a2b8;" onclick="salvarEdicaoGrupo()">💾 SALVAR PARA TODAS AS VARIAÇÕES</button>
+      </div>
+    </div>
+    <!-- ================= JANELA MODAL DE VER VARIAÇÕES DO ESTOQUE ================= -->
+    <div id="modalVariacoesEstoque" class="modal-overlay" style="z-index: 300;">
+        <div class="modal-box" style="max-width: 900px; width: 95%;">
+            <h3 style="margin-top: 0; color: #0d6efd; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 10px;">
+                <span id="tituloModalVariacoesEstoque">📦 Variações do Produto</span>
+                <span style="cursor: pointer; color: #dc3545; font-size: 28px; line-height: 1;" onclick="fecharModalVariacoesEstoque()">×</span>
+            </h3>
+            <div class="area-tabela" style="max-height: 60vh; overflow-y: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="text-align: center; width: 45px;">Foto</th>
+                            <th>Cód</th>
+                            <th>Detalhes</th>
+                            <th>Fornecedor</th>
+                            <th>Custo</th>
+                            <th>Venda</th>
+                            <th style="text-align: center;">Qtd</th>
+                            <th style="text-align: center;">Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaModalVariacoesEstoque">
+                        <!-- Preenchido via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 
     <!-- ================= JANELA MODAL DE EDITAR ITEM ================= -->
     <div id="modalEditarItem" class="modal-overlay">
@@ -1786,53 +1851,392 @@
       // ==========================================
       // LÓGICA DA LISTAGEM DO ESTOQUE
       // ==========================================
+      // ==========================================
+      // LÓGICA DA LISTAGEM DO ESTOQUE (AGRUPADO / ACORDEÃO)
+      // ==========================================
+      // ==========================================
+      // LÓGICA DA LISTAGEM DO ESTOQUE (AGRUPADO EM JANELA MODAL)
+      // ==========================================
+      window.estoqueNuvemCache = [];
+      window.estoqueAgrupadoCache = {}; // Memória para a Janela Modal
+
       function carregarEstoqueGeral() {
           var tbody = document.getElementById('tabelaEstoqueGeral');
           tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#0d6efd; padding: 20px; font-weight: bold;">⏳ Puxando produtos da nuvem...</td></tr>';
           db.collection("produtos").orderBy("nome").get().then((querySnapshot) => {
-              tbody.innerHTML = "";
-              if (querySnapshot.empty) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#999; padding: 20px;">Nenhum produto cadastrado no banco de dados.</td></tr>'; return; }
+              window.estoqueNuvemCache = [];
               querySnapshot.forEach((doc) => {
-                  var p = doc.data(); var tr = document.createElement('tr');
-                  
-                  let imgHtml = "";
-                  if (p.fotos && p.fotos.length > 0) {
-                      let fotosJuntasStr = p.fotos.join('|||');
-                      imgHtml = `<img src="${p.fotos[0]}" onclick="ampliarFoto('${fotosJuntasStr}')" style="width: 45px; height: 45px; object-fit: cover; border-radius: 5px; border: 1px solid #ccc; box-shadow: 0 2px 4px rgba(0,0,0,0.1); cursor: pointer;" title="Ver todas as fotos">
-                                 ${p.fotos.length > 1 ? `<div style="font-size: 9px; text-align: center; color: #0d6efd; font-weight: bold; margin-top: 2px;">+${p.fotos.length - 1}</div>` : ''}`;
-                  } else {
-                      imgHtml = `<div style="width: 45px; height: 45px; background: #eee; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 16px; border: 1px solid #ddd;">📷</div>`;
-                  }
-
-                  tr.innerHTML = `
-                      <td style="text-align:center; vertical-align:middle;">${imgHtml}</td>
-                      <td style="vertical-align:middle; color:#555;">${p.codigo || '-'}</td>
-                      <td style="vertical-align:middle;">
-                          <b style="color:#0d6efd; font-size:15px;">${p.nome || '-'}</b> <br>
-                          <small style="color:#666;">${p.detalhesExtras || ''}</small><br>
-                          <span style="background: #e9ecef; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight:bold; color:#555; display:inline-block; margin-top: 3px;">📁 ${p.categoria || 'Geral'}</span>
-                      </td>
-                      <td style="font-size: 13px; color: #555; vertical-align:middle;">${p.fornecedor || '-'}</td>
-                      <td style="vertical-align:middle;">R$ ${(p.custoUnitario || 0).toFixed(2).replace('.', ',')}</td>
-                      <td style="color:#198754; font-weight:bold; font-size: 16px; vertical-align:middle;">R$ ${(p.precoVenda || 0).toFixed(2).replace('.', ',')}</td>
-                      <td style="font-weight:bold; text-align:center; font-size: 16px; background: #f8f9fa; vertical-align:middle;">${p.quantidade || 0}</td>
-                      <td style="text-align:center; vertical-align:middle;">
-                          <div style="display: flex; justify-content: center; gap: 5px; flex-wrap: wrap;">
-                              <button class="btn-acao" style="background:#17a2b8; color:white; border:none; padding: 5px 8px; font-size: 13px; margin:0; border-radius: 4px;" onclick="abrirModalEditarItem('${doc.id}')" title="Editar Informações">✏️</button>
-                              <button class="btn-acao" style="background:#ffc107; color:#000; border:none; padding: 5px 8px; font-size: 13px; margin:0; border-radius: 4px;" onclick="abrirModalEditarCategoria('${doc.id}', '${encodeURIComponent(p.nome || '')}', '${encodeURIComponent(p.categoria || 'Geral')}')" title="Mudar Categoria">📁</button>
-                              <button class="btn-acao" style="background:#0d6efd; color:white; border:none; padding: 5px 8px; font-size: 13px; margin:0; border-radius: 4px;" onclick="abrirTrocaDeFoto('${doc.id}')" title="Adicionar ou Trocar Foto">📷</button>
-                              <button class="btn-remover" onclick="excluirPecaDoEstoque('${doc.id}')" title="Excluir Peça Definitivamente">❌</button>
-                          </div>
-                      </td>
-                  `;
-                  tbody.appendChild(tr);
+                  let p = doc.data(); 
+                  p.idFirebase = doc.id;
+                  window.estoqueNuvemCache.push(p);
               });
-          }).catch((error) => { console.error("Erro Firebase:", error); tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:red; padding: 20px;">❌ Erro de Conexão.</td></tr>'; });
+              renderizarTabelaEstoqueGeral(window.estoqueNuvemCache);
+          }).catch((error) => { 
+              console.error("Erro Firebase:", error); 
+              document.getElementById('tabelaEstoqueGeral').innerHTML = '<tr><td colspan="8" style="text-align:center; color:red; padding: 20px;">❌ Erro de Conexão.</td></tr>'; 
+          });
+      }
+
+      function renderizarTabelaEstoqueGeral(listaProdutos) {
+          var tbody = document.getElementById('tabelaEstoqueGeral');
+          tbody.innerHTML = "";
+          
+          if (listaProdutos.length === 0) { 
+              tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#999; padding: 20px;">Nenhum produto encontrado.</td></tr>'; 
+              return; 
+          }
+
+          // 1. Agrupar produtos pelo Nome e Categoria
+          let agrupamento = {};
+          listaProdutos.forEach(p => {
+              let chave = (p.nome + "_" + (p.categoria || "Geral")).toUpperCase().trim();
+              if (!agrupamento[chave]) {
+                  agrupamento[chave] = {
+                      nome: p.nome,
+                      categoria: p.categoria || 'Geral',
+                      fornecedor: p.fornecedor || '-',
+                      qtdTotal: 0,
+                      fotosTodas: [],
+                      variacoes: []
+                  };
+              }
+              agrupamento[chave].variacoes.push(p);
+              agrupamento[chave].qtdTotal += parseInt(p.quantidade || 0);
+              if (p.fotos && p.fotos.length > 0) {
+                  agrupamento[chave].fotosTodas = agrupamento[chave].fotosTodas.concat(p.fotos);
+              }
+          });
+
+          window.estoqueAgrupadoCache = agrupamento; // Guarda os grupos na memória para a janela!
+
+          // 2. Desenhar as linhas Principais no painel
+          Object.keys(agrupamento).forEach(chave => {
+              let grupo = agrupamento[chave];
+              
+              let trPai = document.createElement('tr');
+              trPai.style.background = "#fff";
+              trPai.style.borderBottom = "1px solid #dee2e6";
+              
+              // 👇 NOVA MÁGICA: Deixa a linha inteira clicável e com efeito visual!
+              trPai.style.cursor = "pointer";
+              trPai.style.transition = "0.2s";
+              trPai.onmouseover = function() { this.style.background = "#f1f8ff"; }; // Fica levemente azul ao passar o mouse
+              trPai.onmouseout = function() { this.style.background = "#fff"; };
+              trPai.onclick = function() { abrirModalVariacoesEstoque(chave); }; // Abre as variações clicando em qualquer lugar
+              
+              let imgPaiHtml = "";
+              if (grupo.fotosTodas.length > 0) {
+                  imgPaiHtml = `<img src="${grupo.fotosTodas[0]}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px; border: 1px solid #ccc; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">`;
+              } else {
+                  imgPaiHtml = `<div style="width: 50px; height: 50px; background: #eee; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; border: 1px solid #ddd;">📷</div>`;
+              }
+
+              let primeiraVariacao = grupo.variacoes[0];
+              let custoPrincipal = (primeiraVariacao.custoUnitario || 0).toFixed(2).replace('.', ',');
+              let vendaPrincipal = (primeiraVariacao.precoVenda || 0).toFixed(2).replace('.', ',');
+
+              trPai.innerHTML = `
+                  <td style="text-align:center; vertical-align:middle;">${imgPaiHtml}</td>
+                  <td style="text-align:center; vertical-align:middle; color:#ccc;">--</td>
+                  <td style="vertical-align:middle;">
+                      <b style="color:#000; font-size:16px;">${grupo.nome}</b> <br>
+                      <span style="background: #e9ecef; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight:bold; color:#555; display:inline-block; margin-top: 3px;">📁 ${grupo.categoria}</span>
+                      <span style="font-size: 12px; color: #0d6efd; font-weight: bold; margin-left: 8px;">(${grupo.variacoes.length} variações)</span>
+                  </td>
+                  <td style="font-size: 13px; color: #555; vertical-align:middle;">${grupo.fornecedor}</td>
+                  
+                  <td style="vertical-align:middle; font-size: 13px;">R$ ${custoPrincipal}</td>
+                  <td style="color:#198754; font-weight:bold; font-size: 15px; vertical-align:middle;">R$ ${vendaPrincipal}</td>
+                  
+                  <td style="font-weight:bold; text-align:center; font-size: 18px; vertical-align:middle; color: #198754;">${grupo.qtdTotal}</td>
+                  <td style="text-align:center; vertical-align:middle;">
+                      <div style="display: flex; justify-content: center; gap: 4px; flex-wrap: wrap;">
+                          <!-- O 'event.stopPropagation()' abaixo é o escudo que impede de abrir a linha ao clicar no botão -->
+                          <button class="btn-acao" style="background:#17a2b8; color:white; border:none; padding: 6px 8px; font-size: 12px; margin:0; border-radius: 4px;" onclick="event.stopPropagation(); abrirModalEditarGrupo('${chave}')" title="Editar Informações Principais">✏️</button>
+                          <button class="btn-acao" style="background:#0d6efd; color:white; border:none; padding: 6px 8px; font-size: 12px; margin:0; border-radius: 4px;" onclick="event.stopPropagation(); abrirTrocaDeFoto('${primeiraVariacao.idFirebase}')" title="Trocar Foto Principal do Item">📷</button>
+                          <button class="btn-acao" style="background:#212529; color:white; border:none; padding: 6px 8px; font-size: 12px; margin:0; border-radius: 4px;" onclick="event.stopPropagation(); abrirModalVariacoesEstoque('${chave}')" title="Ver Detalhes e Quantidades">👁️</button>
+                      </div>
+                  </td>
+              `;
+              tbody.appendChild(trPai);
+          });
+      }
+
+      // 3. Função que abre a Nova Janela de Variações
+      // 3. Função que abre a Nova Janela de Variações (AGORA COM EDIÇÃO NA MESMA LINHA)
+      // 3. Função que abre a Nova Janela de Variações (AGORA COM EDIÇÃO NA MESMA LINHA)
+      function abrirModalVariacoesEstoque(chave) {
+          let grupo = window.estoqueAgrupadoCache[chave];
+          if (!grupo) return;
+          
+          document.getElementById('tituloModalVariacoesEstoque').innerText = "📦 Variações: " + grupo.nome;
+          let tbodyModal = document.getElementById('tabelaModalVariacoesEstoque');
+          tbodyModal.innerHTML = "";
+          
+          grupo.variacoes.forEach(v => {
+              let tr = document.createElement('tr');
+              
+              let imgFilhoHtml = "";
+              if (v.fotos && v.fotos.length > 0) {
+                  let fotosJuntasStr = v.fotos.join('|||');
+                  let imgCapa = v.fotoEspecifica ? v.fotoEspecifica : v.fotos[0];
+                  imgFilhoHtml = `<img src="${imgCapa}" onclick="ampliarFoto('${fotosJuntasStr}')" style="width: 40px; height: 40px; object-fit: cover; border-radius: 5px; border: 1px solid #ccc; cursor: pointer;" title="Ver fotos">`;
+              } else {
+                  imgFilhoHtml = `<div style="width: 40px; height: 40px; background: #e9ecef; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 14px; border: 1px solid #ddd;">📷</div>`;
+              }
+
+              // Preparando os valores
+              let corTag = v.cor && v.cor !== '-' ? v.cor : '';
+              let tamTag = v.tamanho && v.tamanho !== '-' ? v.tamanho : '';
+              let custoVal = (v.custoUnitario || 0).toFixed(2);
+              let vendaVal = (v.precoVenda || 0).toFixed(2);
+              let qtdVal = v.quantidade || 0;
+
+              tr.innerHTML = `
+                  <td style="text-align:center; vertical-align:middle;">${imgFilhoHtml}</td>
+                  <td style="vertical-align:middle; color:#555; font-size: 12px;">${v.codigo || '-'}</td>
+                  
+                  <td style="vertical-align:middle;">
+                      <!-- MODO VISÃO -->
+                      <div id="view_detalhes_${v.idFirebase}">
+                          <span style="color:#444; font-size: 13px;">Cor: <b>${corTag || '-'}</b> | Tam: <b>${tamTag || '-'}</b></span><br>
+                          <small style="color:#888;">${v.detalhesExtras || ''}</small>
+                      </div>
+                      <!-- MODO EDIÇÃO -->
+                      <div id="edit_detalhes_${v.idFirebase}" style="display:none; flex-direction:column; gap:4px;">
+                          <input type="text" id="input_cor_${v.idFirebase}" value="${corTag}" placeholder="Cor" style="width: 100px; padding: 4px; font-size: 12px; border: 1px solid #0d6efd; border-radius: 4px; box-sizing: border-box;">
+                          <input type="text" id="input_tam_${v.idFirebase}" value="${tamTag}" placeholder="Tam" style="width: 100px; padding: 4px; font-size: 12px; border: 1px solid #0d6efd; border-radius: 4px; box-sizing: border-box;">
+                      </div>
+                  </td>
+                  
+                  <td style="font-size: 12px; color: #888; vertical-align:middle;">${v.fornecedor || '-'}</td>
+                  
+                  <td style="vertical-align:middle; font-size: 13px;">
+                      <div id="view_custo_${v.idFirebase}">R$ ${custoVal.replace('.', ',')}</div>
+                      <div id="edit_custo_${v.idFirebase}" style="display:none;">
+                          <input type="number" id="input_custo_${v.idFirebase}" value="${custoVal}" step="0.01" style="width: 60px; padding: 4px; font-size: 12px; border: 1px solid #0d6efd; border-radius: 4px; box-sizing: border-box;">
+                      </div>
+                  </td>
+                  
+                  <td style="color:#198754; font-weight:bold; font-size: 15px; vertical-align:middle;">
+                      <div id="view_venda_${v.idFirebase}">R$ ${vendaVal.replace('.', ',')}</div>
+                      <div id="edit_venda_${v.idFirebase}" style="display:none;">
+                          <input type="number" id="input_venda_${v.idFirebase}" value="${vendaVal}" step="0.01" style="width: 70px; padding: 4px; font-size: 12px; border: 1px solid #198754; border-radius: 4px; font-weight:bold; color:#198754; box-sizing: border-box;">
+                      </div>
+                  </td>
+                  
+                  <td style="font-weight:bold; text-align:center; font-size: 15px; background: #f8f9fa; vertical-align:middle;">
+                      <div id="view_qtd_${v.idFirebase}">${qtdVal}</div>
+                      <div id="edit_qtd_${v.idFirebase}" style="display:none;">
+                          <input type="number" id="input_qtd_${v.idFirebase}" value="${qtdVal}" style="width: 50px; padding: 4px; font-size: 13px; text-align: center; border: 1px solid #0d6efd; border-radius: 4px; font-weight:bold; box-sizing: border-box;">
+                      </div>
+                  </td>
+                  
+                  <td style="text-align:center; vertical-align:middle;">
+                      <div style="display: flex; justify-content: center; gap: 4px; flex-wrap: wrap;" id="botoes_${v.idFirebase}">
+                          <!-- BOTÃO LÁPIS (EDITAR) -->
+                          <button class="btn-acao" id="btn_edit_${v.idFirebase}" style="background:#17a2b8; color:white; border:none; padding: 6px 8px; font-size: 12px; margin:0; border-radius: 4px;" onclick="ativarEdicaoInline('${v.idFirebase}')" title="Editar Informações">✏️</button>
+                          
+                          <!-- BOTÃO DISQUETE (SALVAR) -->
+                          <button class="btn-acao" id="btn_save_${v.idFirebase}" style="background:#198754; color:white; border:none; padding: 6px 12px; font-size: 12px; margin:0; border-radius: 4px; display:none;" onclick="salvarEdicaoInline('${v.idFirebase}', '${chave}')" title="Salvar Alterações">💾 Salvar</button>
+                          
+                          <!-- OUTROS BOTÕES (Sem a pasta amarela) -->
+                          <button class="btn-acao" id="btn_foto_${v.idFirebase}" style="background:#0d6efd; color:white; border:none; padding: 6px 8px; font-size: 12px; margin:0; border-radius: 4px;" onclick="fecharModalVariacoesEstoque(); abrirTrocaDeFoto('${v.idFirebase}');" title="Adicionar ou Trocar Foto">📷</button>
+                          <button class="btn-remover" id="btn_del_${v.idFirebase}" onclick="fecharModalVariacoesEstoque(); excluirPecaDoEstoque('${v.idFirebase}');" title="Excluir Peça Definitivamente" style="padding: 6px 8px; font-size: 12px; border-radius: 4px;">❌</button>
+                      </div>
+                  </td>
+              `;
+              tbodyModal.appendChild(tr);
+          });
+          
+          document.getElementById('modalVariacoesEstoque').style.display = 'flex';
+      }
+
+      function fecharModalVariacoesEstoque() {
+          document.getElementById('modalVariacoesEstoque').style.display = 'none';
+      }
+
+      // ==========================================
+      // LÓGICA DE EDIÇÃO DO GRUPO PRINCIPAL (EM LOTE)
+      // ==========================================
+      let chaveGrupoEditando = null;
+
+      function abrirModalEditarGrupo(chave) {
+          chaveGrupoEditando = chave;
+          let grupo = window.estoqueAgrupadoCache[chave];
+          if(!grupo) return;
+          
+          // Preenche a listinha de categorias copiando do seu cadastro original
+          document.getElementById('editGrupoCategoria').innerHTML = document.getElementById('cadCategoria').innerHTML;
+          
+          let primeiraVariacao = grupo.variacoes[0];
+          
+          document.getElementById('editGrupoNome').value = grupo.nome || '';
+          
+          // Acha a categoria atual e deixa ela marcada
+          let selectCat = document.getElementById('editGrupoCategoria');
+          let achouCat = Array.from(selectCat.options).some(opt => opt.value === grupo.categoria);
+          selectCat.value = achouCat ? grupo.categoria : "Geral";
+          
+          document.getElementById('editGrupoFornecedor').value = grupo.fornecedor || '';
+          document.getElementById('editGrupoCusto').value = (primeiraVariacao.custoUnitario || 0).toFixed(2);
+          document.getElementById('editGrupoPreco').value = (primeiraVariacao.precoVenda || 0).toFixed(2);
+          
+          document.getElementById('modalEditarGrupo').style.display = 'flex';
+      }
+
+      function fecharModalEditarGrupo() {
+          document.getElementById('modalEditarGrupo').style.display = 'none';
+          chaveGrupoEditando = null;
+      }
+
+      async function salvarEdicaoGrupo() {
+          if(!chaveGrupoEditando) return;
+          let grupo = window.estoqueAgrupadoCache[chaveGrupoEditando];
+          if(!grupo) return;
+          
+          let btn = document.querySelector('#modalEditarGrupo .btn-salvar-item');
+          let txtOri = btn.innerHTML;
+          btn.innerHTML = "⏳ Salvando em lote...";
+          btn.disabled = true;
+          
+          // Pega o que você digitou
+          let novoNome = document.getElementById('editGrupoNome').value.trim();
+          let novaCat = document.getElementById('editGrupoCategoria').value;
+          let novoForn = document.getElementById('editGrupoFornecedor').value.trim();
+          let novoCusto = parseFloat(document.getElementById('editGrupoCusto').value) || 0;
+          let novoPreco = parseFloat(document.getElementById('editGrupoPreco').value) || 0;
+          
+          try {
+              let batch = db.batch();
+              
+              // MÁGICA: Varre todas as cores e tamanhos dessa peça e aplica as regras em TUDO no banco de dados!
+              grupo.variacoes.forEach(v => {
+                  let ref = db.collection("produtos").doc(v.idFirebase);
+                  batch.update(ref, {
+                      nome: novoNome,
+                      categoria: novaCat,
+                      fornecedor: novoForn,
+                      custoUnitario: novoCusto,
+                      precoVenda: novoPreco
+                  });
+              });
+              
+              await batch.commit(); // Salva o lote inteiro de uma vez
+              alert("✅ Sucesso!\n\nAs informações foram atualizadas para todas as variações deste produto!");
+              fecharModalEditarGrupo();
+              carregarEstoqueGeral(); // Dá F5 na tabela para você ver a mudança
+              
+          } catch(e) {
+              alert("❌ Erro ao salvar: " + e.message);
+          } finally {
+              btn.innerHTML = txtOri;
+              btn.disabled = false;
+          }
+      }
+
+      // ==========================================
+      // LÓGICA DE EDIÇÃO INLINE (DENTRO DA JANELA DE VARIAÇÕES)
+      // ==========================================
+      function ativarEdicaoInline(id) {
+          // 1. Oculta os textos normais
+          document.getElementById('view_detalhes_' + id).style.display = 'none';
+          document.getElementById('view_custo_' + id).style.display = 'none';
+          document.getElementById('view_venda_' + id).style.display = 'none';
+          document.getElementById('view_qtd_' + id).style.display = 'none';
+          
+          // 2. Mostra as caixinhas de digitar
+          document.getElementById('edit_detalhes_' + id).style.display = 'flex';
+          document.getElementById('edit_custo_' + id).style.display = 'block';
+          document.getElementById('edit_venda_' + id).style.display = 'block';
+          document.getElementById('edit_qtd_' + id).style.display = 'block';
+          
+          // 3. Esconde o botão de Lápis, Câmera e Lixeira (para você não clicar errado)
+          // Usando uma trava de segurança "if" caso algum botão não exista
+          let btnEdit = document.getElementById('btn_edit_' + id);
+          let btnFoto = document.getElementById('btn_foto_' + id);
+          let btnDel = document.getElementById('btn_del_' + id);
+          let btnCat = document.getElementById('btn_cat_' + id); 
+          
+          if(btnEdit) btnEdit.style.display = 'none';
+          if(btnFoto) btnFoto.style.display = 'none';
+          if(btnDel) btnDel.style.display = 'none';
+          if(btnCat) btnCat.style.display = 'none'; // Se não achar a pasta, ele simplesmente ignora e não trava
+          
+          // 4. Mostra o botãozão verde de SALVAR
+          let btnSave = document.getElementById('btn_save_' + id);
+          if(btnSave) btnSave.style.display = 'inline-block';
+      }
+
+      async function salvarEdicaoInline(id, chaveGrupo) {
+          let btn = document.getElementById('btn_save_' + id);
+          let txtOriginal = btn.innerHTML;
+          btn.innerHTML = "⏳...";
+          btn.disabled = true;
+
+          // Pega os novos valores que você digitou
+          let novaCor = document.getElementById('input_cor_' + id).value.trim();
+          let novoTam = document.getElementById('input_tam_' + id).value.trim();
+          let novoCusto = parseFloat(document.getElementById('input_custo_' + id).value) || 0;
+          let novoPreco = parseFloat(document.getElementById('input_venda_' + id).value) || 0;
+          let novaQtd = parseInt(document.getElementById('input_qtd_' + id).value) || 0;
+
+          try {
+              // 1. Salva no banco de dados da nuvem
+              await db.collection("produtos").doc(id).update({
+                  cor: novaCor,
+                  tamanho: novoTam,
+                  custoUnitario: novoCusto,
+                  precoVenda: novoPreco,
+                  quantidade: novaQtd
+              });
+
+              // 2. Atualiza a memória local (Cache) sem fechar a janela
+              let index = window.estoqueNuvemCache.findIndex(p => p.idFirebase === id);
+              if (index !== -1) {
+                  window.estoqueNuvemCache[index].cor = novaCor;
+                  window.estoqueNuvemCache[index].tamanho = novoTam;
+                  window.estoqueNuvemCache[index].custoUnitario = novoCusto;
+                  window.estoqueNuvemCache[index].precoVenda = novoPreco;
+                  window.estoqueNuvemCache[index].quantidade = novaQtd;
+              }
+
+              // 3. Atualiza a tela de fundo silenciosamente
+              let termo = document.getElementById('buscaEstoque').value.toLowerCase().trim();
+              if (termo === "") {
+                  renderizarTabelaEstoqueGeral(window.estoqueNuvemCache);
+              } else {
+                  let filtrados = window.estoqueNuvemCache.filter(p => {
+                      let textoBusca = (p.nome + " " + p.codigo + " " + (p.cor||'') + " " + (p.tamanho||'') + " " + (p.fornecedor||'')).toLowerCase();
+                      return textoBusca.includes(termo);
+                  });
+                  renderizarTabelaEstoqueGeral(filtrados);
+              }
+
+              // 4. Dá um "F5" mágico só na janela de variações (volta a ser texto com os valores novos!)
+              abrirModalVariacoesEstoque(chaveGrupo);
+
+          } catch (e) {
+              alert("❌ Erro ao salvar: " + e.message);
+              btn.innerHTML = txtOriginal;
+              btn.disabled = false;
+          }
       }
 
       function filtrarEstoque() {
-          var termo = document.getElementById('buscaEstoque').value.toLowerCase(); var linhas = document.querySelectorAll('#tabelaEstoqueGeral tr');
-          linhas.forEach(function(linha) { if(linha.innerText.toLowerCase().includes(termo)) { linha.style.display = ''; } else { linha.style.display = 'none'; } });
+          let termo = document.getElementById('buscaEstoque').value.toLowerCase().trim();
+          
+          if (termo === "") {
+              renderizarTabelaEstoqueGeral(window.estoqueNuvemCache);
+              return;
+          }
+          
+          let filtrados = window.estoqueNuvemCache.filter(p => {
+              let textoBusca = (p.nome + " " + p.codigo + " " + (p.cor||'') + " " + (p.tamanho||'') + " " + (p.fornecedor||'')).toLowerCase();
+              return textoBusca.includes(termo);
+          });
+          
+          renderizarTabelaEstoqueGeral(filtrados);
       }
       async function excluirPecaDoEstoque(idProduto) {
           // 1. Pede a senha
@@ -2034,18 +2438,20 @@
                   let refProd = db.collection("produtos").doc(idProdutoEditandoFoto);
                   
                   if (modoAdicionar) {
-                      // Junta as fotos novas com as que já estavam lá
+                      // Junta as fotos novas e marca a PRIMEIRA enviada como a Foto Específica daquela cor!
                       await refProd.update({
-                          fotos: firebase.firestore.FieldValue.arrayUnion(...urlsNovas) 
+                          fotos: firebase.firestore.FieldValue.arrayUnion(...urlsNovas),
+                          fotoEspecifica: urlsNovas[0]
                       });
                   } else {
-                      // Substitui a galeria velha apenas pelas fotos novas
+                      // Substitui a galeria velha e marca a PRIMEIRA enviada como a Foto Específica
                       await refProd.update({
-                          fotos: urlsNovas 
+                          fotos: urlsNovas,
+                          fotoEspecifica: urlsNovas[0]
                       });
                   }
                   
-                  alert(`✅ ${urlsNovas.length} foto(s) enviada(s) com sucesso!`);
+                  alert(`✅ ${urlsNovas.length} foto(s) enviada(s) com sucesso!\n\n✨ O sistema já definiu a nova foto como a principal para essa Cor/Tamanho no catálogo!`);
                   carregarEstoqueGeral(); // Atualiza a tabela na hora
               } else {
                   alert("❌ Nenhuma foto conseguiu ser enviada.");
