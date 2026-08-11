@@ -143,30 +143,64 @@
 
       @media (max-width: 768px) {
         body { padding: 0; background-color: #e9ecef;}
-        /* === MÁGICA: PLANILHA HORIZONTAL ESPREMIDINHA NO CELULAR === */
-        #tela-lista-itens table, #modalVariacoesEstoque table { width: 100% !important; table-layout: auto !important; }
+        
+        /* === MÁGICA: PLANILHA HORIZONTAL TRAVADA NO CELULAR === */
+        #tela-lista-itens .area-tabela, #modalVariacoesEstoque .area-tabela {
+            overflow-x: hidden !important; /* Trava a tela pra não ir pro lado de jeito nenhum */
+        }
+        #tela-lista-itens table, #modalVariacoesEstoque table { 
+            width: 100% !important; 
+            table-layout: fixed !important; /* O SEGREDO: Força a tabela a não crescer além da tela */
+        }
         #tela-lista-itens th, #tela-lista-itens td, #modalVariacoesEstoque th, #modalVariacoesEstoque td { 
-            padding: 4px 2px !important; 
+            padding: 4px 1px !important; 
             font-size: 9px !important; 
             text-align: center !important; 
             border-bottom: 1px solid #ddd !important;
             vertical-align: middle !important;
-            white-space: nowrap !important; /* Proíbe o texto de quebrar linha */
+            white-space: normal !important; /* Deixa o texto descer pra linha de baixo pra caber */
+            word-wrap: break-word !important;
+            line-height: 1.1 !important;
         }
-        /* O nome do produto pode quebrar linha pra não estourar a tela */
-        #tela-lista-itens td:nth-child(3), #modalVariacoesEstoque td:nth-child(3) { 
-            white-space: normal !important; 
-            text-align: left !important; 
-            min-width: 70px !important; 
-            line-height: 1.1 !important; 
-        }
-        /* Encolhe a Foto */
-        #tela-lista-itens img, #modalVariacoesEstoque img { width: 25px !important; height: 25px !important; border-radius: 4px !important;}
-        #tela-lista-itens td > div[style*="width: 50px"], #modalVariacoesEstoque td > div[style*="width: 40px"] { width: 25px !important; height: 25px !important; font-size: 10px !important; border-radius: 4px !important;}
-        /* Encolhe os textos e botões */
+        
+        /* ESCONDE AS COLUNAS SECUNDÁRIAS (Código e Fornecedor) SÓ NO CELULAR PRA ABRIR ESPAÇO */
+        #tela-lista-itens th:nth-child(2), #tela-lista-itens td:nth-child(2), 
+        #modalVariacoesEstoque th:nth-child(2), #modalVariacoesEstoque td:nth-child(2) { display: none !important; }
+        
+        #tela-lista-itens th:nth-child(4), #tela-lista-itens td:nth-child(4), 
+        #modalVariacoesEstoque th:nth-child(4), #modalVariacoesEstoque td:nth-child(4) { display: none !important; }
+
+        /* LARGURAS DAS 6 COLUNAS QUE SOBRARAM (Total = 100%) */
+        #tela-lista-itens th:nth-child(1), #tela-lista-itens td:nth-child(1),
+        #modalVariacoesEstoque th:nth-child(1), #modalVariacoesEstoque td:nth-child(1) { width: 12% !important; } /* Foto */
+        
+        #tela-lista-itens th:nth-child(3), #tela-lista-itens td:nth-child(3),
+        #modalVariacoesEstoque th:nth-child(3), #modalVariacoesEstoque td:nth-child(3) { width: 33% !important; text-align: left !important; padding-left: 4px !important; } /* Detalhes */
+        
+        #tela-lista-itens th:nth-child(5), #tela-lista-itens td:nth-child(5),
+        #modalVariacoesEstoque th:nth-child(5), #modalVariacoesEstoque td:nth-child(5) { width: 16% !important; } /* Custo */
+        
+        #tela-lista-itens th:nth-child(6), #tela-lista-itens td:nth-child(6),
+        #modalVariacoesEstoque th:nth-child(6), #modalVariacoesEstoque td:nth-child(6) { width: 16% !important; } /* Venda */
+        
+        #tela-lista-itens th:nth-child(7), #tela-lista-itens td:nth-child(7),
+        #modalVariacoesEstoque th:nth-child(7), #modalVariacoesEstoque td:nth-child(7) { width: 8% !important; font-size: 12px !important; font-weight: bold !important;} /* Qtd */
+        
+        #tela-lista-itens th:nth-child(8), #tela-lista-itens td:nth-child(8),
+        #modalVariacoesEstoque th:nth-child(8), #modalVariacoesEstoque td:nth-child(8) { width: 15% !important; } /* Ações */
+
+        /* AJUSTES VISUAIS DOS ITENS PARA CABER TUDO */
+        #tela-lista-itens img, #modalVariacoesEstoque img { width: 24px !important; height: 24px !important; border-radius: 3px !important;}
+        #tela-lista-itens td > div[style*="width: 50px"], #modalVariacoesEstoque td > div[style*="width: 40px"] { width: 24px !important; height: 24px !important; font-size: 9px !important; border-radius: 3px !important;}
         #tela-lista-itens b, #modalVariacoesEstoque b { font-size: 10px !important; }
         #tela-lista-itens span, #modalVariacoesEstoque span { font-size: 8px !important; }
-        .btn-acao, .btn-remover { padding: 4px !important; font-size: 9px !important; margin: 1px !important; }
+        
+        /* Botões organizados */
+        .btn-acao, .btn-remover { padding: 4px !important; font-size: 9px !important; margin: 1px !important; min-width: 18px !important;}
+        
+        /* Na edição (Lápis), os campos de digitar não podem estourar a tela */
+        #modalVariacoesEstoque input { max-width: 100% !important; box-sizing: border-box !important; }
+        
         .app-container { flex-direction: column; }
         .topbar-mobile { display: flex; }
         
@@ -190,13 +224,13 @@
         #tela-estoque > div > div { height: auto !important; overflow: visible !important; width: 100% !important; min-width: 0 !important; display: block !important; }
         #tela-estoque .bloco-form { display: block !important; height: auto !important; }
         #tela-estoque .area-tabela { min-height: 150px !important; max-height: 400px !important; display: block !important; width: 100% !important; }
-        /* ESTICAR A TELA "MEUS ITENS" ATÉ O CHÃO NO CELULAR */
-            #tela-lista-itens { height: calc(100vh - 80px) !important; }
-            #tela-lista-itens .bloco-form { flex: 1 !important; display: flex !important; flex-direction: column !important; margin-bottom: 0 !important; }
-            #tela-lista-itens .area-tabela { max-height: none !important; flex: 1 !important; }
         
-    
-      }
+        /* ESTICAR A TELA "MEUS ITENS" ATÉ O CHÃO NO CELULAR */
+        #tela-lista-itens { height: calc(100vh - 80px) !important; }
+        #tela-lista-itens .bloco-form { flex: 1 !important; display: flex !important; flex-direction: column !important; margin-bottom: 0 !important; }
+        #tela-lista-itens .area-tabela { max-height: none !important; flex: 1 !important; }
+    }
+        
     </style>
   </head>
   <body>
