@@ -302,100 +302,87 @@
               </div>
             </div> <!-- FIM TELA PEDIDOS DO SITE -->
 
-            <!-- ================= TELA 3: ESTOQUE (REFEITA COM MODAL DE VARIAÇÃO) ================= -->
-            <div id="tela-estoque" class="tela-oculta" style="display: flex; flex-direction: column; height: calc(100vh - 40px);">
-              <h2 style="flex-shrink: 0;">📦 Entrada de Mercadorias (Grade)</h2>
-              
-              <div style="display: flex; gap: 15px; flex: 1; overflow: hidden; min-height: 0;">
+            <!-- ================= TELA 3: ESTOQUE (LAYOUT EM UMA COLUNA) ================= -->
+            <!-- ================= TELA 3: ESTOQUE (LAYOUT EM UMA COLUNA) ================= -->
+            <div id="tela-estoque" class="tela-oculta" style="display: flex; flex-direction: column; height: calc(100vh - 40px); overflow-y: auto; align-items: center; padding-bottom: 40px;">
+              <div style="width: 100%; max-width: 800px;">
+                <h2 style="margin-bottom: 20px;">📦 Entrada de Mercadorias</h2>
                 
-                <!-- ================= LADO ESQUERDO (FORMULÁRIOS) ================= -->
-                <div style="flex: 2; min-width: 300px; overflow-y: auto; padding-right: 10px; height: 100%; padding-bottom: 40px;">
-                  
-                  <!-- BLOCO 1: NF -->
-                  <div class="bloco-form" style="border-left-color: #6c757d; background: #f8f9fa;">
-                    <div class="titulo-bloco">1. Fornecedor / NF-e (Preencha uma vez)</div>
-                    <div class="linha-form">
-                      <div class="grupo-input" style="flex: 2;"><label>Fornecedor (Razão Social / Nome Fantasia):</label><input type="text" id="cadFornecedor" placeholder="Ex: Distribuidora XYZ"></div>
-                      <div class="grupo-input"><label>Número da Nota Fiscal:</label><input type="text" id="cadNF" placeholder="Opcional"></div>
-                    </div>
-                  </div>
-                  
-                  <!-- BLOCO 2: INFORMAÇÕES GERAIS DO MODELO -->
-                  <div class="bloco-form" style="border-left-color: #0d6efd; margin-bottom: 5px;">
-                    <div class="titulo-bloco" style="display: flex; justify-content: space-between; align-items: center;">
-                      <span>2. Detalhes Gerais do Modelo</span>
-                    </div>
-                    
-                    <div class="linha-form">
-                      <div class="grupo-input" style="flex: 2; min-width: 200px;">
-                        <label>Nome do Modelo:</label>
-                        <div style="display: flex; gap: 5px;">
-                            <input type="text" id="cadNome" placeholder="Ex: Calça Jeans Skinny, Vestido Midi" style="flex: 1; padding: 8px 10px; border: 1px solid #ced4da; border-radius: 5px; font-size: 14px; font-weight: bold; background: #f8f9fa;">
-                            <button class="btn-acao" style="margin: 0; padding: 0 15px; height: 36px; border-radius: 5px; background: #212529; color: white; border: none; cursor: pointer;" onclick="abrirModalReposicao()" title="Buscar peça já cadastrada">🔍</button>
-                        </div>
-                      </div>
-                      <div class="grupo-input">
-                          <label>Departamento:</label>
-                          <select id="cadDepartamento">
-                              <option value="Feminino">Feminino</option>
-                              <option value="Masculino">Masculino</option>
-                              <option value="Unissex">Unissex</option>
-                          </select>
-                      </div>
-                    </div>
-                    <div class="linha-form" style="margin-bottom: 15px;">
-                      <div class="grupo-input"><label>Categoria:</label><select id="cadCategoria"><option value="Geral">Geral</option></select></div>
-                      <div class="grupo-input"><label>Coleção:</label><input type="text" id="cadColecao" placeholder="Ex: Verão, Dia das Mães, Básico"></div>
-                    </div>
-                    
-                    <!-- GALERIA DE FOTOS DA PEÇA -->
-                    <div class="linha-form" style="margin-bottom: 15px;">
-                      <div class="grupo-input" style="width: 100%;">
-                          <label>📸 Fotos do Modelo (Galeria):</label>
-                          <input type="file" id="cadFotos" accept="image/*" multiple onchange="uploadFotosGaleria(this)" style="padding: 10px; border: 2px dashed #0d6efd; border-radius: 5px; cursor: pointer; background: #e7f1ff; font-weight: bold; color: #0d6efd;">
-                          <p style="font-size: 11px; color: #666; margin: 3px 0 0 0;">Você pode selecionar várias fotos de uma vez (Frente, Costas, etc).</p>
-                          <div id="galeria-preview" style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;"></div>
-                          <div id="box-camera-estoque"><div class="linha-guia"></div><div id="interactive-estoque" class="viewport"></div><button class="btn-fechar-camera" onclick="fecharCameraEstoque()">FECHAR</button></div>
-                      </div>
-                    </div>
-                    
-                    <div style="border-top: 1px dashed #ccc; margin: 15px 0 10px 0;"></div>
-                    
-                    <!-- NOVO BOTÃO DE ADICIONAR VARIAÇÃO -->
-                    <div style="display: flex; justify-content: center; margin-bottom: 10px;">
-                        <button class="btn-acao" style="background:#e83e8c; color:white; border:none; padding: 12px 20px; font-size: 15px; font-weight: bold; border-radius: 8px; width: 100%; box-shadow: 0 4px 6px rgba(232, 62, 140, 0.2);" onclick="abrirModalAddVariacao()">➕ Adicionar Variações (Cor/Tamanho)</button>
-                    </div>
-
-                    <!-- PREVIEW DAS VARIAÇÕES TEMPORÁRIAS -->
-                    <div id="listaPreviewVariacoes" style="display: flex; flex-direction: column; gap: 8px;"></div>
-                    
-                    <button class="btn-salvar-item" style="background: #0d6efd; margin-top: 15px;" onclick="processarVariacoesParaLista()">⬇️ JOGAR TODAS AS VARIAÇÕES PARA A LISTA DA NF</button>
+                <!-- BLOCO DA NOTA FISCAL -->
+                <div class="bloco-form" style="border-left-color: #6c757d; background: #f8f9fa;">
+                  <div class="titulo-bloco">Fornecedor / NF-e (Opcional)</div>
+                  <div class="linha-form">
+                    <div class="grupo-input" style="flex: 2;"><label>Fornecedor (Razão Social / Nome Fantasia):</label><input type="text" id="cadFornecedor" placeholder="Ex: Distribuidora XYZ"></div>
+                    <div class="grupo-input"><label>Número da Nota Fiscal:</label><input type="text" id="cadNF" placeholder="Opcional"></div>
                   </div>
                 </div>
+                
+                <!-- LISTA DOS ITENS ADICIONADOS NA NOTA (Aparece aqui no meio) -->
+                <div id="containerItensAdicionados" style="display: none; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+                   <!-- Renderizado via JS -->
+                </div>
 
-                <!-- ================= LADO DIREITO (LISTA DA NF) ================= -->
-                <div style="flex: 1.1; min-width: 320px; display: flex; flex-direction: column; height: 100%; min-height: 0;">
-                  <div class="bloco-form" style="border-left-color: #198754; flex: 1; display: flex; flex-direction: column; min-height: 0; margin-bottom: 5px; padding-bottom: 15px;">
-                    <div class="titulo-bloco">3. Produtos Prontos (<span id="totalItensLista">0</span>)</div>
-                    
-                    <div class="area-tabela" style="flex: 1; overflow-y: auto; max-height: none;">
-                      <table>
-                        <thead><tr><th>Cód</th><th>Produto / Variação</th><th>Qtd</th><th>Preço</th><th>Ação</th></tr></thead>
-                        <tbody id="listaItensEstoque"><tr><td colspan="5" style="text-align:center; color:#999; padding: 15px;">Nenhum produto adicionado na lista ainda.</td></tr></tbody>
-                      </table>
-                    </div>
-                    
-                    <div style="background: #e9ecef; padding: 10px; border-radius: 5px; margin-top: 15px;">
-                      <button class="btn-acao" style="margin-top:0; border-color: #6c757d; width: 100%; white-space: normal;" onclick="adicionarCustoNota()">💸 + Adicionar Modificador (Desconto/Frete)</button>
-                      <div id="area-custos-nota"></div>
-                    </div>
-                    
-                    <div class="painel-resultado-estoque" style="background: #198754; margin-top: 10px;">
-                      <div><p class="lbl-painel-est" style="color: #d1e7dd;">Soma Custo:</p><p class="val-painel-est" id="txtSomaProdutos" data-valor="0" style="color: white; font-size: 14px;">R$ 0,00</p></div>
-                      <div style="text-align: right;"><p class="lbl-painel-est" style="color: #d1e7dd;">Total NF-e (R$):</p><p class="val-painel-est" id="txtTotalNota" style="color: #fff; font-size: 22px;">R$ 0,00</p></div>
-                    </div>
-                    <button class="btn-salvar-item" style="background: #198754; margin-top: 15px;" onclick="salvarEstoqueCompleto()">💾 ENVIAR PARA O ESTOQUE</button>
+                <!-- BLOCO DO ITEM ATUAL -->
+                <div class="bloco-form" style="border-left-color: #0d6efd; margin-bottom: 15px; display: flex; flex-direction: column;">
+                  <div class="titulo-bloco" style="display: flex; justify-content: space-between; align-items: center; color: #0d6efd; font-size: 18px;">
+                    <span id="tituloItemAtual">Item 1</span>
                   </div>
+                  
+                  <div class="linha-form">
+                    <div class="grupo-input" style="flex: 2; min-width: 200px;">
+                      <label>Nome do Modelo:</label>
+                      <div style="display: flex; gap: 5px;">
+                          <input type="text" id="cadNome" placeholder="Ex: Calça Jeans Skinny, Vestido Midi" style="flex: 1; padding: 8px 10px; border: 1px solid #ced4da; border-radius: 5px; font-size: 14px; font-weight: bold; background: #f8f9fa;">
+                          <button class="btn-acao" style="margin: 0; padding: 0 15px; height: 36px; border-radius: 5px; background: #212529; color: white; border: none; cursor: pointer;" onclick="abrirModalReposicao()" title="Buscar peça já cadastrada">🔍</button>
+                      </div>
+                    </div>
+                    <div class="grupo-input">
+                        <label>Departamento:</label>
+                        <select id="cadDepartamento">
+                            <option value="Feminino">Feminino</option>
+                            <option value="Masculino">Masculino</option>
+                            <option value="Unissex">Unissex</option>
+                        </select>
+                    </div>
+                  </div>
+                  <div class="linha-form" style="margin-bottom: 15px;">
+                    <div class="grupo-input"><label>Categoria:</label><select id="cadCategoria"><option value="Geral">Geral</option></select></div>
+                    <div class="grupo-input"><label>Coleção:</label><input type="text" id="cadColecao" placeholder="Ex: Verão, Dia das Mães, Básico"></div>
+                  </div>
+                  
+                  <!-- GALERIA DE FOTOS E BOTÃO ROSA LADO A LADO -->
+                  <div class="linha-form" style="margin-bottom: 5px; align-items: stretch;">
+                    <div class="grupo-input" style="flex: 2; min-width: 200px;">
+                        <label>📸 Fotos do Modelo (Galeria):</label>
+                        <input type="file" id="cadFotos" accept="image/*" multiple onchange="uploadFotosGaleria(this)" style="padding: 6px 10px; border: 2px dashed #0d6efd; border-radius: 5px; cursor: pointer; background: #e7f1ff; font-weight: bold; color: #0d6efd; height: 100%; box-sizing: border-box;">
+                    </div>
+                    <div class="grupo-input" style="flex: 1; min-width: 150px;">
+                        <label style="visibility: hidden; margin-bottom: 4px;">Ação:</label> 
+                        <button class="btn-acao" style="margin: 0; background:#e83e8c; color:white; border:none; padding: 8px 10px; font-size: 13px; font-weight: bold; border-radius: 5px; height: 100%; box-shadow: 0 4px 6px rgba(232, 62, 140, 0.2); cursor: pointer;" onclick="abrirModalAddVariacao()">➕ Adicionar Variação</button>
+                    </div>
+                  </div>
+                  <p style="font-size: 11px; color: #666; margin: 0 0 10px 0;">Pode selecionar várias fotos. Depois clique no botão Rosa.</p>
+                  
+                  <div id="galeria-preview" style="display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap;"></div>
+                  <div id="box-camera-estoque"><div class="linha-guia"></div><div id="interactive-estoque" class="viewport"></div><button class="btn-fechar-camera" onclick="fecharCameraEstoque()">FECHAR</button></div>
+                  
+                  <!-- PREVIEW DAS VARIAÇÕES TEMPORÁRIAS -->
+                  <div id="listaPreviewVariacoes" style="display: flex; flex-direction: column; gap: 8px; margin-top: 5px; margin-bottom: 15px;"></div>
+                  
+                  <!-- BOTÃO AZUL: ADICIONAR ITEM À NOTA -->
+                  <button class="btn-salvar-item" style="background: #0d6efd; margin-top: 0; box-shadow: 0 4px 8px rgba(13, 110, 253, 0.2); border-radius: 8px; padding: 15px; font-size: 16px;" onclick="processarVariacoesParaLista()">➕ ADICIONAR ESTE ITEM À NOTA</button>
+                </div>
+
+                <!-- BLOCO FINAL: MODIFICADORES E FINALIZAR -->
+                <div class="bloco-form" style="border-left-color: #198754;">
+                  <button class="btn-acao" style="margin-top:0; border-color: #6c757d; width: 100%; white-space: normal; background: #f8f9fa;" onclick="adicionarCustoNota()">💸 + Adicionar Modificador (Desconto/Frete)</button>
+                  <div id="area-custos-nota"></div>
+                  
+                  <div class="painel-resultado-estoque" style="background: #198754; margin-top: 15px;">
+                    <div><p class="lbl-painel-est" style="color: #d1e7dd;">Soma Custo:</p><p class="val-painel-est" id="txtSomaProdutos" data-valor="0" style="color: white; font-size: 14px;">R$ 0,00</p></div>
+                    <div style="text-align: right;"><p class="lbl-painel-est" style="color: #d1e7dd;">Total NF-e (R$):</p><p class="val-painel-est" id="txtTotalNota" style="color: #fff; font-size: 22px;">R$ 0,00</p></div>
+                  </div>
+                  <button class="btn-salvar-item" style="background: #198754; margin-top: 15px; padding: 18px; font-size: 18px;" onclick="salvarEstoqueCompleto()">✅ FINALIZAR NOTA E ENVIAR PARA O ESTOQUE</button>
                 </div>
 
               </div>
@@ -851,67 +838,80 @@
     </div> <!-- FIM DO APP CONTAINER -->
 
     <!-- ========================================== -->
-    <!-- JANELA MODAL NOVA: ADICIONAR VARIAÇÃO UNICA-->
-    <!-- ========================================== -->
+    <!-- ================= JANELA MODAL NOVA: ADICIONAR MÚLTIPLAS VARIAÇÕES ================= -->
     <div id="modalAddVariacao" class="modal-overlay" style="z-index: 400;">
-        <div class="modal-box" style="max-width: 500px; width: 95%;">
-            <h3 style="margin-top: 0; color: #e83e8c; display: flex; justify-content: space-between; border-bottom: 2px solid #eee; padding-bottom: 10px;">
-                ➕ Adicionar Variação
+        <div class="modal-box" style="max-width: 550px; width: 95%; max-height: 90vh; display: flex; flex-direction: column;">
+            <h3 style="margin-top: 0; color: #e83e8c; display: flex; justify-content: space-between; border-bottom: 2px solid #eee; padding-bottom: 10px; flex-shrink: 0;">
+                ➕ Adicionar Variações
                 <span style="cursor: pointer; color: #dc3545; font-size: 28px; line-height: 0.8;" onclick="fecharModalAddVariacao()">×</span>
             </h3>
             
-            <div class="linha-form" style="margin-bottom: 15px;">
-                <div class="grupo-input" style="width: 100%;">
-                    <label style="color: #555;">Código de Barras (Opcional):</label>
-                    <div style="display: flex; gap: 5px;">
-                        <input type="text" id="modalVarCodigo" placeholder="Bipe ou deixe em branco p/ gerar auto" style="flex: 1;">
-                        <button type="button" class="btn-camera" style="padding: 0 12px; height: 38px; border-radius: 5px; background: #212529; color: white; border: none; cursor: pointer;" onclick="abrirCameraVariacao('modalVarCodigo')" title="Escanear Código">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><line x1="7" y1="8" x2="7" y2="16" stroke="#fff" stroke-width="1.5"></line><line x1="10" y1="8" x2="10" y2="16" stroke="#fff" stroke-width="2"></line><line x1="13" y1="8" x2="13" y2="16" stroke="#fff" stroke-width="1"></line><line x1="16" y1="8" x2="16" y2="16" stroke="#fff" stroke-width="2"></line><line x1="4" y1="12" x2="20" y2="12" stroke="#ff4757" stroke-width="2.5"></line></svg>
-                        </button>
+            <div style="overflow-y: auto; padding-right: 5px; flex: 1;">
+                <!-- CÓDIGO DE BARRAS -->
+                <div class="linha-form" style="margin-bottom: 10px;">
+                    <div class="grupo-input" style="width: 100%;">
+                        <label style="color: #555;">Código de Barras (Opcional):</label>
+                        <div style="display: flex; gap: 5px;">
+                            <input type="text" id="modalVarCodigo" placeholder="Bipe ou deixe em branco p/ gerar auto" style="flex: 1;">
+                            <button type="button" class="btn-camera" style="padding: 0 12px; height: 38px; border-radius: 5px; background: #212529; color: white; border: none; cursor: pointer;" onclick="abrirCameraVariacao('modalVarCodigo')" title="Escanear Código">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><line x1="7" y1="8" x2="7" y2="16" stroke="#fff" stroke-width="1.5"></line><line x1="10" y1="8" x2="10" y2="16" stroke="#fff" stroke-width="2"></line><line x1="13" y1="8" x2="13" y2="16" stroke="#fff" stroke-width="1"></line><line x1="16" y1="8" x2="16" y2="16" stroke="#fff" stroke-width="2"></line><line x1="4" y1="12" x2="20" y2="12" stroke="#ff4757" stroke-width="2.5"></line></svg>
+                            </button>
+                        </div>
                     </div>
                 </div>
+
+                <!-- COR, TAMANHO E QTD -->
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <div class="grupo-input" style="flex: 2;">
+                        <label style="color: #555;">Cor:</label>
+                        <input type="text" id="modalVarCor" placeholder="Ex: Azul">
+                    </div>
+                    <div class="grupo-input" style="flex: 2;">
+                        <label style="color: #555;">Tamanho:</label>
+                        <input type="text" id="modalVarTamanho" placeholder="Ex: P, M, 38">
+                    </div>
+                    <div class="grupo-input" style="flex: 1.2;">
+                        <label style="color: #555;">Qtd:</label>
+                        <input type="number" id="modalVarQtd" value="1" min="1" style="text-align: center;">
+                    </div>
+                </div>
+
+                <!-- CUSTO, MARGEM E PREÇO -->
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <div class="grupo-input" style="flex: 1;">
+                        <label style="color: #555;">Custo (R$):</label>
+                        <input type="number" id="modalVarCusto" placeholder="0.00" onkeyup="calcularModalVariacao()" style="text-align: center;">
+                    </div>
+                    <div class="grupo-input" style="flex: 1;">
+                        <label style="color: #555;">Margem (%):</label>
+                        <input type="number" id="modalVarMargem" placeholder="100" value="100" onkeyup="calcularModalVariacao()" style="text-align: center;">
+                    </div>
+                    <div class="grupo-input" style="flex: 1.2;">
+                        <label style="color: #198754;">Venda (R$):</label>
+                        <input type="number" id="modalVarPreco" placeholder="0.00" style="border-color:#198754; color:#198754; font-weight:bold; text-align: center;" onkeyup="calcularModalReverso()">
+                    </div>
+                </div>
+
+                <!-- FOTO ESPECÍFICA -->
+                <div class="grupo-input" style="margin-bottom: 15px;">
+                    <label style="color: #555;">📸 Foto Específica (Opcional):</label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <div id="modalVarPreviewFoto" style="width: 45px; height: 45px; background: #e9ecef; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 16px; overflow: hidden; border: 1px solid #ced4da; flex-shrink: 0;">📷</div>
+                        <input type="file" accept="image/*" onchange="uploadFotoModalVariacao(this)" style="font-size: 13px; padding: 8px; background: #f8f9fa; border: 1px dashed #0d6efd; border-radius: 5px; cursor: pointer; width: 100%;">
+                        <input type="hidden" id="modalVarFotoUrl" value="">
+                    </div>
+                </div>
+
+                <button class="btn-acao" style="background: #f8f9fa; color: #0d6efd; border: 2px dashed #0d6efd; margin-top: 0; width: 100%; padding: 12px; font-size: 14px; font-weight: bold; border-radius: 8px;" onclick="adicionarVariacaoNaListaModal()">👇 INCLUIR NA LISTINHA DE BAIXO</button>
+                
+                <div id="listaVariaveisModal" style="margin-top: 15px; display: flex; flex-direction: column; gap: 8px;">
+                    <!-- A listinha vai aparecer aqui dentro -->
+                </div>
             </div>
 
-            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                <div class="grupo-input" style="flex: 2;">
-                    <label style="color: #555;">Cor:</label>
-                    <input type="text" id="modalVarCor" placeholder="Ex: Azul">
-                </div>
-                <div class="grupo-input" style="flex: 2;">
-                    <label style="color: #555;">Tamanho:</label>
-                    <input type="text" id="modalVarTamanho" placeholder="Ex: 38">
-                </div>
-                <div class="grupo-input" style="flex: 1.2;">
-                    <label style="color: #555;">Qtd:</label>
-                    <input type="number" id="modalVarQtd" value="1" min="1" style="text-align: center;">
-                </div>
+            <div style="flex-shrink: 0; margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px;">
+                <button class="btn-salvar-item" style="background: #e83e8c; margin: 0; padding: 15px; font-size: 16px; border-radius: 8px; box-shadow: 0 4px 8px rgba(232, 62, 140, 0.3);" onclick="salvarTodasVariacoesDoModal()">💾 SALVAR E VOLTAR PARA A TELA DO ITEM</button>
             </div>
-
-            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                <div class="grupo-input" style="flex: 1;">
-                    <label style="color: #555;">Custo (R$):</label>
-                    <input type="number" id="modalVarCusto" placeholder="0.00" onkeyup="calcularModalVariacao()" style="text-align: center;">
-                </div>
-                <div class="grupo-input" style="flex: 1;">
-                    <label style="color: #555;">Margem (%):</label>
-                    <input type="number" id="modalVarMargem" placeholder="100" value="100" onkeyup="calcularModalVariacao()" style="text-align: center;">
-                </div>
-                <div class="grupo-input" style="flex: 1.2;">
-                    <label style="color: #198754;">Venda (R$):</label>
-                    <input type="number" id="modalVarPreco" placeholder="0.00" style="border-color:#198754; color:#198754; font-weight:bold; text-align: center;" onkeyup="calcularModalReverso()">
-                </div>
-            </div>
-
-            <div class="grupo-input" style="margin-bottom: 20px;">
-                <label style="color: #555;">📸 Foto Específica (Opcional):</label>
-                <div style="display: flex; gap: 10px; align-items: center;">
-                    <div id="modalVarPreviewFoto" style="width: 45px; height: 45px; background: #e9ecef; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 16px; overflow: hidden; border: 1px solid #ced4da; flex-shrink: 0;">📷</div>
-                    <input type="file" accept="image/*" onchange="uploadFotoModalVariacao(this)" style="font-size: 13px; padding: 8px; background: #f8f9fa; border: 1px dashed #0d6efd; border-radius: 5px; cursor: pointer; width: 100%;">
-                    <input type="hidden" id="modalVarFotoUrl" value="">
-                </div>
-            </div>
-
-            <button class="btn-salvar-item" style="background: #e83e8c; margin-top: 10px;" onclick="salvarVariacaoModal()">➕ CONFIRMAR VARIAÇÃO</button>
         </div>
     </div>
 
@@ -1412,24 +1412,32 @@
       }
 
       // ==========================================
-      // NOVA LÓGICA DE ESTOQUE COM JANELA MODAL
+      // NOVA LÓGICA DE ESTOQUE COM JANELA MODAL MULTI-VARIACÕES
       // ==========================================
       let listaDeEntradaEstoque = [];
       let variacoesTemporarias = []; 
+      let variacoesDesteItemModal = []; // Memória da listinha que fica dentro da janela
 
       function abrirModalAddVariacao() {
+          variacoesDesteItemModal = []; // Zera a listinha do modal
+          renderizarListaDoModal();
+          limparCamposModalVariacao();
+
+          document.getElementById('modalAddVariacao').style.display = 'flex';
+          document.getElementById('modalVarCor').focus();
+      }
+
+      function limparCamposModalVariacao() {
           document.getElementById('modalVarCodigo').value = '';
           document.getElementById('modalVarCor').value = '';
           document.getElementById('modalVarTamanho').value = '';
           document.getElementById('modalVarQtd').value = '1';
-          document.getElementById('modalVarCusto').value = '';
-          document.getElementById('modalVarMargem').value = '100';
-          document.getElementById('modalVarPreco').value = '';
+          
+          // O custo, margem e preço eu deixei intencionalmente SEM limpar, 
+          // porque numa grade de grade (M, G, GG), geralmente o preço é o mesmo. Assim você poupa digitação!
+          
           document.getElementById('modalVarFotoUrl').value = '';
           document.getElementById('modalVarPreviewFoto').innerHTML = '📷';
-
-          document.getElementById('modalAddVariacao').style.display = 'flex';
-          document.getElementById('modalVarCor').focus();
       }
 
       function fecharModalAddVariacao() {
@@ -1439,8 +1447,7 @@
       function calcularModalVariacao() {
           let custo = parseFloat(document.getElementById('modalVarCusto').value) || 0;
           let margem = parseFloat(document.getElementById('modalVarMargem').value) || 0;
-          let lucroEmReais = custo * (margem / 100);
-          let precoSugerido = custo + lucroEmReais;
+          let precoSugerido = custo + (custo * (margem / 100));
           document.getElementById('modalVarPreco').value = precoSugerido.toFixed(2);
       }
 
@@ -1448,13 +1455,13 @@
           let custo = parseFloat(document.getElementById('modalVarCusto').value) || 0;
           let preco = parseFloat(document.getElementById('modalVarPreco').value) || 0;
           if(custo > 0 && preco > custo) {
-              let lucroR$ = preco - custo;
-              let novaMargem = (lucroR$ / custo) * 100;
+              let novaMargem = ((preco - custo) / custo) * 100;
               document.getElementById('modalVarMargem').value = novaMargem.toFixed(2);
           }
       }
 
-      function salvarVariacaoModal() {
+      // 1º Passo: O botão tracejado joga a variação pra listinha debaixo
+      function adicionarVariacaoNaListaModal() {
           let codigo = document.getElementById('modalVarCodigo').value.trim();
           let cor = document.getElementById('modalVarCor').value.trim();
           let tamanho = document.getElementById('modalVarTamanho').value.trim();
@@ -1464,6 +1471,7 @@
           let fotoUrl = document.getElementById('modalVarFotoUrl').value;
 
           if(qtd < 1) { alert("A quantidade deve ser pelo menos 1!"); return; }
+          if(cor === "" && tamanho === "") { alert("Digite pelo menos a Cor ou o Tamanho!"); return; }
 
           if (codigo === "") { 
               codigo = "*" + Math.floor(1000 + Math.random() * 9000) + "*"; 
@@ -1471,13 +1479,70 @@
               codigo = "*" + codigo + "*"; 
           }
 
-          variacoesTemporarias.push({
+          variacoesDesteItemModal.push({
               codigo: codigo, cor: cor, tamanho: tamanho, qtd: qtd,
               custo: custo, preco: preco, fotoEspecifica: fotoUrl
           });
 
+          renderizarListaDoModal();
+          limparCamposModalVariacao();
+          document.getElementById('modalVarTamanho').focus(); // Foco no tamanho pra facilitar digitar a grade
+      }
+
+      function renderizarListaDoModal() {
+          let container = document.getElementById('listaVariaveisModal');
+          container.innerHTML = '';
+          if (variacoesDesteItemModal.length === 0) {
+              container.innerHTML = '<p style="text-align:center; color:#999; font-size:12px; margin:0;">Nenhuma variação adicionada ainda.</p>';
+              return;
+          }
+
+          variacoesDesteItemModal.forEach((v, index) => {
+              let imgHtml = v.fotoEspecifica ? `<img src="${v.fotoEspecifica}" style="width:30px; height:30px; object-fit:cover; border-radius:4px;">` : `📷`;
+              container.innerHTML += `
+              <div style="display:flex; justify-content:space-between; align-items:center; background:#f8f9fa; padding:8px 12px; border:1px solid #dee2e6; border-radius:6px;">
+                  <div style="display:flex; align-items:center; gap:10px;">
+                      <div style="width:30px; height:30px; background:#fff; display:flex; align-items:center; justify-content:center; border-radius:4px; font-size:14px; border: 1px solid #dee2e6;">${imgHtml}</div>
+                      <div style="line-height:1.2;">
+                          <strong style="font-size:13px; color:#333;">Cor: ${v.cor || '-'} | Tam: ${v.tamanho || '-'}</strong><br>
+                          <span style="font-size:11px; color:#666;">Custo: R$${v.custo.toFixed(2)} | Venda: R$${v.preco.toFixed(2)}</span>
+                      </div>
+                  </div>
+                  <div style="display:flex; align-items:center; gap:15px;">
+                      <span style="font-weight:bold; color:#0d6efd; font-size:14px;">${v.qtd} un</span>
+                      <button class="btn-remover" onclick="removerVariacaoDaListaModal(${index})" style="padding:4px 8px; font-size:11px;">X</button>
+                  </div>
+              </div>`;
+          });
+      }
+
+      function removerVariacaoDaListaModal(index) {
+          variacoesDesteItemModal.splice(index, 1);
+          renderizarListaDoModal();
+      }
+
+      // 2º Passo: O Botão Rosa final joga a listinha inteira pra tela de trás e fecha a janela
+      function salvarTodasVariacoesDoModal() {
+          let corDigitada = document.getElementById('modalVarCor').value.trim();
+          let tamDigitado = document.getElementById('modalVarTamanho').value.trim();
+          
+          // MÁGICA: Se você digitou uma cor/tamanho mas esqueceu de clicar em "Incluir na listinha", ele inclui sozinho!
+          if (corDigitada !== "" || tamDigitado !== "") {
+              adicionarVariacaoNaListaModal();
+          }
+
+          if(variacoesDesteItemModal.length === 0) {
+              alert("⚠️ Você não adicionou nenhuma variação!");
+              return;
+          }
+
+          // Pega tudo que tá na listinha do modal e joga pra lista temporária principal da tela
+          variacoesDesteItemModal.forEach(v => {
+              variacoesTemporarias.push(v);
+          });
+
           fecharModalAddVariacao();
-          renderizarPreviewVariacoes();
+          renderizarPreviewVariacoes(); // Atualiza a tela de trás do item
       }
 
       function renderizarPreviewVariacoes() {
@@ -1537,6 +1602,11 @@
 
       function fecharCameraEstoque() { if (cameraEstoqueLigada) { Quagga.stop(); cameraEstoqueLigada = false; } document.getElementById('box-camera-estoque').style.display = 'none'; }
 
+      // ==========================================
+      // NOVA LÓGICA DE ESTOQUE (AGRUPANDO ITENS NA NOTA)
+      // ==========================================
+      let numeroItemAtual = 1; // Contador inteligente de itens
+
       function processarVariacoesParaLista() {
           let nome = document.getElementById('cadNome').value.trim();
           let departamento = document.getElementById('cadDepartamento').value;
@@ -1557,12 +1627,14 @@
               }
 
               listaDeEntradaEstoque.push({ 
+                  grupoId: numeroItemAtual, // <-- MARCADOR DO GRUPO PARA JUNTAR TUDO
                   codigo: v.codigo, nome: nome, departamento: departamento, categoria: categoria, colecao: colecao,
                   cor: v.cor || '-', tamanho: v.tamanho || '-', detalhes: detalhesModa, qtd: v.qtd, 
                   custoUnitario: v.custo, precoVenda: v.preco, fotoEspecifica: v.fotoEspecifica, fotos: fotosFinaisDestaVariacao
               });
           });
 
+          // Limpa o formulário e avança para o próximo Item
           variacoesTemporarias = [];
           renderizarPreviewVariacoes();
           
@@ -1571,37 +1643,111 @@
           document.getElementById('cadColecao').value = "";
           
           urlsFotosGaleria = []; document.getElementById('galeria-preview').innerHTML = "";
-          atualizarTabelaEntradaEstoque(); document.getElementById('cadNome').focus();
+          
+          // Mágica: Renomeia o título para Item 2, Item 3...
+          numeroItemAtual++;
+          if(document.getElementById('tituloItemAtual')) document.getElementById('tituloItemAtual').innerText = "Item " + numeroItemAtual;
+          
+          atualizarTabelaEntradaEstoque(); 
+          document.getElementById('cadNome').focus();
       }
 
       function atualizarTabelaEntradaEstoque() {
-          var tbody = document.getElementById('listaItensEstoque'); var html = ''; var somaDoCustoTotal = 0; 
-          if (listaDeEntradaEstoque.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#999; padding: 15px;">Nenhum produto adicionado na lista ainda.</td></tr>'; document.getElementById('totalItensLista').innerText = "0"; document.getElementById('txtSomaProdutos').innerText = "R$ 0,00"; document.getElementById('txtSomaProdutos').setAttribute('data-valor', '0'); calcularTotalNota(); return; }
+          var container = document.getElementById('containerItensAdicionados'); 
+          var html = ''; var somaDoCustoTotal = 0; 
           
+          if (listaDeEntradaEstoque.length === 0) { 
+              container.style.display = 'none'; 
+              document.getElementById('txtSomaProdutos').innerText = "R$ 0,00"; 
+              document.getElementById('txtSomaProdutos').setAttribute('data-valor', '0'); 
+              calcularTotalNota(); 
+              return; 
+          }
+          
+          container.style.display = 'flex';
+          let grupos = {}; 
+          
+          // Loop para Agrupar os itens do mesmo modelo
           for (var i = 0; i < listaDeEntradaEstoque.length; i++) {
               var p = listaDeEntradaEstoque[i]; 
               if(p.custoOriginal === undefined) p.custoOriginal = p.custoUnitario; 
               if(p.precoVendaOriginal === undefined) p.precoVendaOriginal = p.precoVenda; 
               if(p.aceitaRateio === undefined) p.aceitaRateio = true;
+              
               somaDoCustoTotal += (p.custoUnitario * p.qtd);
+              
+              let gId = p.grupoId || p.nome; // Agrupa pelo ID gerado na hora de adicionar o Item
+              if (!grupos[gId]) {
+                  grupos[gId] = { nome: p.nome, foto: (p.fotos && p.fotos.length > 0) ? p.fotos[0] : null, qtdTotal: 0, custoTotal: 0, variacoesHTML: '' };
+              }
+              
+              grupos[gId].qtdTotal += p.qtd;
+              grupos[gId].custoTotal += (p.custoUnitario * p.qtd);
               
               let chkHtml = `<label class="container-rateio-item" style="font-size:11px; color:#198754; font-weight:bold; cursor:pointer; display:none; margin-top:4px; background:#e8f5e9; padding:4px 6px; border-radius:4px; border: 1px solid #c8e6c9; width: max-content;"><input type="checkbox" style="vertical-align:middle; margin:0 4px 0 0; cursor:pointer;" onchange="alternarRateioItem(${i}, this.checked)" ${p.aceitaRateio ? 'checked' : ''}> Receber Rateio</label>`;
               
-              html += `<tr style="border-bottom: 1px solid #f0f0f0;">
-                  <td style="padding: 8px 10px; vertical-align: middle; color: #666; font-size: 12px;">${p.codigo}</td>
-                  <td style="padding: 8px 10px; vertical-align: middle;"><b style="color: #333; font-size: 14px;">${p.nome}</b><br><small style="color:#777;">${p.detalhes}</small>${chkHtml}</td>
-                  <td style="padding: 8px 10px; font-weight:bold; text-align:center; font-size:16px; vertical-align: middle;">${p.qtd}</td>
-                  <td style="padding: 8px 10px; vertical-align: middle; line-height: 1.3; white-space: nowrap;"><small style="color:#666; font-size:11px; font-weight:bold;">Custo: R$ <span id="custoItem_${i}">${p.custoUnitario.toFixed(2).replace('.',',')}</span></small><br><b style="color:#198754; font-size:14px;">Venda: R$ <span id="vendaItem_${i}">${p.precoVenda.toFixed(2).replace('.', ',')}</span></b>
-                      <div style="margin-top:5px; display:flex; align-items:center; gap:4px; background:#f8f9fa; border:1px solid #dee2e6; border-radius:4px; padding:3px 5px; width:max-content;"><span style="font-size:10px; font-weight:bold; color:#6c757d;">✏️ Ajustar:</span><input type="number" step="0.01" value="${p.precoVenda.toFixed(2)}" onchange="atualizarPrecoManual(${i}, this.value)" style="width: 55px; font-size:11px; font-weight:bold; color:#198754; text-align:center; border:1px solid #ccc; border-radius:3px; padding:2px;"></div>
-                  </td>
-                  <td style="padding: 8px 10px; text-align:center; vertical-align: middle;"><button class="btn-remover" onclick="removerItemEntrada(${i})" style="padding: 5px 10px;">X</button></td>
-              </tr>`;
+              let imgHtmlVar = (p.fotoEspecifica) ? `<img src="${p.fotoEspecifica}" style="width:30px; height:30px; object-fit:cover; border-radius:4px; border:1px solid #ccc;">` : `<div style="width:30px; height:30px; background:#eee; border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:12px; border:1px solid #ddd;">📷</div>`;
+
+              grupos[gId].variacoesHTML += `
+              <div style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 6px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; margin-top: 6px;">
+                  <div style="display: flex; gap: 10px; align-items: center;">
+                      ${imgHtmlVar}
+                      <div>
+                          <b style="color: #333; font-size: 12px;">Cód: ${p.codigo}</b> <span style="color:#0d6efd; font-size:12px; font-weight:bold;">(${p.qtd} un)</span><br>
+                          <small style="color:#666; font-size: 11px;">${p.detalhes}</small>
+                          ${chkHtml}
+                      </div>
+                  </div>
+                  <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
+                      <small style="color:#666; font-size:10px; font-weight:bold;">Custo: R$ <span id="custoItem_${i}">${p.custoUnitario.toFixed(2).replace('.',',')}</span></small>
+                      <div style="display:flex; align-items:center; gap:4px; background:#fff; border:1px solid #ced4da; border-radius:4px; padding:2px 4px;">
+                          <span style="font-size:9px; font-weight:bold; color:#6c757d;">Venda:</span>
+                          <input type="number" step="0.01" value="${p.precoVenda.toFixed(2)}" onchange="atualizarPrecoManual(${i}, this.value)" style="width: 50px; font-size:10px; font-weight:bold; color:#198754; text-align:center; border:1px solid #ccc; border-radius:3px; padding:2px;">
+                      </div>
+                      <button class="btn-remover" onclick="removerItemEntrada(${i})" style="padding: 4px 8px; font-size: 10px; margin-top: 2px;">X Remover</button>
+                  </div>
+              </div>`;
           }
           
-          tbody.innerHTML = html; document.getElementById('totalItensLista').innerText = listaDeEntradaEstoque.length;
+          // Renderiza os Blocos Principais
+          Object.keys(grupos).forEach(gId => {
+              let g = grupos[gId];
+              let imgHtml = g.foto ? `<img src="${g.foto}" style="width:50px; height:50px; object-fit:cover; border-radius:6px; border:1px solid #ccc;">` : `<div style="width:50px; height:50px; background:#eee; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:20px; border:1px solid #ddd;">📷</div>`;
+              
+              html += `
+              <div style="background: white; border: 1px solid #ced4da; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                      <div style="display: flex; gap: 12px; align-items: center;">
+                          ${imgHtml}
+                          <div>
+                              <b style="color: #333; font-size: 15px;">${g.nome}</b><br>
+                              <span style="color:#0d6efd; font-size:13px; font-weight:bold;">${g.qtdTotal} unidades</span> | 
+                              <span style="color:#198754; font-size:13px; font-weight:bold;">Custo Total: R$ ${g.custoTotal.toFixed(2).replace('.', ',')}</span>
+                          </div>
+                      </div>
+                      <button class="btn-acao" style="margin:0; background:#f8f9fa; border:1px solid #ced4da; font-weight:bold;" onclick="toggleVariacoesEstoque('var_grupo_${gId}')">👇 Ver Variações</button>
+                  </div>
+                  <!-- AQUI FICAM AS VARIAÇÕES ESCONDIDAS -->
+                  <div id="var_grupo_${gId}" style="display: none; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #ccc; flex-direction: column;">
+                      ${g.variacoesHTML}
+                  </div>
+              </div>`;
+          });
+          
+          container.innerHTML = `<h3 style="font-size:14px; margin:0 0 5px 0; color:#198754;">✔️ Itens Adicionados nesta Nota:</h3>` + html;
+          
           document.getElementById('txtSomaProdutos').innerText = "R$ " + somaDoCustoTotal.toFixed(2).replace('.', ','); 
           document.getElementById('txtSomaProdutos').setAttribute('data-valor', somaDoCustoTotal);
           setTimeout(calcularTotalNota, 50);
+      }
+
+      function toggleVariacoesEstoque(id) {
+          let el = document.getElementById(id);
+          if(el.style.display === 'none') {
+              el.style.display = 'flex';
+          } else {
+              el.style.display = 'none';
+          }
       }
       
       function atualizarPrecoManual(index, novoValorDigitado) {
@@ -1620,6 +1766,7 @@
           div.innerHTML = `<div style="display:flex; gap:8px; align-items: flex-end;"><div class="grupo-input" style="flex: 2; min-width: 120px;"><input type="text" placeholder="Ex:Desconto, Frete..." style="padding: 6px;"></div><div class="grupo-input" style="flex: 1; min-width: 110px;"><select class="tipo-custo-nota" onchange="calcularTotalNota()" style="padding: 6px;"><option value="+R$">➕ R$ Acréscimo</option><option value="+%">➕ % Acréscimo</option><option value="-R$">➖ R$ Desconto</option><option value="-%">➖ % Desconto</option></select></div><div class="grupo-input" style="flex: 1; min-width: 80px;"><input type="number" class="valor-custo-nota" placeholder="0.00" onkeyup="calcularTotalNota()" style="padding: 6px;"></div><button class="btn-remover-custo" onclick="removerCustoNota(this)">X</button></div><label style="font-size:12px; font-weight:bold; color:#0d6efd; cursor:pointer; margin-top:4px;"><input type="checkbox" class="chk-rateio-global" onchange="calcularTotalNota()" checked style="vertical-align:middle; width:16px; height:16px; cursor:pointer;"> Dividir este valor no custo dos itens marcados</label>`;
           area.appendChild(div); calcularTotalNota();
       }
+      
       function removerCustoNota(botao) { botao.closest('.linha-custo-extra').remove(); calcularTotalNota(); }
 
       function alternarRateioItem(index, valor) { listaDeEntradaEstoque[index].aceitaRateio = valor; calcularTotalNota(); }
@@ -1673,9 +1820,15 @@
       }
 
       async function salvarEstoqueCompleto() {
+          // Trava de segurança inteligente
+          if (variacoesTemporarias.length > 0) {
+              alert("⚠️ Você tem variações que ainda não foram adicionadas à nota!\n\nClique no botão azul '➕ ADICIONAR ESTE ITEM À NOTA' primeiro.");
+              return;
+          }
+
           var fornecedor = document.getElementById('cadFornecedor').value.trim(); 
           var nf = document.getElementById('cadNF').value.trim(); 
-          if (listaDeEntradaEstoque.length === 0) { alert("⚠️ A lista está vazia! Adicione os produtos primeiro."); return; }
+          if (listaDeEntradaEstoque.length === 0) { alert("⚠️ A lista da nota está vazia! Adicione os produtos primeiro."); return; }
           
           var btnSalvar = document.querySelector('.btn-salvar-item[onclick="salvarEstoqueCompleto()"]'); 
           var textoOriginal = btnSalvar.innerHTML; btnSalvar.innerHTML = "⏳ SALVANDO NA NUVEM..."; btnSalvar.disabled = true; btnSalvar.style.opacity = "0.7";
@@ -1704,8 +1857,13 @@
                       });
                   }
               }
-              alert("✅ SUCESSO ABSOLUTO!\n\nEstoque atualizado e fotos vinculadas com sucesso!");
+              alert("✅ SUCESSO ABSOLUTO!\n\nNota fiscal finalizada e estoque atualizado com sucesso!");
+              
               urlsFotosGaleria = []; document.getElementById('galeria-preview').innerHTML = ""; listaDeEntradaEstoque = []; document.getElementById('cadFornecedor').value = ""; document.getElementById('cadNF').value = ""; document.getElementById('area-custos-nota').innerHTML = ""; 
+              
+              numeroItemAtual = 1;
+              if(document.getElementById('tituloItemAtual')) document.getElementById('tituloItemAtual').innerText = "Item 1";
+              
               atualizarTabelaEntradaEstoque();
           } catch (error) { 
               console.error("Erro ao salvar:", error); alert("❌ ERRO AO SALVAR!\nVerifique sua internet. Detalhe: " + error.message);
