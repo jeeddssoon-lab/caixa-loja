@@ -89,7 +89,7 @@
       .grid-pagamento { display: flex; justify-content: space-between; gap: 5px; margin-bottom: 10px; }
       .btn-pag { flex: 1; padding: 10px 0; font-size: 12px; font-weight: bold; border: 2px solid #dee2e6; border-radius: 5px; cursor: pointer; background: #fff; color: #495057; transition: 0.2s; text-align: center; white-space: nowrap; letter-spacing: -0.3px; }
       .btn-pag:hover { background: #f8f9fa; }
-      .btn-pag.ativo { background: #0d6efd; color: white; border-color: #0d6efd; }
+      .btn-pag.ativo { background: #0d6efd; color: white; border: none; border-radius: 5px; }
       .caixa-opcoes { display: none; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px; padding: 10px; margin-bottom: 15px; }
       .label-opcao { font-size: 12px; font-weight: bold; color: #555; display: block; margin-bottom: 5px; }
       .input-opcao { width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; background: white; font-weight: bold; box-sizing: border-box; }
@@ -144,92 +144,67 @@
       @media (max-width: 768px) {
         body { padding: 0; background-color: #e9ecef;}
         
-        /* === MÁGICA: PLANILHA HORIZONTAL TRAVADA NO CELULAR === */
-        #tela-lista-itens .area-tabela, #modalVariacoesEstoque .area-tabela {
-            overflow-x: hidden !important; /* Trava a tela pra não ir pro lado de jeito nenhum */
-        }
-        #tela-lista-itens table, #modalVariacoesEstoque table { 
-            width: 100% !important; 
-            table-layout: fixed !important; /* O SEGREDO: Força a tabela a não crescer além da tela */
-        }
-        #tela-lista-itens th, #tela-lista-itens td, #modalVariacoesEstoque th, #modalVariacoesEstoque td { 
-            padding: 4px 1px !important; 
-            font-size: 9px !important; 
-            text-align: center !important; 
-            border-bottom: 1px solid #ddd !important;
-            vertical-align: middle !important;
-            white-space: normal !important; /* Deixa o texto descer pra linha de baixo pra caber */
-            word-wrap: break-word !important;
-            line-height: 1.1 !important;
-        }
+        #tela-lista-itens .area-tabela, #modalVariacoesEstoque .area-tabela { overflow-x: hidden !important; }
+        #tela-lista-itens table, #modalVariacoesEstoque table { width: 100% !important; table-layout: fixed !important; }
+        #tela-lista-itens th, #tela-lista-itens td, #modalVariacoesEstoque th, #modalVariacoesEstoque td { padding: 4px 1px !important; font-size: 9px !important; text-align: center !important; border-bottom: 1px solid #ddd !important; vertical-align: middle !important; white-space: normal !important; word-wrap: break-word !important; line-height: 1.1 !important; }
         
-        /* ESCONDE AS COLUNAS SECUNDÁRIAS (Código e Fornecedor) SÓ NO CELULAR PRA ABRIR ESPAÇO */
         #tela-lista-itens th:nth-child(2), #tela-lista-itens td:nth-child(2), 
         #modalVariacoesEstoque th:nth-child(2), #modalVariacoesEstoque td:nth-child(2) { display: none !important; }
         
         #tela-lista-itens th:nth-child(4), #tela-lista-itens td:nth-child(4), 
         #modalVariacoesEstoque th:nth-child(4), #modalVariacoesEstoque td:nth-child(4) { display: none !important; }
 
-        /* LARGURAS DAS 6 COLUNAS QUE SOBRARAM (Total = 100%) */
         #tela-lista-itens th:nth-child(1), #tela-lista-itens td:nth-child(1),
-        #modalVariacoesEstoque th:nth-child(1), #modalVariacoesEstoque td:nth-child(1) { width: 12% !important; } /* Foto */
+        #modalVariacoesEstoque th:nth-child(1), #modalVariacoesEstoque td:nth-child(1) { width: 12% !important; } 
         
         #tela-lista-itens th:nth-child(3), #tela-lista-itens td:nth-child(3),
-        #modalVariacoesEstoque th:nth-child(3), #modalVariacoesEstoque td:nth-child(3) { width: 33% !important; text-align: left !important; padding-left: 4px !important; } /* Detalhes */
+        #modalVariacoesEstoque th:nth-child(3), #modalVariacoesEstoque td:nth-child(3) { width: 33% !important; text-align: left !important; padding-left: 4px !important; } 
         
         #tela-lista-itens th:nth-child(5), #tela-lista-itens td:nth-child(5),
-        #modalVariacoesEstoque th:nth-child(5), #modalVariacoesEstoque td:nth-child(5) { width: 16% !important; } /* Custo */
+        #modalVariacoesEstoque th:nth-child(5), #modalVariacoesEstoque td:nth-child(5) { width: 16% !important; } 
         
         #tela-lista-itens th:nth-child(6), #tela-lista-itens td:nth-child(6),
-        #modalVariacoesEstoque th:nth-child(6), #modalVariacoesEstoque td:nth-child(6) { width: 16% !important; } /* Venda */
+        #modalVariacoesEstoque th:nth-child(6), #modalVariacoesEstoque td:nth-child(6) { width: 16% !important; } 
         
         #tela-lista-itens th:nth-child(7), #tela-lista-itens td:nth-child(7),
-        #modalVariacoesEstoque th:nth-child(7), #modalVariacoesEstoque td:nth-child(7) { width: 8% !important; font-size: 12px !important; font-weight: bold !important;} /* Qtd */
+        #modalVariacoesEstoque th:nth-child(7), #modalVariacoesEstoque td:nth-child(7) { width: 8% !important; font-size: 12px !important; font-weight: bold !important;} 
         
         #tela-lista-itens th:nth-child(8), #tela-lista-itens td:nth-child(8),
-        #modalVariacoesEstoque th:nth-child(8), #modalVariacoesEstoque td:nth-child(8) { width: 15% !important; } /* Ações */
+        #modalVariacoesEstoque th:nth-child(8), #modalVariacoesEstoque td:nth-child(8) { width: 15% !important; } 
 
-        /* AJUSTES VISUAIS DOS ITENS PARA CABER TUDO */
         #tela-lista-itens img, #modalVariacoesEstoque img { width: 24px !important; height: 24px !important; border-radius: 3px !important;}
         #tela-lista-itens td > div[style*="width: 50px"], #modalVariacoesEstoque td > div[style*="width: 40px"] { width: 24px !important; height: 24px !important; font-size: 9px !important; border-radius: 3px !important;}
         #tela-lista-itens b, #modalVariacoesEstoque b { font-size: 10px !important; }
         #tela-lista-itens span, #modalVariacoesEstoque span { font-size: 8px !important; }
         
-        /* Botões organizados */
         .btn-acao, .btn-remover { padding: 4px !important; font-size: 9px !important; margin: 1px !important; min-width: 18px !important;}
         
-        /* Na edição (Lápis), os campos de digitar não podem estourar a tela */
         #modalVariacoesEstoque input { max-width: 100% !important; box-sizing: border-box !important; }
         
         .app-container { flex-direction: column; }
         .topbar-mobile { display: flex; }
         
-        /* DESTRAVA A ROLAGEM GERAL DA TELA NO CELULAR */
         .main-content { padding: 10px; justify-content: flex-start !important; }
         
         .pdv-container { flex-direction: column; height: auto; gap: 10px; }
         .area-tabela { max-height: 300px !important; overflow-y: auto !important; }
         
-        /* O CÉREBRO DO MENU LATERAL OCULTO (MENU HAMBÚRGUER) */
         .sidebar { position: fixed; top: 0; left: -300px; width: 260px; height: 100vh; z-index: 105; transition: left 0.3s ease-in-out; }
         .sidebar.aberta { left: 0; box-shadow: 5px 0 15px rgba(0,0,0,0.5); }
         .sidebar-logo span { display: inline; }
         .sidebar-btn { font-size: 15px; padding: 12px 15px; justify-content: flex-start; }
         
-        /* DESTRAVANDO TOTALMENTE A TELA DE ESTOQUE NO CELULAR */
         #tela-estoque { height: auto !important; overflow: visible !important; }
         #tela-estoque > div { flex-direction: column !important; overflow: visible !important; height: auto !important; display: flex !important; }
         
-        /* O SEGREDO PRA TABELA NÃO SUMIR: Forçar blocos fixos */
         #tela-estoque > div > div { height: auto !important; overflow: visible !important; width: 100% !important; min-width: 0 !important; display: block !important; }
         #tela-estoque .bloco-form { display: block !important; height: auto !important; }
         #tela-estoque .area-tabela { min-height: 150px !important; max-height: 400px !important; display: block !important; width: 100% !important; }
         
-        /* ESTICAR A TELA "MEUS ITENS" ATÉ O CHÃO NO CELULAR */
         #tela-lista-itens { height: calc(100vh - 80px) !important; }
         #tela-lista-itens .bloco-form { flex: 1 !important; display: flex !important; flex-direction: column !important; margin-bottom: 0 !important; }
         #tela-lista-itens .area-tabela { max-height: none !important; flex: 1 !important; }
-    }
+      }
         
     </style>
   </head>
@@ -342,11 +317,9 @@
             <div id="tela-estoque" class="tela-oculta" style="display: flex; flex-direction: column; height: calc(100vh - 40px);">
               <h2 style="flex-shrink: 0;">📦 Entrada de Mercadorias (Grade)</h2>
               
-              <!-- O SEGREDO DO SCROLL: min-height: 0 trava o fundo da tela -->
               <div style="display: flex; gap: 15px; flex: 1; overflow: hidden; min-height: 0;">
                 
-                <!-- ================= LADO ESQUERDO (FORMULÁRIOS) ================= -->
-                <!-- Adicionado height: 100% e um espaço extra (padding-bottom) para rolar até o fim -->
+                <!-- ================= LADO ESQUERDO (FORMULÁRIOS E VARIACÕES GLOBAIS) ================= -->
                 <div style="flex: 2; min-width: 300px; overflow-y: auto; padding-right: 10px; height: 100%; padding-bottom: 40px;">
                   
                   <!-- BLOCO 1: NF -->
@@ -358,11 +331,10 @@
                     </div>
                   </div>
                   
-                  <!-- BLOCO 2: DETALHES DA PEÇA E VARIAÇÕES -->
+                  <!-- BLOCO 2: INFORMAÇÕES DO MODELO BASE -->
                   <div class="bloco-form" style="border-left-color: #0d6efd; margin-bottom: 5px;">
                     <div class="titulo-bloco" style="display: flex; justify-content: space-between; align-items: center;">
-                      <span>2. Detalhes da Peça e Variações (Grade)</span>
-                      <button class="btn-acao" style="margin:0; background:#e83e8c; color:white; border:none; padding: 6px 15px;" onclick="adicionarLinhaVariacao()">➕ Nova Cor/Tamanho</button>
+                      <span>2. Detalhes Gerais do Modelo</span>
                     </div>
                     
                     <div class="linha-form">
@@ -395,14 +367,18 @@
                           <div id="galeria-preview" style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;"></div>
                       </div>
                     </div>
-
-                    <div id="box-camera-estoque"><div class="linha-guia"></div><div id="interactive-estoque" class="viewport"></div><button class="btn-fechar-camera" onclick="fecharCameraEstoque()">FECHAR</button></div>
-
-                    <div style="border-top: 1px dashed #ccc; margin: 15px 0 10px 0;"></div>
-
-                    <div id="container-variacoes"></div>
                     
-                    <button class="btn-salvar-item" style="background: #0d6efd; margin-top: 10px;" onclick="processarVariacoesParaLista()">⬇️ JOGAR TODAS AS VARIAÇÕES PARA A LISTA DA NF</button>
+                    <div style="border-top: 1px dashed #ccc; margin: 15px 0 10px 0;"></div>
+                    
+                    <!-- NOVO BOTÃO DE ADICIONAR VARIAÇÃO (ABRE MODAL) -->
+                    <div style="display: flex; justify-content: center; margin-bottom: 10px;">
+                        <button class="btn-acao" style="background:#e83e8c; color:white; border:none; padding: 12px 20px; font-size: 15px; font-weight: bold; border-radius: 8px; width: 100%; box-shadow: 0 4px 6px rgba(232, 62, 140, 0.2);" onclick="abrirModalAddVariacao()">➕ Adicionar Variações (Cor/Tamanho)</button>
+                    </div>
+
+                    <!-- LISTA LIMPA DE PRÉVIA DAS VARIAÇÕES (ANTES DE IR PRA NF) -->
+                    <div id="listaPreviewVariacoes" style="display: flex; flex-direction: column; gap: 8px;"></div>
+                    
+                    <button class="btn-salvar-item" style="background: #0d6efd; margin-top: 15px;" onclick="processarVariacoesParaLista()">⬇️ JOGAR TODAS AS VARIAÇÕES PARA A LISTA DA NF</button>
                   </div>
                 </div>
 
@@ -906,6 +882,76 @@
 
         </main>
     </div> <!-- FIM DO APP CONTAINER -->
+
+    <!-- ========================================== -->
+    <!-- JANELA MODAL NOVA: ADICIONAR VARIAÇÃO UNICA-->
+    <!-- ========================================== -->
+    <div id="modalAddVariacao" class="modal-overlay" style="z-index: 400;">
+        <div class="modal-box" style="max-width: 500px; width: 95%;">
+            <h3 style="margin-top: 0; color: #e83e8c; display: flex; justify-content: space-between; border-bottom: 2px solid #eee; padding-bottom: 10px;">
+                ➕ Adicionar Variação
+                <span style="cursor: pointer; color: #dc3545; font-size: 28px; line-height: 0.8;" onclick="fecharModalAddVariacao()">×</span>
+            </h3>
+            
+            <!-- CÓDIGO DE BARRAS -->
+            <div class="linha-form" style="margin-bottom: 15px;">
+                <div class="grupo-input" style="width: 100%;">
+                    <label style="color: #555;">Código de Barras (Opcional):</label>
+                    <div style="display: flex; gap: 5px;">
+                        <input type="text" id="modalVarCodigo" placeholder="Bipe ou deixe em branco p/ gerar auto" style="flex: 1;">
+                        <button type="button" class="btn-camera" style="padding: 0 12px; height: 38px; border-radius: 5px; background: #212529; color: white; border: none; cursor: pointer;" onclick="abrirCameraVariacao('modalVarCodigo')" title="Escanear Código">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><line x1="7" y1="8" x2="7" y2="16" stroke="#fff" stroke-width="1.5"></line><line x1="10" y1="8" x2="10" y2="16" stroke="#fff" stroke-width="2"></line><line x1="13" y1="8" x2="13" y2="16" stroke="#fff" stroke-width="1"></line><line x1="16" y1="8" x2="16" y2="16" stroke="#fff" stroke-width="2"></line><line x1="4" y1="12" x2="20" y2="12" stroke="#ff4757" stroke-width="2.5"></line></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COR, TAMANHO E QTD -->
+            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <div class="grupo-input" style="flex: 2;">
+                    <label style="color: #555;">Cor:</label>
+                    <input type="text" id="modalVarCor" placeholder="Ex: Azul">
+                </div>
+                <div class="grupo-input" style="flex: 2;">
+                    <label style="color: #555;">Tamanho:</label>
+                    <input type="text" id="modalVarTamanho" placeholder="Ex: 38">
+                </div>
+                <div class="grupo-input" style="flex: 1.2;">
+                    <label style="color: #555;">Qtd:</label>
+                    <input type="number" id="modalVarQtd" value="1" min="1" style="text-align: center;">
+                </div>
+            </div>
+
+            <!-- CUSTO, MARGEM E PREÇO -->
+            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <div class="grupo-input" style="flex: 1;">
+                    <label style="color: #555;">Custo (R$):</label>
+                    <input type="number" id="modalVarCusto" placeholder="0.00" onkeyup="calcularModalVariacao()" style="text-align: center;">
+                </div>
+                <div class="grupo-input" style="flex: 1;">
+                    <label style="color: #555;">Margem (%):</label>
+                    <input type="number" id="modalVarMargem" placeholder="100" value="100" onkeyup="calcularModalVariacao()" style="text-align: center;">
+                </div>
+                <div class="grupo-input" style="flex: 1.2;">
+                    <label style="color: #198754;">Venda (R$):</label>
+                    <input type="number" id="modalVarPreco" placeholder="0.00" style="border-color:#198754; color:#198754; font-weight:bold; text-align: center;" onkeyup="calcularModalReverso()">
+                </div>
+            </div>
+
+            <!-- FOTO ESPECÍFICA -->
+            <div class="grupo-input" style="margin-bottom: 20px;">
+                <label style="color: #555;">📸 Foto Específica (Opcional):</label>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <div id="modalVarPreviewFoto" style="width: 45px; height: 45px; background: #e9ecef; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 16px; overflow: hidden; border: 1px solid #ced4da; flex-shrink: 0;">📷</div>
+                    <input type="file" accept="image/*" onchange="uploadFotoModalVariacao(this)" style="font-size: 13px; padding: 8px; background: #f8f9fa; border: 1px dashed #0d6efd; border-radius: 5px; cursor: pointer; width: 100%;">
+                    <input type="hidden" id="modalVarFotoUrl" value="">
+                </div>
+            </div>
+
+            <button class="btn-salvar-item" style="background: #e83e8c; margin-top: 10px;" onclick="salvarVariacaoModal()">➕ CONFIRMAR VARIAÇÃO</button>
+        </div>
+    </div>
+
     <!-- ================= JANELA MODAL DE EDITAR GRUPO PRINCIPAL ================= -->
     <div id="modalEditarGrupo" class="modal-overlay" style="z-index: 350;">
       <div class="modal-box" style="max-width: 400px;">
@@ -943,6 +989,7 @@
         <button class="btn-salvar-item" style="background: #17a2b8;" onclick="salvarEdicaoGrupo()">💾 SALVAR PARA TODAS AS VARIAÇÕES</button>
       </div>
     </div>
+    
     <!-- ================= JANELA MODAL DE VER VARIAÇÕES DO ESTOQUE ================= -->
     <div id="modalVariacoesEstoque" class="modal-overlay" style="z-index: 300;">
         <div class="modal-box" style="max-width: 900px; width: 95%;">
@@ -1134,7 +1181,6 @@
               document.getElementById("senhaLogin").value = localStorage.getItem("senhaSalva");
               document.getElementById("lembrarCheck").checked = true;
           }
-          adicionarLinhaVariacao(); // Inicia o estoque já com 1 linha pronta para digitar
           carregarListaCategorias(); // Puxa as categorias para o seletor do estoque
       };
 
@@ -1299,9 +1345,7 @@
               let taxasSalvas = JSON.parse(localStorage.getItem('taxasMaquininhaLOJA')) || {};
               
               if (temCredito) {
-                  // Cliente sempre paga a taxa cheia de 10x no valor do produto
                   taxaParaOCliente = parseFloat(taxasSalvas[prefixo + '_10']) || 0;
-                  // O PDV vai calcular o líquido descontando apenas a taxa da maquininha da parcela real
                   taxaRealDaMaquininha = parseFloat(taxasSalvas[prefixo + '_' + parcelas]) || 0;
               } else {
                   taxaParaOCliente = parseFloat(taxasSalvas[prefixo + '_Débito']) || 0;
@@ -1312,7 +1356,6 @@
           for (var i = 0; i < window.carrinho.length; i++) { 
               var p = window.carrinho[i]; var precoBase = limpaValorHTML(p.precoVista); var precoComTaxa = precoBase;
               
-              // Cobra do cliente a taxa cheia travada
               if (taxaParaOCliente > 0) { precoComTaxa = Math.round((precoBase / (1 - (taxaParaOCliente / 100))) * 100) / 100; }
               
               var subtotalItem = precoComTaxa * p.quantidadeComprada; subtotal += subtotalItem; 
@@ -1338,7 +1381,6 @@
           
           document.getElementById('txtTotal').innerText = "R$ " + totalFinal.toFixed(2).replace('.', ','); 
           
-          // MÁGICA DO LUCRO EXTRA: Mostra pro vendedor o que cai na conta!
           if (temCredito || temDebito) {
               window.valorLiquidoGlobal = totalFinal - (totalFinal * (taxaRealDaMaquininha / 100));
               if(document.getElementById('linhaLiquido')) {
@@ -1431,100 +1473,121 @@
       }
 
       // ==========================================
-      // NOVA LÓGICA DE ESTOQUE COM GRADE (MATRIZ)
+      // NOVA LÓGICA DE ESTOQUE COM GRADE (MATRIZ) - AGORA COM JANELA MODAL
       // ==========================================
       let listaDeEntradaEstoque = [];
-      let contadorVariaveis = 0;
+      let variacoesTemporarias = []; // Armazena a lista do botão rosa antes de ir pra NF
 
-      // 1. O botão Rosa de Adicionar Variação puxa essa função
-      // 1. O botão Rosa de Adicionar Variação puxa essa função
-      function adicionarLinhaVariacao() {
-          contadorVariaveis++;
-          let div = document.createElement('div');
-          div.className = 'linha-variacao-item';
-          div.style.cssText = "background: #ffffff; border: 1px solid #ced4da; border-radius: 6px; padding: 12px; margin-bottom: 10px; position: relative; box-shadow: 0 2px 4px rgba(0,0,0,0.05);";
-          div.innerHTML = `
-              <!-- 1. CÓDIGO E BOTÃO REMOVER -->
-              <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 10px; gap: 5px;">
-                  <div class="grupo-input" style="flex: 1; min-width: 10px;">
-                      <label style="font-size: 11px; font-weight: bold; color: #555;">Código de Barras:</label>
-                      <div style="display: flex; gap: 5px;">
-                          <input type="text" class="var-codigo" id="var-cod-${contadorVariaveis}" placeholder="Bipe/Digite" style="flex: 1; min-width: 10px;">
-                          <button type="button" class="btn-camera" style="padding: 0 10px; height: 34px; display: flex; align-items: center; justify-content: center; background: #212529; color: white; border: none; border-radius: 4px; cursor: pointer;" onclick="abrirCameraVariacao('var-cod-${contadorVariaveis}')" title="Escanear Código">
-                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><line x1="7" y1="8" x2="7" y2="16" stroke="#fff" stroke-width="1.5"></line><line x1="10" y1="8" x2="10" y2="16" stroke="#fff" stroke-width="2"></line><line x1="13" y1="8" x2="13" y2="16" stroke="#fff" stroke-width="1"></line><line x1="16" y1="8" x2="16" y2="16" stroke="#fff" stroke-width="2"></line><line x1="4" y1="12" x2="20" y2="12" stroke="#ff4757" stroke-width="2.5"></line></svg>
-                          </button>
-                      </div>
-                  </div>
-                  <button type="button" onclick="this.parentElement.parentElement.remove()" style="background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; padding: 0 12px; font-weight: bold; font-size: 11px; height: 34px; white-space: nowrap;">X Remover</button>
-              </div>
+      function abrirModalAddVariacao() {
+          // 1. Limpa os campos da janela toda vez que abre
+          document.getElementById('modalVarCodigo').value = '';
+          document.getElementById('modalVarCor').value = '';
+          document.getElementById('modalVarTamanho').value = '';
+          document.getElementById('modalVarQtd').value = '1';
+          document.getElementById('modalVarCusto').value = '';
+          document.getElementById('modalVarMargem').value = '100';
+          document.getElementById('modalVarPreco').value = '';
+          document.getElementById('modalVarFotoUrl').value = '';
+          document.getElementById('modalVarPreviewFoto').innerHTML = '📷';
 
-              <!-- 2. COR, TAMANHO E QTD (EM UMA LINHA SÓ) -->
-              <div style="display: flex; gap: 5px; margin-bottom: 10px;">
-                  <div class="grupo-input" style="flex: 2; min-width: 10px;">
-                      <label style="font-size: 11px; font-weight: bold; color: #555;">Cor:</label>
-                      <input type="text" class="var-cor" placeholder="Ex: Azul" style="min-width: 10px; width: 100%; box-sizing: border-box; padding: 8px 5px;">
-                  </div>
-                  <div class="grupo-input" style="flex: 2; min-width: 10px;">
-                      <label style="font-size: 11px; font-weight: bold; color: #555;">Tam:</label>
-                      <input type="text" class="var-tamanho" placeholder="Ex: 38" style="min-width: 10px; width: 100%; box-sizing: border-box; padding: 8px 5px;">
-                  </div>
-                  <div class="grupo-input" style="flex: 1.2; min-width: 10px;">
-                      <label style="font-size: 11px; font-weight: bold; color: #555;">Qtd:</label>
-                      <input type="number" class="var-qtd" value="1" min="1" style="min-width: 10px; width: 100%; box-sizing: border-box; text-align: center; padding: 8px 2px;">
-                  </div>
-              </div>
-
-              <!-- 3. CUSTO, MARGEM E PREÇO (EM UMA LINHA SÓ) -->
-              <div style="display: flex; gap: 5px; margin-bottom: 10px;">
-                  <div class="grupo-input" style="flex: 1; min-width: 10px;">
-                      <label style="font-size: 10px; font-weight: bold; color: #555;">Custo (R$):</label>
-                      <input type="number" class="var-custo" placeholder="0.00" onkeyup="calcularLinhaVariacao(this)" style="min-width: 10px; width: 100%; box-sizing: border-box; padding: 8px 2px; text-align: center;">
-                  </div>
-                  <div class="grupo-input" style="flex: 1; min-width: 10px;">
-                      <label style="font-size: 10px; font-weight: bold; color: #555;">Margem(%):</label>
-                      <input type="number" class="var-margem" placeholder="100" onkeyup="calcularLinhaVariacao(this)" style="min-width: 10px; width: 100%; box-sizing: border-box; padding: 8px 2px; text-align: center;">
-                  </div>
-                  <div class="grupo-input" style="flex: 1.2; min-width: 10px;">
-                      <label style="font-size: 10px; font-weight: bold; color: #198754;">Venda(R$):</label>
-                      <input type="number" class="var-preco" placeholder="0.00" style="border-color:#198754; color:#198754; font-weight:bold; min-width: 10px; width: 100%; box-sizing: border-box; padding: 8px 2px; text-align: center;" onkeyup="calcularLinhaReverso(this)">
-                  </div>
-              </div>
-
-              <!-- 4. FOTO (CORRIGIDA) -->
-              <div class="grupo-input" style="min-width: 10px;">
-                  <label style="font-size: 11px; font-weight: bold; color: #555;">📸 Foto Específica (Opcional):</label>
-                  <div style="display: flex; gap: 5px; align-items: center;">
-                      <div class="preview-var-foto" style="width: 32px; height: 32px; background: #e9ecef; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 12px; overflow: hidden; border: 1px solid #ced4da; flex-shrink: 0;">📷</div>
-                      <input type="file" accept="image/*" onchange="uploadFotoVariacao(this)" style="font-size: 11px; padding: 6px; background: #f8f9fa; border: 1px dashed #0d6efd; border-radius: 4px; cursor: pointer; width: 100%; box-sizing: border-box;">
-                      <input type="hidden" class="var-foto-url" value="">
-                  </div>
-              </div>
-          `;
-          document.getElementById('container-variacoes').appendChild(div);
+          // 2. Mostra a Janela e coloca o cursor na Cor
+          document.getElementById('modalAddVariacao').style.display = 'flex';
+          document.getElementById('modalVarCor').focus();
       }
 
-      // 2. Os cálculos matemáticos rodam INDIVIDUALMENTE para cada tamanho
-      function calcularLinhaVariacao(inputElement) {
-          let linha = inputElement.closest('.linha-variacao-item');
-          let custo = parseFloat(linha.querySelector('.var-custo').value) || 0;
-          let margem = parseFloat(linha.querySelector('.var-margem').value) || 0;
+      function fecharModalAddVariacao() {
+          document.getElementById('modalAddVariacao').style.display = 'none';
+      }
+
+      function calcularModalVariacao() {
+          let custo = parseFloat(document.getElementById('modalVarCusto').value) || 0;
+          let margem = parseFloat(document.getElementById('modalVarMargem').value) || 0;
           let lucroEmReais = custo * (margem / 100);
           let precoSugerido = custo + lucroEmReais;
-          linha.querySelector('.var-preco').value = precoSugerido.toFixed(2);
+          document.getElementById('modalVarPreco').value = precoSugerido.toFixed(2);
       }
 
-      function calcularLinhaReverso(inputElement) {
-          let linha = inputElement.closest('.linha-variacao-item');
-          let custo = parseFloat(linha.querySelector('.var-custo').value) || 0;
-          let preco = parseFloat(linha.querySelector('.var-preco').value) || 0;
+      function calcularModalReverso() {
+          let custo = parseFloat(document.getElementById('modalVarCusto').value) || 0;
+          let preco = parseFloat(document.getElementById('modalVarPreco').value) || 0;
           if(custo > 0 && preco > custo) {
               let lucroR$ = preco - custo;
               let novaMargem = (lucroR$ / custo) * 100;
-              linha.querySelector('.var-margem').value = novaMargem.toFixed(2);
+              document.getElementById('modalVarMargem').value = novaMargem.toFixed(2);
           }
       }
 
-      // 3. A Câmera agora é inteligente e sabe preencher a caixa certa
+      function salvarVariacaoModal() {
+          let codigo = document.getElementById('modalVarCodigo').value.trim();
+          let cor = document.getElementById('modalVarCor').value.trim();
+          let tamanho = document.getElementById('modalVarTamanho').value.trim();
+          let qtd = parseInt(document.getElementById('modalVarQtd').value) || 1;
+          let custo = parseFloat(document.getElementById('modalVarCusto').value) || 0;
+          let preco = parseFloat(document.getElementById('modalVarPreco').value) || 0;
+          let fotoUrl = document.getElementById('modalVarFotoUrl').value;
+
+          if(qtd < 1) {
+              alert("A quantidade deve ser pelo menos 1!");
+              return;
+          }
+
+          // Se deixar o código em branco, o sistema gera o asterisco automático
+          if (codigo === "") { 
+              codigo = "*" + Math.floor(1000 + Math.random() * 9000) + "*"; 
+          } else if (!codigo.includes('*') && !isNaN(codigo)) { 
+              codigo = "*" + codigo + "*"; 
+          }
+
+          variacoesTemporarias.push({
+              codigo: codigo,
+              cor: cor,
+              tamanho: tamanho,
+              qtd: qtd,
+              custo: custo,
+              preco: preco,
+              fotoEspecifica: fotoUrl
+          });
+
+          fecharModalAddVariacao();
+          renderizarPreviewVariacoes();
+      }
+
+      function renderizarPreviewVariacoes() {
+          let container = document.getElementById('listaPreviewVariacoes');
+          container.innerHTML = '';
+          
+          if(variacoesTemporarias.length === 0) {
+              container.style.display = 'none';
+              return;
+          }
+          
+          container.style.display = 'flex';
+          
+          variacoesTemporarias.forEach((v, index) => {
+              let imgHtml = v.fotoEspecifica ? `<img src="${v.fotoEspecifica}" style="width:100%; height:100%; object-fit:cover; border-radius:4px;">` : `📷`;
+              container.innerHTML += `
+              <div style="display:flex; justify-content:space-between; align-items:center; background:#ffffff; padding:12px; border:1px solid #ced4da; border-radius:6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                  <div style="display:flex; align-items:center; gap:12px;">
+                      <div style="width:35px; height:35px; background:#f8f9fa; display:flex; align-items:center; justify-content:center; border-radius:4px; font-size:14px; border: 1px solid #dee2e6;">${imgHtml}</div>
+                      <div>
+                          <strong style="font-size:13px; color:#333;">Cor: ${v.cor || '-'} | Tam: ${v.tamanho || '-'}</strong><br>
+                          <span style="font-size:11px; color:#666;">Cód: ${v.codigo} | Custo: R$ ${v.custo.toFixed(2)} | Venda: R$ ${v.preco.toFixed(2)}</span>
+                      </div>
+                  </div>
+                  <div style="display:flex; align-items:center; gap:15px;">
+                      <span style="font-weight:bold; color:#0d6efd; font-size:15px;">${v.qtd} un</span>
+                      <button class="btn-remover" onclick="removerVariacaoTemp(${index})" style="padding:6px 10px; font-size:11px;" title="Remover da lista">X</button>
+                  </div>
+              </div>`;
+          });
+      }
+
+      function removerVariacaoTemp(index) {
+          variacoesTemporarias.splice(index, 1);
+          renderizarPreviewVariacoes();
+      }
+
+      // A Câmera continua inteligente e sabe preencher a caixa certa
       let cameraEstoqueLigada = false;
       let inputCameraAlvo = '';
 
@@ -1557,7 +1620,7 @@
 
       function fecharCameraEstoque() { if (cameraEstoqueLigada) { Quagga.stop(); cameraEstoqueLigada = false; } document.getElementById('box-camera-estoque').style.display = 'none'; }
 
-      // 4. O Botão Azul junta a Peça Pai + Todas as Variações
+      // O Botão Azul junta a Peça Pai + A listinha Temporária de Variações
       function processarVariacoesParaLista() {
           let nome = document.getElementById('cadNome').value.trim();
           let departamento = document.getElementById('cadDepartamento').value;
@@ -1570,83 +1633,56 @@
               return;
           }
 
-          let linhas = document.querySelectorAll('.linha-variacao-item');
-          if (linhas.length === 0) {
-              alert("⚠️ Adicione pelo menos uma variação (Cor/Tamanho)!");
+          if (variacoesTemporarias.length === 0) {
+              alert("⚠️ Adicione pelo menos uma variação (Cor/Tamanho) clicando no botão rosa!");
               return;
           }
 
-          let variacoesProcessadas = 0;
-
-          linhas.forEach(linha => {
-              let codigo = linha.querySelector('.var-codigo').value.trim();
-              let cor = linha.querySelector('.var-cor').value.trim() || '-';
-              let tamanho = linha.querySelector('.var-tamanho').value.trim() || '-';
-              let qtd = parseInt(linha.querySelector('.var-qtd').value) || 0;
-              let custo = parseFloat(linha.querySelector('.var-custo').value) || 0;
-              let preco = parseFloat(linha.querySelector('.var-preco').value) || 0;
-              
-              // CAPTURA A FOTO ESPECÍFICA DE NOVO
-              let fotoEspecifica = linha.querySelector('.var-foto-url') ? linha.querySelector('.var-foto-url').value : "";
-
-              if (qtd <= 0) return; // Ignora se a pessoa apertou "+" a mais e deixou zerado
-
-              if (codigo === "") { 
-                  var numeroGerado = Math.floor(1000 + Math.random() * 9000); 
-                  codigo = "*" + numeroGerado + "*"; 
-              } else if (!codigo.includes('*') && !isNaN(codigo)) { 
-                  codigo = "*" + codigo + "*"; 
-              }
-
-              var detalhesModa = `Cor: ${cor} | Tam: ${tamanho}`;
+          variacoesTemporarias.forEach(v => {
+              var detalhesModa = `Cor: ${v.cor || '-'} | Tam: ${v.tamanho || '-'}`;
 
               let fotosFinaisDestaVariacao = [];
-              if (fotoEspecifica !== "") {
-                  fotosFinaisDestaVariacao.push(fotoEspecifica); // A foto específica entra como PRINCIPAL (A primeira)
+              if (v.fotoEspecifica !== "") {
+                  fotosFinaisDestaVariacao.push(v.fotoEspecifica); // A foto específica entra como PRINCIPAL (A primeira)
                   urlsFotosGaleria.forEach(img => {
-                      if(img !== fotoEspecifica) fotosFinaisDestaVariacao.push(img); // Bota as fotos do modelo atrás
+                      if(img !== v.fotoEspecifica) fotosFinaisDestaVariacao.push(img); // Bota as fotos do modelo atrás
                   });
               } else {
                   fotosFinaisDestaVariacao = [...urlsFotosGaleria]; // Se não botou foto específica, usa só as da galeria geral
               }
 
               listaDeEntradaEstoque.push({ 
-                  codigo: codigo, 
+                  codigo: v.codigo, 
                   nome: nome, 
                   departamento: departamento,
                   categoria: categoria,
                   colecao: colecao,
-                  cor: cor,
-                  tamanho: tamanho,
+                  cor: v.cor || '-',
+                  tamanho: v.tamanho || '-',
                   detalhes: detalhesModa, 
-                  qtd: qtd, 
-                  custoUnitario: custo, 
-                  precoVenda: preco,
-                  fotoEspecifica: fotoEspecifica, // <--- O SEGREDO ESTÁ AQUI (Gravando quem é a específica!)
+                  qtd: v.qtd, 
+                  custoUnitario: v.custo, 
+                  precoVenda: v.preco,
+                  fotoEspecifica: v.fotoEspecifica,
                   fotos: fotosFinaisDestaVariacao
               });
-              
-              variacoesProcessadas++;
           });
 
-          if(variacoesProcessadas > 0) {
-              document.getElementById('container-variacoes').innerHTML = ""; 
-              adicionarLinhaVariacao(); 
-              
-              document.getElementById('cadNome').value = "";
-              document.getElementById('cadCategoria').value = "";
-              document.getElementById('cadColecao').value = "";
-              
-              urlsFotosGaleria = [];
-              document.getElementById('galeria-preview').innerHTML = "";
-              
-              atualizarTabelaEntradaEstoque(); 
-              
-              document.getElementById('cadNome').focus();
-          } else {
-              alert("⚠️ Preencha a quantidade corretamente!");
-          }
+          // Limpa tudo para o próximo cadastro
+          variacoesTemporarias = [];
+          renderizarPreviewVariacoes();
+          
+          document.getElementById('cadNome').value = "";
+          document.getElementById('cadCategoria').value = "Geral";
+          document.getElementById('cadColecao').value = "";
+          
+          urlsFotosGaleria = [];
+          document.getElementById('galeria-preview').innerHTML = "";
+          
+          atualizarTabelaEntradaEstoque(); 
+          document.getElementById('cadNome').focus();
       }
+
       function atualizarTabelaEntradaEstoque() {
           var tbody = document.getElementById('listaItensEstoque'); var html = ''; var somaDoCustoTotal = 0; 
           if (listaDeEntradaEstoque.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#999; padding: 15px;">Nenhum produto adicionado na lista ainda.</td></tr>'; document.getElementById('totalItensLista').innerText = "0"; document.getElementById('txtSomaProdutos').innerText = "R$ 0,00"; document.getElementById('txtSomaProdutos').setAttribute('data-valor', '0'); calcularTotalNota(); return; }
@@ -1664,7 +1700,6 @@
                   <input type="checkbox" style="vertical-align:middle; margin:0 4px 0 0; cursor:pointer;" onchange="alternarRateioItem(${i}, this.checked)" ${p.aceitaRateio ? 'checked' : ''}> Receber Rateio
               </label>`;
               
-              // ADICIONAMOS A CAIXINHA "AJUSTAR" EMBAIXO DO PREÇO DE VENDA
               html += `<tr style="border-bottom: 1px solid #f0f0f0;">
                   <td style="padding: 8px 10px; vertical-align: middle; color: #666; font-size: 12px;">${p.codigo}</td>
                   <td style="padding: 8px 10px; vertical-align: middle;">
@@ -1694,20 +1729,16 @@
           
           setTimeout(calcularTotalNota, 50);
       }
-      // Função nova para arredondar ou ajustar manualmente o preço de venda
+      
       function atualizarPrecoManual(index, novoValorDigitado) {
           let novoFinal = parseFloat(novoValorDigitado);
-          if(isNaN(novoFinal) || novoFinal < 0) return; // Trava se a pessoa digitar besteira ou apagar
+          if(isNaN(novoFinal) || novoFinal < 0) return; 
 
           let p = listaDeEntradaEstoque[index];
 
-          // Se tiver um frete rolando, ele descobre qual é o valor só desse frete
           let rateioDaPeca = p.precoVenda - p.precoVendaOriginal; 
-
-          // Salva na memória o novo valor base (subtraindo o rateio, se existir)
           p.precoVendaOriginal = novoFinal - rateioDaPeca;
           
-          // Manda recalcular tudo. O valor da tela vai ficar EXATAMENTE igual ao que você digitou!
           calcularTotalNota(); 
       }
 
@@ -1734,7 +1765,6 @@
       }
       function removerCustoNota(botao) { botao.closest('.linha-custo-extra').remove(); calcularTotalNota(); }
 
-      // Função ajudante para ligar/desligar o rateio em um item específico
       function alternarRateioItem(index, valor) {
           listaDeEntradaEstoque[index].aceitaRateio = valor;
           calcularTotalNota(); 
@@ -1746,7 +1776,6 @@
           var totalGlobaisExtras = 0;
           var existeRateioAtivo = false; 
           
-          // 1. Somar o custo original
           var qtdTotalParaRateio = 0;
           for(let i=0; i < listaDeEntradaEstoque.length; i++) {
               if(listaDeEntradaEstoque[i].custoOriginal === undefined) listaDeEntradaEstoque[i].custoOriginal = listaDeEntradaEstoque[i].custoUnitario;
@@ -1759,7 +1788,6 @@
               }
           }
 
-          // 2. Ler os modificadores (Frete, Desconto)
           var linhasCustos = document.querySelectorAll('#area-custos-nota .linha-custo-extra');
           linhasCustos.forEach(function(linha) {
               var tipo = linha.querySelector('.tipo-custo-nota').value; 
@@ -1784,17 +1812,14 @@
               el.style.display = existeRateioAtivo ? 'block' : 'none';
           });
 
-          // 3. Aplicar o Rateio no Custo e na VENDA
           var rateioPorPeca = qtdTotalParaRateio > 0 ? (totalRateio / qtdTotalParaRateio) : 0;
           var novaSomaDoCustoTotal = 0;
           
           for(let i=0; i < listaDeEntradaEstoque.length; i++) {
               if(listaDeEntradaEstoque[i].aceitaRateio && existeRateioAtivo) {
-                  // SOMA NO CUSTO E NA VENDA
                   listaDeEntradaEstoque[i].custoUnitario = listaDeEntradaEstoque[i].custoOriginal + rateioPorPeca;
                   listaDeEntradaEstoque[i].precoVenda = listaDeEntradaEstoque[i].precoVendaOriginal + rateioPorPeca; 
               } else {
-                  // VOLTA AO NORMAL SE DESMARCADO OU SEM MODIFICADOR
                   listaDeEntradaEstoque[i].custoUnitario = listaDeEntradaEstoque[i].custoOriginal;
                   listaDeEntradaEstoque[i].precoVenda = listaDeEntradaEstoque[i].precoVendaOriginal; 
               }
@@ -1804,20 +1829,17 @@
               
               novaSomaDoCustoTotal += (listaDeEntradaEstoque[i].custoUnitario * listaDeEntradaEstoque[i].qtd);
               
-              // Atualiza Custo na Tela
               let elCusto = document.getElementById(`custoItem_${i}`);
               if(elCusto) {
                   elCusto.innerText = listaDeEntradaEstoque[i].custoUnitario.toFixed(2).replace('.',',');
               }
               
-              // Atualiza Venda na Tela (NOVO)
               let elVenda = document.getElementById(`vendaItem_${i}`);
               if(elVenda) {
                   elVenda.innerText = listaDeEntradaEstoque[i].precoVenda.toFixed(2).replace('.',',');
               }
           }
 
-          // 4. Atualizar Totais
           document.getElementById('txtSomaProdutos').innerText = "R$ " + novaSomaDoCustoTotal.toFixed(2).replace('.', ','); 
           document.getElementById('txtSomaProdutos').setAttribute('data-valor', novaSomaDoCustoTotal);
           
@@ -1841,7 +1863,6 @@
               for (let i = 0; i < listaDeEntradaEstoque.length; i++) {
                   let item = listaDeEntradaEstoque[i];
                   
-                  // Verifica se já existe uma peça EXATAMENTE IGUAL
                   let buscaExata = await db.collection("produtos")
                       .where("nome", "==", item.nome)
                       .where("cor", "==", item.cor)
@@ -1879,7 +1900,7 @@
                           categoria: item.categoria, 
                           colecao: item.colecao,
                           fotos: fotosFinais,
-                          fotoEspecifica: item.fotoEspecifica || "", // <--- GRAVANDO DE FATO NO FIREBASE
+                          fotoEspecifica: item.fotoEspecifica || "",
                           cor: item.cor,
                           tamanho: item.tamanho,
                           detalhesExtras: item.detalhes, 
@@ -1913,16 +1934,10 @@
       }
 
       // ==========================================
-      // LÓGICA DA LISTAGEM DO ESTOQUE
-      // ==========================================
-      // ==========================================
-      // LÓGICA DA LISTAGEM DO ESTOQUE (AGRUPADO / ACORDEÃO)
-      // ==========================================
-      // ==========================================
       // LÓGICA DA LISTAGEM DO ESTOQUE (AGRUPADO EM JANELA MODAL)
       // ==========================================
       window.estoqueNuvemCache = [];
-      window.estoqueAgrupadoCache = {}; // Memória para a Janela Modal
+      window.estoqueAgrupadoCache = {}; 
 
       function carregarEstoqueGeral() {
           var tbody = document.getElementById('tabelaEstoqueGeral');
@@ -1999,9 +2014,6 @@
           });
       }
 
-      // 3. Função que abre a Nova Janela de Variações
-      // 3. Função que abre a Nova Janela de Variações (AGORA COM EDIÇÃO NA MESMA LINHA)
-      // 3. Função que abre a Nova Janela de Variações (AGORA COM EDIÇÃO NA MESMA LINHA)
       function abrirModalVariacoesEstoque(chave) {
           let grupo = window.estoqueAgrupadoCache[chave]; if (!grupo) return;
           document.getElementById('tituloModalVariacoesEstoque').innerText = "📦 Variações: " + grupo.nome;
@@ -2076,14 +2088,9 @@
           let grupo = window.estoqueAgrupadoCache[chave];
           if(!grupo) return;
           
-          // Preenche a listinha de categorias copiando do seu cadastro original
           document.getElementById('editGrupoCategoria').innerHTML = document.getElementById('cadCategoria').innerHTML;
-          
           let primeiraVariacao = grupo.variacoes[0];
-          
           document.getElementById('editGrupoNome').value = grupo.nome || '';
-          
-          // Acha a categoria atual e deixa ela marcada
           let selectCat = document.getElementById('editGrupoCategoria');
           let achouCat = Array.from(selectCat.options).some(opt => opt.value === grupo.categoria);
           selectCat.value = achouCat ? grupo.categoria : "Geral";
@@ -2110,7 +2117,6 @@
           btn.innerHTML = "⏳ Salvando em lote...";
           btn.disabled = true;
           
-          // Pega o que você digitou
           let novoNome = document.getElementById('editGrupoNome').value.trim();
           let novaCat = document.getElementById('editGrupoCategoria').value;
           let novoForn = document.getElementById('editGrupoFornecedor').value.trim();
@@ -2119,8 +2125,6 @@
           
           try {
               let batch = db.batch();
-              
-              // MÁGICA: Varre todas as cores e tamanhos dessa peça e aplica as regras em TUDO no banco de dados!
               grupo.variacoes.forEach(v => {
                   let ref = db.collection("produtos").doc(v.idFirebase);
                   batch.update(ref, {
@@ -2132,10 +2136,10 @@
                   });
               });
               
-              await batch.commit(); // Salva o lote inteiro de uma vez
+              await batch.commit(); 
               alert("✅ Sucesso!\n\nAs informações foram atualizadas para todas as variações deste produto!");
               fecharModalEditarGrupo();
-              carregarEstoqueGeral(); // Dá F5 na tabela para você ver a mudança
+              carregarEstoqueGeral(); 
               
           } catch(e) {
               alert("❌ Erro ao salvar: " + e.message);
@@ -2149,20 +2153,16 @@
       // LÓGICA DE EDIÇÃO INLINE (DENTRO DA JANELA DE VARIAÇÕES)
       // ==========================================
       function ativarEdicaoInline(id) {
-          // 1. Oculta os textos normais
           document.getElementById('view_detalhes_' + id).style.display = 'none';
           document.getElementById('view_custo_' + id).style.display = 'none';
           document.getElementById('view_venda_' + id).style.display = 'none';
           document.getElementById('view_qtd_' + id).style.display = 'none';
           
-          // 2. Mostra as caixinhas de digitar
           document.getElementById('edit_detalhes_' + id).style.display = 'flex';
           document.getElementById('edit_custo_' + id).style.display = 'block';
           document.getElementById('edit_venda_' + id).style.display = 'block';
           document.getElementById('edit_qtd_' + id).style.display = 'block';
           
-          // 3. Esconde o botão de Lápis, Câmera e Lixeira (para você não clicar errado)
-          // Usando uma trava de segurança "if" caso algum botão não exista
           let btnEdit = document.getElementById('btn_edit_' + id);
           let btnFoto = document.getElementById('btn_foto_' + id);
           let btnDel = document.getElementById('btn_del_' + id);
@@ -2171,9 +2171,8 @@
           if(btnEdit) btnEdit.style.display = 'none';
           if(btnFoto) btnFoto.style.display = 'none';
           if(btnDel) btnDel.style.display = 'none';
-          if(btnCat) btnCat.style.display = 'none'; // Se não achar a pasta, ele simplesmente ignora e não trava
+          if(btnCat) btnCat.style.display = 'none'; 
           
-          // 4. Mostra o botãozão verde de SALVAR
           let btnSave = document.getElementById('btn_save_' + id);
           if(btnSave) btnSave.style.display = 'inline-block';
       }
@@ -2184,7 +2183,6 @@
           btn.innerHTML = "⏳...";
           btn.disabled = true;
 
-          // Pega os novos valores que você digitou
           let novaCor = document.getElementById('input_cor_' + id).value.trim();
           let novoTam = document.getElementById('input_tam_' + id).value.trim();
           let novoCusto = parseFloat(document.getElementById('input_custo_' + id).value) || 0;
@@ -2192,7 +2190,6 @@
           let novaQtd = parseInt(document.getElementById('input_qtd_' + id).value) || 0;
 
           try {
-              // 1. Salva no banco de dados da nuvem
               await db.collection("produtos").doc(id).update({
                   cor: novaCor,
                   tamanho: novoTam,
@@ -2201,7 +2198,6 @@
                   quantidade: novaQtd
               });
 
-              // 2. Atualiza a memória local (Cache) sem fechar a janela
               let index = window.estoqueNuvemCache.findIndex(p => p.idFirebase === id);
               if (index !== -1) {
                   window.estoqueNuvemCache[index].cor = novaCor;
@@ -2211,7 +2207,6 @@
                   window.estoqueNuvemCache[index].quantidade = novaQtd;
               }
 
-              // 3. Atualiza a tela de fundo silenciosamente
               let termo = document.getElementById('buscaEstoque').value.toLowerCase().trim();
               if (termo === "") {
                   renderizarTabelaEstoqueGeral(window.estoqueNuvemCache);
@@ -2223,7 +2218,6 @@
                   renderizarTabelaEstoqueGeral(filtrados);
               }
 
-              // 4. Dá um "F5" mágico só na janela de variações (volta a ser texto com os valores novos!)
               abrirModalVariacoesEstoque(chaveGrupo);
 
           } catch (e) {
@@ -2248,34 +2242,27 @@
           
           renderizarTabelaEstoqueGeral(filtrados);
       }
+      
       async function excluirPecaDoEstoque(idProduto) {
-          // 1. Pede a senha
           let senha = prompt("🔒 EXCLUSÃO RESTRITA\n\nDigite a senha do Administrador para APAGAR esta peça do estoque:");
-          
-          if (senha === null) return; // Se o cara apertar "Cancelar", fecha a janelinha e não faz nada
-          
+          if (senha === null) return; 
           if (senha !== SENHA_CORRETA) { 
               alert("❌ SENHA INCORRETA! Exclusão bloqueada.");
               return;
           }
-
-          // 2. Confirmação Dupla
           let confirma = confirm("⚠️ ATENÇÃO: Tem certeza que deseja apagar este item PERMANENTEMENTE do banco de dados?\n\nIsso não pode ser desfeito.");
           if (!confirma) return;
 
-          // 3. Executa a exclusão no Firebase
           try {
               await db.collection("produtos").doc(idProduto).delete();
               alert("✅ PEÇA EXCLUÍDA COM SUCESSO!");
-              carregarEstoqueGeral(); // Recarrega a tabela na mesma hora pra peça sumir da tela
+              carregarEstoqueGeral(); 
           } catch (error) {
               console.error("Erro ao excluir peça:", error);
               alert("❌ ERRO AO EXCLUIR!\n" + error.message);
           }
       }
-      // ==========================================
-      // LÓGICA PARA EDITAR CATEGORIA DE PRODUTO EXISTENTE
-      // ==========================================
+      
       let idProdutoEditandoCategoria = null;
 
       function abrirModalEditarCategoria(idProduto, nomeEncoded, catEncoded) {
@@ -2284,13 +2271,10 @@
           let categoriaAtual = decodeURIComponent(catEncoded);
           
           document.getElementById('txtNomeProdutoEditCat').innerText = "Peça: " + nomeProduto;
-
-          // Mágica: Clona as categorias que o sistema já carregou na tela de estoque
           let optionsHtml = document.getElementById('cadCategoria').innerHTML;
           let select = document.getElementById('selectNovaCategoria');
           select.innerHTML = optionsHtml;
 
-          // Marca a opção correta que a peça já tem
           let achou = Array.from(select.options).some(opt => opt.value === categoriaAtual);
           if(achou) {
               select.value = categoriaAtual;
@@ -2322,7 +2306,7 @@
               });
               alert("✅ Categoria atualizada na nuvem com sucesso!");
               fecharModalEditarCategoria();
-              carregarEstoqueGeral(); // Recarrega a tabela para você ver a mudança na hora
+              carregarEstoqueGeral(); 
           } catch(e) {
               alert("❌ Erro ao salvar: " + e.message);
           } finally {
@@ -2330,9 +2314,7 @@
               btn.disabled = false;
           }
       }
-      // ==========================================
-      // LÓGICA PARA EDITAR INFORMAÇÕES DO ITEM (NOME, PREÇO, ESTOQUE)
-      // ==========================================
+      
       let idItemSendoEditado = null;
 
       async function abrirModalEditarItem(idProduto) {
@@ -2346,7 +2328,6 @@
               if (doc.exists) {
                   let p = doc.data();
                   
-                  // Puxa as infos do banco e joga nas caixinhas
                   document.getElementById('editItemNome').value = p.nome || '';
                   document.getElementById('editItemDetalhes').value = p.detalhesExtras || '';
                   document.getElementById('editItemFornecedor').value = p.fornecedor || '';
@@ -2376,7 +2357,6 @@
           btn.innerHTML = "⏳ Salvando...";
           btn.disabled = true;
 
-          // Pega tudo que você digitou nas caixinhas e prepara pra salvar
           let novosDados = {
               nome: document.getElementById('editItemNome').value.trim(),
               detalhesExtras: document.getElementById('editItemDetalhes').value.trim(),
@@ -2390,7 +2370,7 @@
               await db.collection("produtos").doc(idItemSendoEditado).update(novosDados);
               alert("✅ Produto atualizado com sucesso!");
               fecharModalEditarItem();
-              carregarEstoqueGeral(); // Recarrega a tabela de itens na hora!
+              carregarEstoqueGeral(); 
           } catch(e) {
               alert("❌ Erro ao salvar: " + e.message);
           } finally {
@@ -2398,9 +2378,7 @@
               btn.disabled = false;
           }
       }
-      // ==========================================
-      // LÓGICA PARA ADICIONAR OU TROCAR FOTO RÁPIDA (GALERIA)
-      // ==========================================
+      
       let idProdutoEditandoFoto = null;
 
       function abrirTrocaDeFoto(idProduto) {
@@ -2412,7 +2390,7 @@
               inputFoto.type = 'file';
               inputFoto.id = 'inputTrocaFotoEscondido';
               inputFoto.accept = 'image/*';
-              inputFoto.multiple = true; // AGORA PERMITE SELECIONAR VÁRIAS FOTOS
+              inputFoto.multiple = true; 
               inputFoto.style.display = 'none';
               inputFoto.onchange = function(e) { processarTrocaDeFoto(e.target); };
               document.body.appendChild(inputFoto);
@@ -2426,14 +2404,12 @@
           let files = inputElement.files;
           if(files.length === 0 || !idProdutoEditandoFoto) return;
           
-          // PERGUNTA INTELIGENTE PARA O USUÁRIO
           let modoAdicionar = confirm("Deseja ADICIONAR as novas fotos à galeria deste produto?\n\n[ OK ] = Sim, juntar com as fotos antigas.\n[ CANCELAR ] = Não, APAGAR as antigas e deixar SÓ as novas.");
           
           document.body.style.cursor = 'wait'; 
           let urlsNovas = [];
           
           try {
-              // Envia todas as fotos selecionadas em looping
               for(let i = 0; i < files.length; i++) {
                   let formData = new FormData();
                   formData.append("image", files[i]);
@@ -2448,13 +2424,11 @@
                   let refProd = db.collection("produtos").doc(idProdutoEditandoFoto);
                   
                   if (modoAdicionar) {
-                      // Junta as fotos novas e marca a PRIMEIRA enviada como a Foto Específica daquela cor!
                       await refProd.update({
                           fotos: firebase.firestore.FieldValue.arrayUnion(...urlsNovas),
                           fotoEspecifica: urlsNovas[0]
                       });
                   } else {
-                      // Substitui a galeria velha e marca a PRIMEIRA enviada como a Foto Específica
                       await refProd.update({
                           fotos: urlsNovas,
                           fotoEspecifica: urlsNovas[0]
@@ -2462,7 +2436,7 @@
                   }
                   
                   alert(`✅ ${urlsNovas.length} foto(s) enviada(s) com sucesso!\n\n✨ O sistema já definiu a nova foto como a principal para essa Cor/Tamanho no catálogo!`);
-                  carregarEstoqueGeral(); // Atualiza a tabela na hora
+                  carregarEstoqueGeral(); 
               } else {
                   alert("❌ Nenhuma foto conseguiu ser enviada.");
               }
@@ -2473,9 +2447,7 @@
               idProdutoEditandoFoto = null;
           }
       }
-      // ==========================================
-      // LÓGICA DE GERENCIAMENTO DE CATEGORIAS
-      // ==========================================
+      
       let urlFotoCatAtual = "";
       
       async function uploadFotoNovaCategoria(inputElement) {
@@ -2496,7 +2468,7 @@
 
       async function salvarNovaCategoria() {
           let nomeCat = document.getElementById('nomeNovaCategoria').value.trim();
-          let generoCat = document.getElementById('generoNovaCategoria').value; // PEGA O GÊNERO AQUI!
+          let generoCat = document.getElementById('generoNovaCategoria').value;
           if(nomeCat === "") { alert("Digite o nome da Categoria!"); return; }
           let btn = document.getElementById('btnSalvarCat');
           btn.innerHTML = "⏳ Salvando..."; btn.disabled = true;
@@ -2504,7 +2476,7 @@
           try {
               await db.collection("categorias").add({
                   nome: nomeCat,
-                  genero: generoCat, // SALVA NO BANCO DE DADOS
+                  genero: generoCat,
                   foto: urlFotoCatAtual,
                   dataCadastro: firebase.firestore.FieldValue.serverTimestamp()
               });
@@ -2513,7 +2485,7 @@
               document.getElementById('preview-cat').innerHTML = "📷";
               document.getElementById('fotoNovaCategoria').value = "";
               urlFotoCatAtual = "";
-              carregarListaCategorias(); // Recarrega a tabela e o seletor
+              carregarListaCategorias(); 
           } catch(e) { alert("Erro: " + e.message); }
           btn.innerHTML = "💾 SALVAR CATEGORIA"; btn.disabled = false;
       }
@@ -2523,7 +2495,6 @@
           let tbodyCat = document.getElementById('tabelaCategoriasEdit');
           if(tbodyCat) tbodyCat.innerHTML = '<tr><td colspan="4" style="text-align:center;">⏳ Carregando...</td></tr>';
           
-          // Ordena primeiro pelo nome para ficar organizado
           db.collection("categorias").orderBy("nome").get().then((snapshot) => {
               let htmlSelect = '<option value="Geral">Geral (Sem Categoria)</option>';
               let htmlTabela = '';
@@ -2536,7 +2507,6 @@
                   let cat = doc.data();
                   let generoTxt = cat.genero ? cat.genero : 'Unissex';
                   
-                  // Na hora de dar entrada na NF, vai aparecer: "Conjunto (Menina)"
                   htmlSelect += `<option value="${cat.nome} (${generoTxt})">${cat.nome} (${generoTxt})</option>`;
                   
                   if(tbodyCat) {
@@ -2568,9 +2538,6 @@
           }
       }
 
-      // ==========================================
-      // LÓGICA DAS TAXAS DA MAQUININHA (AGORA NA NUVEM)
-      // ==========================================
       function carregarTabelaTaxas() {
           let tbody = document.getElementById('corpoTabelaTaxas'); 
           tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 20px;">⏳ Puxando da nuvem...</td></tr>';
@@ -2579,7 +2546,7 @@
               let taxasSalvas = {};
               if (doc.exists) { 
                   taxasSalvas = doc.data(); 
-                  localStorage.setItem('taxasMaquininhaLOJA', JSON.stringify(taxasSalvas)); // Mantém backup local para o caixa
+                  localStorage.setItem('taxasMaquininhaLOJA', JSON.stringify(taxasSalvas)); 
               } else {
                   taxasSalvas = JSON.parse(localStorage.getItem('taxasMaquininhaLOJA')) || {};
               }
@@ -2620,9 +2587,6 @@
           }
       }
 
-      // ==========================================
-      // NOVO CÉREBRO: O EDITOR DE ETIQUETAS + PRÉVIA
-      // ==========================================
       window.dadosListaEtiquetas = []; 
 
       function carregarListaEtiquetas() {
@@ -2827,9 +2791,6 @@
           }, 500);
       }
 
-      // ==========================================
-      // LÓGICA DO HISTÓRICO DE VENDAS
-      // ==========================================
       window.vendasCarregadas = {}; 
 
       function carregarHistoricoVendas() {
@@ -2940,9 +2901,6 @@
           }
       }
 
-      // ==========================================
-      // LÓGICA DO DASHBOARD FINANCEIRO E PRODUTOS
-      // ==========================================
       function carregarDashboard() {
           let periodo = document.getElementById('filtroPeriodoDash').value;
           
@@ -3022,9 +2980,6 @@
           });
       }
 
-      // ==========================================
-      // LÓGICA DE REPOSIÇÃO DE ESTOQUE RÁPIDA
-      // ==========================================
       let dadosReposicao = [];
 
       function abrirModalReposicao() {
@@ -3086,10 +3041,7 @@
       function selecionarParaReposicao(index) {
           let p = dadosReposicao[index];
           
-          // Preenche a Peça Pai Mágicamente
           document.getElementById('cadNome').value = p.nome || '';
-
-          // Preenche o Fornecedor automático (deixa a NF intacta para o usuário digitar a nova)
           document.getElementById('cadFornecedor').value = p.fornecedor || '';
           
           let selDepto = document.getElementById('cadDepartamento');
@@ -3102,54 +3054,92 @@
           document.getElementById('cadCategoria').value = p.categoria || '';
           document.getElementById('cadColecao').value = p.colecao || '';
           
-          // Limpa todas as linhas velhas e injeta 1 zerada
-          document.getElementById('container-variacoes').innerHTML = '';
-          adicionarLinhaVariacao();
+          // Joga a peça puxada direto na janela de variações pronta para confirmar
+          abrirModalAddVariacao();
           
-          // Pega a linha recem criada para preencher
-          let primeiraLinha = document.querySelector('.linha-variacao-item');
+          let codParaJanela = (p.codigo && !p.codigo.includes('*')) ? p.codigo : (p.codigo || "").replace(/\*/g, '');
+          document.getElementById('modalVarCodigo').value = codParaJanela;
+          document.getElementById('modalVarCor').value = p.cor || '';
+          document.getElementById('modalVarTamanho').value = p.tamanho || '';
+          document.getElementById('modalVarCusto').value = p.custoUnitario || '';
+          document.getElementById('modalVarPreco').value = (p.precoVenda || 0).toFixed(2);
           
-          primeiraLinha.querySelector('.var-codigo').value = (p.codigo && !p.codigo.includes('*')) ? p.codigo : (p.codigo || "").replace(/\*/g, '');
-          primeiraLinha.querySelector('.var-cor').value = p.cor || '';
-          primeiraLinha.querySelector('.var-tamanho').value = p.tamanho || '';
-          
-          // Preenche Valores
-          primeiraLinha.querySelector('.var-custo').value = p.custoUnitario || '';
-          primeiraLinha.querySelector('.var-preco').value = (p.precoVenda || 0).toFixed(2);
-          
-          // Recalcula a Margem pra não ficar em branco
+          // Recalcula a Margem
           if (p.custoUnitario > 0 && p.precoVenda > p.custoUnitario) {
               let lucro = p.precoVenda - p.custoUnitario;
               let margem = (lucro / p.custoUnitario) * 100;
-              primeiraLinha.querySelector('.var-margem').value = margem.toFixed(2);
+              document.getElementById('modalVarMargem').value = margem.toFixed(2);
           }
           
-          // Põe o cursor na Quantidade pronto pra bater o dedo
-          primeiraLinha.querySelector('.var-qtd').value = "1";
-          
+          document.getElementById('modalVarQtd').value = "1";
           fecharModalReposicao();
-          primeiraLinha.querySelector('.var-qtd').focus();
+          document.getElementById('modalVarQtd').focus();
       }
 
-      
-      // ==========================================
-      // LÓGICA DE UPLOAD DA GALERIA (IMGBB)
-      // ==========================================
-      
-      // ⚠️ COLOQUE SUA CHAVE DO IMGBB AQUI DENTRO DAS ASPAS:
       const CHAVE_IMGBB = '5712c272e44c6e7b747c21a80ab34447'; 
-      
       let urlsFotosGaleria = [];
 
-      // ==========================================
-      // LÓGICA DE UPLOAD DA FOTO ESPECÍFICA DA VARIAÇÃO
-      // ==========================================
-      async function uploadFotoVariacao(inputElement) {
+      async function uploadFotosGaleria(inputElement) {
+          let files = inputElement.files;
+          if(files.length === 0) return;
+          
+          let preview = document.getElementById('galeria-preview');
+          let btnSalvar = document.querySelector('.btn-salvar-item[onclick="processarVariacoesParaLista()"]');
+          let textoOriginalBtn = btnSalvar.innerHTML;
+          btnSalvar.disabled = true; 
+          btnSalvar.innerHTML = "⏳ ENVIANDO FOTOS...";
+          
+          for(let i = 0; i < files.length; i++) {
+              let file = files[i];
+              
+              let imgBox = document.createElement('div');
+              imgBox.style.cssText = "width: 70px; height: 70px; background: #ccc; display: flex; align-items: center; justify-content: center; border-radius: 5px; font-size: 10px; color: white; font-weight: bold; position: relative;";
+              imgBox.innerText = "Subindo...";
+              preview.appendChild(imgBox);
+              
+              let formData = new FormData();
+              formData.append("image", file);
+              
+              try {
+                  let response = await fetch(`https://api.imgbb.com/1/upload?key=${CHAVE_IMGBB}`, {
+                      method: "POST",
+                      body: formData
+                  });
+                  let data = await response.json();
+                  
+                  if (data.success) {
+                      let url = data.data.url;
+                      urlsFotosGaleria.push(url); 
+                      
+                      imgBox.innerHTML = `
+                          <img src="${url}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 5px; border: 1px solid #0d6efd;">
+                          <button type="button" onclick="removerFotoGaleria('${url}', this)" style="position: absolute; top: -5px; right: -5px; background: #dc3545; color: white; border: none; border-radius: 50%; width: 22px; height: 22px; font-size: 12px; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.3);" title="Remover Foto">X</button>
+                      `;
+                  } else {
+                      imgBox.innerText = "Erro"; imgBox.style.background = "#dc3545";
+                  }
+              } catch(e) {
+                  console.error("Erro no envio ImgBB:", e);
+                  imgBox.innerText = "Erro"; imgBox.style.background = "#dc3545";
+              }
+          }
+          
+          inputElement.value = ""; 
+          btnSalvar.disabled = false;
+          btnSalvar.innerHTML = textoOriginalBtn;
+      }
+
+      function removerFotoGaleria(urlDaFoto, botaoClicado) {
+          urlsFotosGaleria = urlsFotosGaleria.filter(link => link !== urlDaFoto);
+          botaoClicado.parentElement.remove();
+      }
+
+      // Função específica da foto de dentro da Janela Modal
+      async function uploadFotoModalVariacao(inputElement) {
           if(inputElement.files.length === 0) return;
           
-          let linha = inputElement.closest('.linha-variacao-item');
-          let preview = linha.querySelector('.preview-var-foto');
-          let hiddenUrl = linha.querySelector('.var-foto-url');
+          let preview = document.getElementById('modalVarPreviewFoto');
+          let hiddenUrl = document.getElementById('modalVarFotoUrl');
           
           preview.innerHTML = "⏳";
           
@@ -3170,71 +3160,6 @@
           }
       }
 
-      async function uploadFotosGaleria(inputElement) {
-          let files = inputElement.files;
-          if(files.length === 0) return;
-          
-          let preview = document.getElementById('galeria-preview');
-          let btnSalvar = document.querySelector('.btn-salvar-item[onclick="salvarEstoqueCompleto()"]');
-          let textoOriginalBtn = btnSalvar.innerHTML;
-          btnSalvar.disabled = true; 
-          btnSalvar.innerHTML = "⏳ ENVIANDO FOTOS...";
-          
-          for(let i = 0; i < files.length; i++) {
-              let file = files[i];
-              
-              // Cria o quadradinho "Subindo..." (Agora com position: relative para segurar o X)
-              let imgBox = document.createElement('div');
-              imgBox.style.cssText = "width: 70px; height: 70px; background: #ccc; display: flex; align-items: center; justify-content: center; border-radius: 5px; font-size: 10px; color: white; font-weight: bold; position: relative;";
-              imgBox.innerText = "Subindo...";
-              preview.appendChild(imgBox);
-              
-              // Empacota a imagem para o ImgBB
-              let formData = new FormData();
-              formData.append("image", file);
-              
-              try {
-                  // Manda direto pro ImgBB
-                  let response = await fetch(`https://api.imgbb.com/1/upload?key=${CHAVE_IMGBB}`, {
-                      method: "POST",
-                      body: formData
-                  });
-                  let data = await response.json();
-                  
-                  if (data.success) {
-                      let url = data.data.url;
-                      urlsFotosGaleria.push(url); // Salva o link da foto
-                      
-                      // Troca pela foto real na tela E ADICIONA O BOTÃO 'X'
-                      imgBox.innerHTML = `
-                          <img src="${url}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 5px; border: 1px solid #0d6efd;">
-                          <button type="button" onclick="removerFotoGaleria('${url}', this)" style="position: absolute; top: -5px; right: -5px; background: #dc3545; color: white; border: none; border-radius: 50%; width: 22px; height: 22px; font-size: 12px; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.3);" title="Remover Foto">X</button>
-                      `;
-                  } else {
-                      imgBox.innerText = "Erro"; imgBox.style.background = "#dc3545";
-                  }
-              } catch(e) {
-                  console.error("Erro no envio ImgBB:", e);
-                  imgBox.innerText = "Erro"; imgBox.style.background = "#dc3545";
-              }
-          }
-          
-          inputElement.value = ""; // Limpa a caixinha
-          btnSalvar.disabled = false;
-          btnSalvar.innerHTML = textoOriginalBtn;
-      }
-
-      // FUNÇÃO NOVA: O motor que apaga a foto quando clica no X
-      function removerFotoGaleria(urlDaFoto, botaoClicado) {
-          // 1. Tira o link da memória para não ir pro banco de dados
-          urlsFotosGaleria = urlsFotosGaleria.filter(link => link !== urlDaFoto);
-          
-          // 2. Tira a imagem da tela
-          botaoClicado.parentElement.remove();
-      }
-      // ==========================================
-      // NOVO MOTOR DE PESQUISA AO VIVO DO CAIXA
-      // ==========================================
       window.memoriaCaixa = [];
 
       function carregarEstoqueCaixaMemoria() {
@@ -3246,90 +3171,6 @@
               });
           });
       }
-
-      function pesquisaAoVivoCaixa() {
-          let termo = document.getElementById('codigoBarra').value.trim().toLowerCase();
-          let areaBusca = document.getElementById('areaResultadosCaixa');
-          let msgBox = document.getElementById('msgCaixa'); 
-          
-          // Se for código de barras (números ou asterisco) ou se a caixa estiver vazia, ele esconde a lista
-          if(termo.length === 0) { areaBusca.style.display = 'none'; msgBox.innerHTML = ""; return; }
-          if(!isNaN(termo.replace(/\*/g,''))) return; 
-
-          // Só começa a buscar após digitar 2 letras (pra não bugar a tela)
-          if(termo.length >= 2) {
-              let resultados = window.memoriaCaixa.filter(p => {
-                  let nome = (p.nome || "").toLowerCase();
-                  let cor = (p.cor || "").toLowerCase();
-                  let desc = (p.detalhesExtras || "").toLowerCase();
-                  return nome.includes(termo) || cor.includes(termo) || desc.includes(termo);
-              });
-
-              if(resultados.length > 0) {
-                  msgBox.innerHTML = "";
-                  // Limita a 10 resultados para a lista não ficar gigante na tela
-                  let resultadosFormatados = resultados.slice(0, 10).map(p => {
-                      return {
-                          codigo: p.codigo || '', item: p.nome || 'Produto', tamanho: p.detalhesExtras || '', fornecedor: p.fornecedor || '',
-                          precoVista: p.precoVenda || 0, precoParc: p.precoVenda || 0, quantidade: p.quantidade || 0, idFirebase: p.idFirebase, foto: (p.fotos && p.fotos.length > 0) ? p.fotos[0] : null
-                      };
-                  });
-                  window.resultadosAtuais = resultadosFormatados; 
-                  mostrarListaParaEscolha(resultadosFormatados);
-              } else {
-                  areaBusca.innerHTML = '<div class="cabecalho-busca" style="color:#dc3545; padding: 10px;">Nenhum produto encontrado com este nome.</div>';
-                  areaBusca.style.display = 'block';
-              }
-          } else {
-              areaBusca.style.display = 'none';
-          }
-      }
-
-      // ATUALIZAÇÃO: A lista de escolha agora mostra a foto do produto no caixa!
-      function mostrarListaParaEscolha(resultados) { 
-          var area = document.getElementById('areaResultadosCaixa'); 
-          var html = '<div class="cabecalho-busca" style="background: #0d6efd; color: white;">Selecione o produto correto:</div>'; 
-          
-          for (var i = 0; i < resultados.length; i++) { 
-              var p = resultados[i]; 
-              var temCredito = window.formasPagamento.includes('credito'); 
-              var valorBruto = temCredito ? p.precoParc : p.precoVista; 
-              var valorReal = limpaValorHTML(valorBruto); 
-              var valorExibir = "R$ " + valorReal.toFixed(2).replace('.', ','); 
-              
-              let imgHtml = p.foto 
-                  ? `<img src="${p.foto}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px; border: 1px solid #ccc; margin-right: 12px; flex-shrink: 0;">` 
-                  : `<div style="width: 50px; height: 50px; background: #eee; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 16px; margin-right: 12px; flex-shrink: 0;">📷</div>`;
-
-              html += ` 
-              <div class="item-resultado" onclick="selecionarProdutoCaixa(${i})" style="display: flex; align-items: center; justify-content: space-between; padding: 10px;"> 
-                  <div style="display: flex; align-items: center;">
-                      ${imgHtml}
-                      <div class="info-busca"> 
-                          <b style="color:#0d6efd; font-size:16px;">${p.item}</b> <span style="font-size:11px; color:#666;">(${p.fornecedor})</span><br> 
-                          <span style="font-size:12px; color:#555;">${p.tamanho} | Cód: ${p.codigo} | 📦 Estq: ${p.quantidade}</span> <br> 
-                          <span style="color:#198754; font-weight:bold; font-size:15px;">${valorExibir}</span> 
-                      </div> 
-                  </div>
-                  <button class="btn-add-lupa" style="background: #198754; color: white; border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 12px;">+ Add</button> 
-              </div> `; 
-          } 
-          area.innerHTML = html; 
-          area.style.display = 'block'; 
-      }
-
-      // ATUALIZAÇÃO: Quando seleciona, a barra de pesquisa limpa sozinha
-      function selecionarProdutoCaixa(index) { 
-          document.getElementById('areaResultadosCaixa').style.display = 'none'; 
-          adicionarAoCarrinho(window.resultadosAtuais[index]); 
-          document.getElementById('codigoBarra').value = ""; // Limpa a barra
-          document.getElementById('codigoBarra').focus(); 
-      }
-      // ==========================================
-      // LÓGICA DE CONFIGURAÇÕES DO SITE (LOGO E BANNER)
-      // ==========================================
-      let urlBannerTemporario = "";
-      let urlLogoTemporaria = "";
 
       function carregarConfigSite() {
           let prevBanner = document.getElementById('preview-banner');
@@ -3344,13 +3185,15 @@
                   if(dados.logoUrl) prevLogo.innerHTML = `<img src="${dados.logoUrl}" style="width:100%; height:100%; object-fit:contain;">`;
                   else prevLogo.innerHTML = "Sem Logo";
 
-                  // Puxa as 3 fotinhas do banco de dados
                   if(dados.bannerMenina) { document.getElementById('prev-gen-menina').innerHTML = `<img src="${dados.bannerMenina}" style="width:100%; height:100%; object-fit:cover;">`; urlsGenerosTemp.Menina = dados.bannerMenina; }
                   if(dados.bannerUnissex) { document.getElementById('prev-gen-unissex').innerHTML = `<img src="${dados.bannerUnissex}" style="width:100%; height:100%; object-fit:cover;">`; urlsGenerosTemp.Unissex = dados.bannerUnissex; }
                   if(dados.bannerMenino) { document.getElementById('prev-gen-menino').innerHTML = `<img src="${dados.bannerMenino}" style="width:100%; height:100%; object-fit:cover;">`; urlsGenerosTemp.Menino = dados.bannerMenino; }
               } else { prevBanner.innerHTML = "Sem Banner"; prevLogo.innerHTML = "Sem Logo"; }
           }).catch(e => { prevBanner.innerHTML = "Erro"; prevLogo.innerHTML = "Erro"; });
       }
+
+      let urlBannerTemporario = "";
+      let urlLogoTemporaria = "";
 
       async function uploadBannerSite(inputElement) {
           if(inputElement.files.length === 0) return;
@@ -3407,6 +3250,7 @@
               btn.innerHTML = "💾 SALVAR LOGO"; document.getElementById('arquivoLogo').value = "";
           } catch(error) { alert("Erro ao salvar."); btn.innerHTML = "💾 SALVAR LOGO"; btn.disabled = false; }
       }
+      
       let urlsGenerosTemp = { Menina: "", Unissex: "", Menino: "" };
 
       async function uploadGenero(tipo, inputElement) {
@@ -3438,9 +3282,7 @@
           } catch(error) { alert("Erro ao salvar."); btn.innerHTML = "💾 SALVAR BANNERS DE GÊNERO"; }
           btn.disabled = false;
       }
-      // ==========================================
-      // LÓGICA DE PEDIDOS DO SITE
-      // ==========================================
+      
       window.pedidosSiteAtivos = {};
       window.pedidoSendoAtendido = null;
 
@@ -3491,102 +3333,4 @@
                       <td><span style="background: #e9ecef; padding: 3px 6px; border-radius: 4px; font-size: 11px;">${txtPag}</span><br><b style="color: #198754; font-size: 15px;">R$ ${(p.totalFinal || 0).toFixed(2).replace('.',',')}</b></td>
                       <td style="text-align:center;">
                           <div style="display: flex; justify-content: center; gap: 5px;">
-                              <button class="btn-acao" style="background:#198754; color:white; border:none; padding: 8px 12px; margin:0;" onclick="enviarPedidoParaCaixa('${p.idOriginal}')">🛒 Atender</button>
-                              <button class="btn-remover" onclick="excluirPedidoSite('${p.idOriginal}')" title="Excluir/Cancelar Pedido" style="margin:0; padding: 8px 12px;">❌</button>
-                          </div>
-                      </td>
-                  `;
-                  tbody.appendChild(tr);
-              });
-          }).catch(error => {
-              console.error(error);
-              tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:red; padding: 20px;">❌ Erro ao buscar: ${error.message}</td></tr>`;
-          });
-      }
-
-      function excluirPedidoSite(idPedido) {
-          let senha = prompt("🔒 EXCLUSÃO RESTRITA\n\nDigite a senha do Administrador para apagar este pedido do site:");
-          if (senha === null) return; 
-          if (senha !== SENHA_CORRETA) { 
-              alert("❌ SENHA INCORRETA! Exclusão bloqueada."); 
-              return; 
-          }
-
-          let confirma = confirm("⚠️ Tem certeza que deseja excluir e cancelar este pedido?\n\nEle será apagado permanentemente da lista.");
-          if (!confirma) return;
-
-          db.collection("pedidos_site").doc(idPedido).delete().then(() => {
-              alert("✅ Pedido excluído com sucesso!");
-              carregarPedidosSite(); // Recarrega a tela para a linha sumir na hora
-          }).catch((error) => {
-              console.error("Erro ao excluir pedido:", error);
-              alert("❌ Erro ao excluir pedido: " + error.message);
-          });
-      }
-
-      function enviarPedidoParaCaixa(idPedido) {
-          let pedido = window.pedidosSiteAtivos[idPedido];
-          if(!pedido) return;
-          
-          window.pedidoSendoAtendido = idPedido; 
-          window.carrinho = []; // Zera a tela de caixa
-          
-          // Importa os itens para o formato do PDV
-          if(pedido.itens) {
-              pedido.itens.forEach(itemSite => {
-                  window.carrinho.push({
-                      idFirebase: itemSite.idFirebase,
-                      codigo: itemSite.idFirebase, 
-                      item: itemSite.nome,
-                      tamanho: itemSite.detalhes,
-                      precoVista: itemSite.preco,
-                      precoParc: itemSite.preco,
-                      quantidade: itemSite.estoqueMax, 
-                      quantidadeComprada: itemSite.qtdPedida,
-                      foto: itemSite.fotoThumb
-                  });
-              });
-          }
-          
-          // Configura as opções do painel lateral baseadas no que ele escolheu
-          let tipoPag = "dinheiro";
-          if(pedido.pagamento && pedido.pagamento.includes("Pix")) tipoPag = "pix";
-          if(pedido.pagamento && pedido.pagamento.includes("Débito")) tipoPag = "debito";
-          if(pedido.pagamento && pedido.pagamento.includes("Crédito")) tipoPag = "credito";
-          
-          window.formasPagamento = [tipoPag];
-          document.getElementById('chkMisto').checked = false;
-          
-          abrirTela('tela-caixa', document.getElementById('btn-menu-caixa'));
-          
-          let msgCaixa = document.getElementById('msgCaixa');
-          msgCaixa.innerHTML = `🔔 <b>ATENDENDO PEDIDO ONLINE:</b> ${pedido.cliente}`;
-          msgCaixa.style.color = "#fd7e14";
-          
-          // Pré-seleciona maquininha
-          if(tipoPag === 'credito' || tipoPag === 'debito') {
-              document.getElementById('bandeira-cartao').value = pedido.bandeira === 'elo' ? 'Elo' : 'Visa/Master';
-              if(tipoPag === 'credito') document.getElementById('parcelas-cartao').value = pedido.parcelas || "1";
-          }
-          
-          aplicarCoresDosBotoes();
-          atualizarTabelaCaixa();
-      }
-      // ==========================================
-      // LÓGICA DO MENU MOBILE (HAMBÚRGUER)
-      // ==========================================
-      function toggleMenuMobile() {
-          let sidebar = document.querySelector('.sidebar');
-          let overlay = document.getElementById('overlayMenu');
-          
-          if(sidebar.classList.contains('aberta')) {
-              sidebar.classList.remove('aberta');
-              overlay.style.display = 'none';
-          } else {
-              sidebar.classList.add('aberta');
-              overlay.style.display = 'block';
-          }
-      }
-    </script>
-  </body>
-</html>
+                              <button class="btn-acao" style="background:#I encountered an error doing what you asked. Could you try again?
